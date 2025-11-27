@@ -1,0 +1,2140 @@
+{% comment %}
+  会员忠诚度计划区块
+  提供会员等级、积分、奖励等功能
+
+  Parameters:
+  - title: 区块标题（可选）
+  - show_signup: 是否显示注册表单（可选，默认true）
+  - show_tiers: 是否显示会员等级（可选，默认true）
+  - show_rewards: 是否显示奖励兑换（可选，默认true）
+  - compact: 是否使用紧凑布局（可选，默认false）
+{% endcomment %}
+
+{%- assign section_title = title | default: '会员专享' -%}
+{%- assign show_signup = show_signup | default: true -%}
+{%- assign show_tiers = show_tiers | default: true -%}
+{%- assign show_rewards = show_rewards | default: true -%}
+{%- assign is_compact = compact | default: false -%}
+
+<section class="customer-loyalty{% if is_compact %} customer-loyalty--compact{% endif %}" data-customer-loyalty>
+  <div class="container">
+    <!-- 区块头部 -->
+    <header class="loyalty-header">
+      <h2 class="loyalty-title">{{ section_title }}</h2>
+      <p class="loyalty-description">{{ 'loyalty.join_program_description' | t }}</p>
+    </header>
+
+    <!-- 会员状态显示 -->
+    {% if customer %}
+      <div class="loyalty-status" data-loyalty-status>
+        <div class="loyalty-overview">
+          <div class="loyalty-avatar">
+            {% if customer.first_name %}
+              <div class="loyalty-avatar__text">{{ customer.first_name | slice: 0, 1 | upcase }}</div>
+            {% else %}
+              <div class="loyalty-avatar__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+            {% endif %}
+            <div class="loyalty-level-badge" data-level-badge>
+              {{ customer.metafields.loyalty.level | default: 'Bronze' }}
+            </div>
+          </div>
+          <div class="loyalty-info">
+            <div class="loyalty-welcome">
+              <h3 class="loyalty-welcome__title">{{ 'loyalty.welcome_back' | t }}, {{ customer.first_name | default: customer.name }}</h3>
+              <div class="loyalty-current-tier">
+                <span class="loyalty-tier-label">{{ 'loyalty.current_tier' | t }}</span>
+                <span class="loyalty-tier-name" data-tier-name>{{ customer.metafields.loyalty.level | default: 'Bronze' }}</span>
+              </div>
+            </div>
+            <div class="loyalty-stats">
+              <div class="loyalty-stat">
+                <span class="loyalty-stat__value" data-points="{{ customer.metafields.loyalty.points | default: 0 }}">
+                  {{ customer.metafields.loyalty.points | default: 0 }}
+                </span>
+                <span class="loyalty-stat__label">{{ 'loyalty.points' | t }}</span>
+              </div>
+              <div class="loyalty-stat">
+                <span class="loyalty-stat__value" data-spent="{{ customer.metafields.loyalty.points_spent | default: 0 }}">
+                  {{ customer.metafields.loyalty.points_spent | default: 0 }}
+                </span>
+                <span class="loyalty-stat__label">{{ 'loyalty.points_spent' | t }}</span>
+              </div>
+              <div class="loyalty-stat">
+                <span class="loyalty-stat__value" data-lifetime="{{ customer.metafields.loyalty.lifetime_points | default: 0 }}">
+                  {{ customer.metafields.loyalty.lifetime_points | default: 0 }}
+                </span>
+                <span class="loyalty-stat__label">{{ 'loyalty.lifetime_earned' | t }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 会员进度条 -->
+        {% if show_tiers %}
+        <div class="loyalty-progress">
+          <div class="loyalty-progress__header">
+            <span class="loyalty-progress__label">{{ 'loyalty.next_tier' | t }}</span>
+            <span class="loyalty-progress__next" data-next-tier>Silver</span>
+          </div>
+          <div class="loyalty-progress__bar">
+            <div class="loyalty-progress__fill" style="width: 35%" data-progress-fill></div>
+            <div class="loyalty-progress__milestones">
+              <span class="milestone active" data-tier="bronze">{{ 'loyalty.tier_bronze' | t }}</span>
+              <span class="milestone" data-tier="silver">{{ 'loyalty.tier_silver' | t }}</span>
+              <span class="milestone" data-tier="gold">{{ 'loyalty.tier_gold' | t }}</span>
+              <span class="milestone" data-tier="platinum">{{ 'loyalty.tier_platinum' | t }}</span>
+            </div>
+          </div>
+          <div class="loyalty-progress__info">
+            <span>{{ 'loyalty.points_to_next_tier' | t }}:</span>
+            <span class="loyalty-progress__remaining" data-remaining-points="650">650</span>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <!-- 非会员注册邀请 -->
+      {% if show_signup %}
+      <div class="loyalty-signup">
+        <div class="loyalty-signup__content">
+          <div class="loyalty-signup__icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+              <path d="M24 2L18 8L24 14L30 8L24 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M18 8l12 12M12 20l12 12" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="24" cy="24" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <div class="loyalty-signup__info">
+            <h3 class="loyalty-signup__title">{{ 'loyalty.join_loyalty' | t }}</h3>
+            <p class="loyalty-signup__description">{{ 'loyalty.sign_up_benefits' | t }}</p>
+            <ul class="loyalty-signup__benefits">
+              <li>{{ 'loyalty.benefit_1' | t }}</li>
+              <li>{{ 'loyalty.benefit_2' | t }}</li>
+              <li>{{ 'loyalty.benefit_3' | t }}</li>
+            </ul>
+          </div>
+        </div>
+        <div class="loyalty-signup__form">
+          <form class="loyalty-signup-form" data-loyalty-signup-form>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="loyalty-first-name" class="form-label">{{ 'customer.first_name' | t }} *</label>
+                <input type="text" id="loyalty-first-name" name="first_name" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label for="loyalty-email" class="form-label">{{ 'customer.email' | t }} *</label>
+                <input type="email" id="loyalty-email" name="email" class="form-input" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="loyalty-password" class="form-label">{{ 'customer.password' | t }} *</label>
+              <input type="password" id="loyalty-password" name="password" class="form-input" required>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full-width">
+              {{ 'loyalty.join_now' | t }}
+            </button>
+            <p class="loyalty-signup__terms">
+              {{ 'loyalty.agree_terms' | t }}
+              <a href="{{ pages[terms].url | default: '/pages/terms' }}" target="_blank">{{ 'loyalty.terms_conditions' | t }}</a>
+            </p>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- 会员等级展示 -->
+    {% if show_tiers %}
+    <div class="loyalty-tiers">
+      <h3 class="loyalty-section-title">{{ 'loyalty.membership_tiers' | t }}</h3>
+      <div class="loyalty-tiers__grid">
+        <!-- Bronze等级 -->
+        <div class="loyalty-tier loyalty-tier--bronze{% if customer and customer.metafields.loyalty.level == 'Bronze' %} loyalty-tier--current{% endif %}">
+          <div class="loyalty-tier__header">
+            <div class="loyalty-tier__icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 6l-4 4 8 0M12 10l-4 4m-4-4l4-4m-4 0h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+            <div class="loyalty-tier__info">
+              <h4 class="loyalty-tier__name">{{ 'loyalty.tier_bronze' | t }}</h4>
+              <p class="loyalty-tier__description">{{ 'loyalty.tier_bronze_desc' | t }}</p>
+            </div>
+            {% if customer and customer.metafields.loyalty.level == 'Bronze' %}
+              <div class="loyalty-tier__badge">{{ 'loyalty.current' | t }}</div>
+            {% endif %}
+          </div>
+          <div class="loyalty-tier__benefits">
+            <ul>
+              <li>{{ 'loyalty.bronze_benefit_1' | t }}</li>
+              <li>{{ 'loyalty.bronze_benefit_2' | t }}</li>
+              <li>{{ 'loyalty.bronze_benefit_3' | t }}</li>
+              <li>{{ 'loyalty.bronze_benefit_4' | t }}</li>
+            </ul>
+          </div>
+          <div class="loyalty-tier__details">
+            <div class="loyalty-tier__requirement">
+              <span class="loyalty-tier__requirement-label">{{ 'loyalty.join_requirement' | t }}:</span>
+              <span class="loyalty-tier__requirement-value">{{ 'loyalty.bronze_requirement' | t }}</span>
+            </div>
+            <div class="loyalty-tier__multiplier">
+              <span class="loyalty-tier__multiplier-label">{{ 'loyalty.points_multiplier' | t }}:</span>
+              <span class="loyalty-tier__multiplier-value">1x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Silver等级 -->
+        <div class="loyalty-tier loyalty-tier--silver{% if customer and customer.metafields.loyalty.level == 'Silver' %} loyalty-tier--current{% endif %}">
+          <div class="loyalty-tier__header">
+            <div class="loyalty-tier__icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2l-4 4 8 0M12 10l-4 4m-4-4l4-4m-4 0h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+            <div class="loyalty-tier__info">
+              <h4 class="loyalty-tier__name">{{ 'loyalty.tier_silver' | t }}</h4>
+              <p class="loyalty-tier__description">{{ 'loyalty.tier_silver_desc' | t }}</p>
+            </div>
+            {% if customer and customer.metafields.loyalty.level == 'Silver' %}
+              <div class="loyalty-tier__badge">{{ 'loyalty.current' | t }}</div>
+            {% endif %}
+          </div>
+          <div class="loyalty-tier__benefits">
+            <ul>
+              <li>{{ 'loyalty.silver_benefit_1' | t }}</li>
+              <li>{{ 'loyalty.silver_benefit_2' | t }}</li>
+              <li>{{ 'loyalty.silver_benefit_3' | t }}</li>
+              <li>{{ 'loyalty.silver_benefit_4' | t }}</li>
+            </ul>
+          </div>
+          <div class="loyalty-tier__details">
+            <div class="loyalty-tier__requirement">
+              <span class="loyalty-tier__requirement-label">{{ 'loyalty.join_requirement' | t }}:</span>
+              <span class="loyalty-tier__requirement-value">{{ 'loyalty.silver_requirement' | t }}</span>
+            </div>
+            <div class="loyalty-tier__multiplier">
+              <span class="loyalty-tier__multiplier-label">{{ 'loyalty.points_multiplier' | t }}:</span>
+              <span class="loyalty-tier__multiplier-value">1.2x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gold等级 -->
+        <div class="loyalty-tier loyalty-tier--gold{% if customer and customer.metafields.loyalty.level == 'Gold' %} loyalty-tier--current{% endif %}">
+          <div class="loyalty-tier__header">
+            <div class="loyalty-tier__icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2l-4 4 8 0M12 10l-4 4m-4-4l4-4m-4 0h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+            <div class="loyalty-tier__info">
+              <h4 class="loyalty-tier__name">{{ 'loyalty.tier_gold' | t }}</h4>
+              <p class="loyalty-tier__description">{{ 'loyalty.tier_gold_desc' | t }}</p>
+            </div>
+            {% if customer and customer.metafields.loyalty.level == 'Gold' %}
+              <div class="loyalty-tier__badge">{{ 'loyalty.current' | t }}</div>
+            {% endif %}
+          </div>
+          <div class="loyalty-tier__benefits">
+            <ul>
+              <li>{{ 'loyalty.gold_benefit_1' | t }}</li>
+              <li>{{ 'loyalty.gold_benefit_2' | t }}</li>
+              <li>{{ 'loyalty.gold_benefit_3' | t }}</li>
+              <li>{{ 'loyalty.gold_benefit_4' | t }}</li>
+            </ul>
+          </div>
+          <div class="loyalty-tier__details">
+            <div class="loyalty-tier__requirement">
+              <span class="loyalty-tier__requirement-label">{{ 'loyalty.join_requirement' | t }}:</span>
+              <span class="loyalty-tier__requirement-value">{{ 'loyalty.gold_requirement' | t }}</span>
+            </div>
+            <div class="loyalty-tier__multiplier">
+              <span class="loyalty-tier__multiplier-label">{{ 'loyalty.points_multiplier' | t }}:</span>
+              <span class="loyalty-tier__multiplier-value">1.5x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platinum等级 -->
+        <div class="loyalty-tier loyalty-tier--platinum{% if customer and customer.metafields.loyalty.level == 'Platinum' %} loyalty-tier--current{% endif %}">
+          <div class="loyalty-tier__header">
+            <div class="loyalty-tier__icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 2l-4 4 8 0M12 10l-4 4m-4-4l4-4m-4 0h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M16 14l2-2m-2 0l-2 2M14 16l2 2m-2-2l-2-2" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+            <div class="loyalty-tier__info">
+              <h4 class="loyalty-tier__name">{{ 'loyalty.tier_platinum' | t }}</h4>
+              <p class="loyalty-tier__description">{{ 'loyalty.tier_platinum_desc' | t }}</p>
+            </div>
+            {% if customer and customer.metafields.loyalty.level == 'Platinum' %}
+              <div class="loyalty-tier__badge">{{ 'loyalty.current' | t }}</div>
+            {% endif %}
+          </div>
+          <div class="loyalty-tier__benefits">
+            <ul>
+              <li>{{ 'loyalty.platinum_benefit_1' | t }}</li>
+              <li>{{ 'loyalty.platinum_benefit_2' | t }}</li>
+              <li>{{ 'loyalty.platinum_benefit_3' | t }}</li>
+              <li>{{ 'loyalty.platinum_benefit_4' | t }}</li>
+            </ul>
+          </div>
+          <div class="loyalty-tier__details">
+            <div class="loyalty-tier__requirement">
+              <span class="loyalty-tier__requirement-label">{{ 'loyalty.join_requirement' | t }}:</span>
+              <span class="loyalty-tier__requirement-value">{{ 'loyalty.platinum_requirement' | t }}</span>
+            </div>
+            <div class="loyalty-tier__multiplier">
+              <span class="loyalty-tier__multiplier-label">{{ 'loyalty.points_multiplier' | t }}:</span>
+              <span class="loyalty-tier__multiplier-value">2x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 积分兑换商城 -->
+    {% if show_rewards %}
+    <div class="loyalty-rewards">
+      <h3 class="loyalty-section-title">{{ 'loyalty.rewards_store' | t }}</h3>
+      <div class="loyalty-rewards__header">
+        <div class="loyalty-rewards__balance">
+          <span class="loyalty-rewards__balance-label">{{ 'loyalty.available_points' | t }}:</span>
+          <span class="loyalty-rewards__balance-value" data-available-points="{{ customer.metafields.loyalty.points | default: 0 }}">
+            {{ customer.metafields.loyalty.points | default: 0 }}
+          </span>
+        </div>
+        <div class="loyalty-rewards__filter">
+          <select class="loyalty-rewards__select" data-reward-filter>
+            <option value="all">{{ 'loyalty.all_categories' | t }}</option>
+            <option value="discount">{{ 'loyalty.category_discount' | t }}</option>
+            <option value="shipping">{{ 'loyalty.category_shipping' | t }}</option>
+            <option value="exclusive">{{ 'loyalty.category_exclusive' | t }}</option>
+            <option value="experience">{{ 'loyalty.category_experience' | t }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="loyalty-rewards__grid" data-rewards-grid>
+        <!-- 折扣券奖励 -->
+        <div class="loyalty-reward" data-reward data-category="discount">
+          <div class="loyalty-reward__image">
+            <div class="loyalty-reward__icon loyalty-reward__icon--discount">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M6 4v16M18 4v16M10 4v16M14 4v16" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+          </div>
+          <div class="loyalty-reward__content">
+            <h4 class="loyalty-reward__title">{{ 'loyalty.reward_discount_title' | t }}</h4>
+            <p class="loyalty-reward__description">{{ 'loyalty.reward_discount_desc' | t }}</p>
+            <div class="loyalty-reward__value">
+              <span class="loyalty-reward__discount">15% {{ 'loyalty.off' | t }}</span>
+            </div>
+            <div class="loyalty-reward__cost">
+              <span class="loyalty-reward__points">500</span>
+              <span class="loyalty-reward__points-label">{{ 'loyalty.points' | t }}</span>
+            </div>
+            <button type="button" class="btn btn--primary loyalty-reward__redeem" data-reward-id="discount-15">
+              {{ 'loyalty.redeem' | t }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 免费配送奖励 -->
+        <div class="loyalty-reward" data-reward data-category="shipping">
+          <div class="loyalty-reward__image">
+            <div class="loyalty-reward__icon loyalty-reward__icon--shipping">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="2" y="8" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="8" cy="22" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="22" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M4 8V4c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v4" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+          </div>
+          <div class="loyalty-reward__content">
+            <h4 class="loyalty-reward__title">{{ 'loyalty.reward_shipping_title' | t }}</h4>
+            <p class="loyalty-reward__description">{{ 'loyalty.reward_shipping_desc' | t }}</p>
+            <div class="loyalty-reward__value">
+              <span class="loyalty-reward__discount">{{ 'loyalty.free_shipping' | t }}</span>
+            </div>
+            <div class="loyalty-reward__cost">
+              <span class="loyalty-reward__points">300</span>
+              <span class="loyalty-reward__points-label">{{ 'loyalty.points' | t }}</span>
+            </div>
+            <button type="button" class="btn btn--primary loyalty-reward__redeem" data-reward-id="free-shipping">
+              {{ 'loyalty.redeem' | t }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 专属产品奖励 -->
+        <div class="loyalty-reward" data-reward data-category="exclusive">
+          <div class="loyalty-reward__image">
+            <img src="{{ 'exclusive-product.jpg' | asset_url }}" alt="{{ 'loyalty.reward_exclusive_title' | t }}" loading="lazy">
+          </div>
+          <div class="loyalty-reward__content">
+            <h4 class="loyalty-reward__title">{{ 'loyalty.reward_exclusive_title' | t }}</h4>
+            <p class="loyalty-reward__description">{{ 'loyalty.reward_exclusive_desc' | t }}</p>
+            <div class="loyalty-reward__value">
+              <span class="loyalty-reward__discount">限量版</span>
+            </div>
+            <div class="loyalty-reward__cost">
+              <span class="loyalty-reward__points">1000</span>
+              <span class="loyalty-reward__points-label">{{ 'loyalty.points' | t }}</span>
+            </div>
+            <button type="button" class="btn btn--primary loyalty-reward__redeem" data-reward-id="exclusive-product">
+              {{ 'loyalty.redeem' | t }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 生日礼物奖励 -->
+        <div class="loyalty-reward" data-reward data-category="experience">
+          <div class="loyalty-reward__image">
+            <div class="loyalty-reward__icon loyalty-reward__icon--experience">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5.91 1.83L22 21l-12-5.36L2 21l5.91-5.36L2 9.27l6.91 1.01L12 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M12 6v6" stroke="currentColor" stroke-width="2" fill="none"/>
+                <circle cx="12" cy="15" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+          </div>
+          <div class="loyalty-reward__content">
+            <h4 class="loyalty-reward__title">{{ 'loyalty.reward_birthday_title' | t }}</h4>
+            <p class="loyalty-reward__description">{{ 'loyalty.reward_birthday_desc' | t }}</p>
+            <div class="loyalty-reward__value">
+              <span class="loyalty-reward__discount">生日礼物</span>
+            </div>
+            <div class="loyalty-reward__cost">
+              <span class="loyalty-reward__points">200</span>
+              <span class="loyalty-reward__points-label">{{ 'loyalty.points' | t }}</span>
+            </div>
+            <button type="button" class="btn btn--primary loyalty-reward__redeem" data-reward-id="birthday-gift">
+              {{ 'loyalty.claim' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 积分历史 -->
+    {% if customer %}
+    <div class="loyalty-history">
+      <h3 class="loyalty-section-title">{{ 'loyalty.points_history' | t }}</h3>
+      <div class="loyalty-history__table-wrapper">
+        <table class="loyalty-history__table">
+          <thead>
+            <tr>
+              <th>{{ 'loyalty.date' | t }}</th>
+              <th>{{ 'loyalty.description' | t }}</th>
+              <th>{{ 'loyalty.type' | t }}</th>
+              <th>{{ 'loyalty.points' | t }}</th>
+              <th>{{ 'loyalty.balance' | t }}</th>
+            </tr>
+          </thead>
+          <tbody data-points-history>
+            <!-- 历史记录会动态加载 -->
+            <tr class="loyalty-history__empty">
+              <td colspan="6">{{ 'loyalty.no_history' | t }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- 积分兑换模态框 -->
+<div class="loyalty-redeem-modal" data-loyalty-redeem-modal hidden>
+  <div class="loyalty-redeem-modal__overlay" data-redeem-overlay></div>
+  <div class="loyalty-redeem-modal__content">
+    <div class="loyalty-redeem-modal__header">
+      <h3 class="loyalty-redeem-modal__title">{{ 'loyalty.confirm_redemption' | t }}</h3>
+      <button type="button" class="loyalty-redeem-modal__close" data-redeem-close>&times;</button>
+    </div>
+    <div class="loyalty-redeem-modal__body">
+      <div class="loyalty-redeem-modal__reward">
+        <div class="loyalty-redeem-modal__reward-image">
+          <div class="loyalty-redeem-modal__reward-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+              <path d="M24 4l8 8L24 12l16-8L24 4z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+        </div>
+        <div class="loyalty-redeem-modal__reward-content">
+          <h4 class="loyalty-redeem-modal__reward-title">{{ 'loyalty.reward_selected' | t }}</h4>
+          <p class="loyalty-redeem-modal__reward-description">{{ 'loyalty.confirm_description' | t }}</p>
+        </div>
+      </div>
+      <div class="loyalty-redeem-modal__details">
+        <div class="loyalty-redeem-modal__points">
+          <div class="loyalty-redeem-modal__points-info">
+            <span class="loyalty-redeem-modal__points-label">{{ 'loyalty.points_cost' | t }}:</span>
+            <span class="loyalty-redeem-modal__points-value" data-redeem-points>500</span>
+          </div>
+          <div class="loyalty-redeem-modal__points-info">
+            <span class="loyalty-redeem-modal__points-label">{{ 'loyalty.remaining_points' | t }}:</span>
+            <span class="loyalty-redeem-modal__points-value" data-remaining-points>{{ customer.metafields.loyalty.points | default: 0 }}</span>
+          </div>
+        </div>
+        <div class="loyalty-redeem-modal__terms">
+          <p>{{ 'loyalty.redeem_terms' | t }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="loyalty-redeem-modal__footer">
+      <button type="button" class="btn btn--secondary" data-redeem-cancel>
+        {{ 'general.cancel' | t }}
+      </button>
+      <button type="button" class="btn btn--primary" data-redeem-confirm>
+        {{ 'loyalty.confirm_redeem' | t }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .customer-loyalty {
+    background: var(--color-bg-primary);
+    padding: var(--spacing-12) 0;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(135, 206, 235, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(135, 206, 235, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+  }
+
+  /* 紧凑布局 */
+  .customer-loyalty--compact {
+    padding: var(--spacing-8) 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-4);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 头部 */
+  .loyalty-header {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .loyalty-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .loyalty-description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-light);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* 会员状态 */
+  .loyalty-status {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+  }
+
+  .loyalty-overview {
+    display: flex;
+    gap: var(--spacing-6);
+    align-items: center;
+  }
+
+  .loyalty-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loyalty-avatar__text,
+  .loyalty-avatar__icon {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+    color: var(--color-text-inverse);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4));
+  }
+
+  .loyalty-avatar__icon {
+    font-size: var(--font-size-2xl);
+  }
+
+  .loyalty-level-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    padding: var(--spacing-1) var(--spacing-3);
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    @include glow(var(--glow-size-small, var(--color-accent), 0.6));
+  }
+
+  .loyalty-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .loyalty-welcome__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .loyalty-current-tier {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .loyalty-tier-label {
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+  }
+
+  .loyalty-tier-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .loyalty-stats {
+    display: flex;
+    gap: var(--spacing-6);
+    flex-wrap: wrap;
+  }
+
+  .loyalty-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 60px;
+  }
+
+  .loyalty-stat__value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-secondary);
+    line-height: 1;
+    margin-bottom: var(--spacing-1);
+  }
+
+  .loyalty-stat__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  /* 进度条 */
+  .loyalty-progress {
+    margin-top: var(--spacing-4);
+  }
+
+  .loyalty-progress__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-sm);
+  }
+
+  .loyalty-progress__label {
+    color: var(--color-text-light);
+  }
+
+  .loyalty-progress__next {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .loyalty-progress__bar {
+    position: relative;
+    height: 8px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .loyalty-progress__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-secondary), var(--color-accent));
+    border-radius: var(--radius-full);
+    transition: width var(--duration-normal) var(--ease-out);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.4));
+  }
+
+  .loyalty-progress__milestones {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--spacing-3);
+    pointer-events: none;
+  }
+
+  .milestone {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &.active {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  .loyalty-progress__info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+  }
+
+  .loyalty-progress__remaining {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-secondary);
+  }
+
+  /* 注册邀请 */
+  .loyalty-signup {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-8);
+    margin-bottom: var(--spacing-8);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+  }
+
+  .loyalty-signup__content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-6);
+    align-items: center;
+  }
+
+  .loyalty-signup__icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4));
+  }
+
+  .loyalty-signup__info {
+    text-align: left;
+  }
+
+  .loyalty-signup__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .loyalty-signup__description {
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .loyalty-signup__benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .loyalty-signup__benefits li {
+    padding: var(--spacing-1) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    position: relative;
+    padding-left: var(--spacing-4);
+
+    &::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--color-success);
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  .loyalty-signup__form {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    border: 1px solid var(--color-border);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: var(--spacing-2);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-input {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--duration-normal) var(--ease-out);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &::placeholder {
+      color: var(--color-text-light);
+    }
+  }
+
+  .loyalty-signup__terms {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    line-height: 1.4;
+    margin-top: var(--spacing-3);
+  }
+
+  .loyalty-signup__terms a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  /* 区块标题 */
+  .loyalty-section-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-6);
+    position: relative;
+    padding-left: var(--spacing-4);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(to bottom, var(--color-secondary), var(--color-accent));
+      border-radius: var(--radius-full);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4));
+    }
+  }
+
+  /* 会员等级 */
+  .loyalty-tiers {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .loyalty-tiers__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .loyalty-tier {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &.loyalty-tier--bronze {
+      border-color: rgba(205, 127, 50, 0.3);
+      .loyalty-tier__icon {
+        color: #cd7f32;
+        background: rgba(205, 127, 50, 0.1);
+      }
+    }
+
+    &.loyalty-tier--silver {
+      border-color: rgba(192, 192, 192, 0.3);
+      .loyalty-tier__icon {
+        color: #c0c0c0;
+        background: rgba(192, 192, 192, 0.1);
+      }
+    }
+
+    &.loyalty-tier--gold {
+      border-color: rgba(255, 215, 0, 0.3);
+      .loyalty-tier__icon {
+        color: #ffd700;
+        background: rgba(255, 215, 0, 0.1);
+      }
+    }
+
+    &.loyalty-tier--platinum {
+      border-color: rgba(229, 228, 226, 0.3);
+      .loyalty-tier__icon {
+        color: #e5e4e2;
+        background: rgba(229, 228, 226, 0.1);
+      }
+    }
+
+    &.loyalty-tier--current {
+      border-width: 2px;
+      @include glow(var(--glow-size-medium, var(--color-accent), 0.4));
+    }
+  }
+
+  .loyalty-tier__header {
+    padding: var(--spacing-5);
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    position: relative;
+  }
+
+  .loyalty-tier__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+  }
+
+  .loyalty-tier__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .loyalty-tier__name {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .loyalty-tier__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    line-height: 1.4;
+  }
+
+  .loyalty-tier__badge {
+    position: absolute;
+    top: var(--spacing-3);
+    right: var(--spacing-3);
+    background: var(--color-success);
+    color: var(--color-text-inverse);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    @include glow(var(--glow-size-small, var(--color-success), 0.6));
+  }
+
+  .loyalty-tier__benefits {
+    padding: var(--spacing-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .loyalty-tier__benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .loyalty-tier__benefits li {
+    padding: var(--spacing-2) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    position: relative;
+    padding-left: var(--spacing-4);
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--color-secondary);
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  .loyalty-tier__details {
+    padding: var(--spacing-5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+  }
+
+  .loyalty-tier__requirement,
+  .loyalty-tier__multiplier {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .loyalty-tier__requirement-label,
+  .loyalty-tier__multiplier-label {
+    color: var(--color-text-light);
+    font-size: var(--font-size-xs);
+  }
+
+  .loyalty-tier__requirement-value,
+  .loyalty-tier__multiplier-value {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .loyalty-tier__multiplier-value {
+    color: var(--color-secondary);
+  }
+
+  /* 积分兑换 */
+  .loyalty-rewards {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .loyalty-rewards__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+    gap: var(--spacing-4);
+  }
+
+  .loyalty-rewards__balance {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-base);
+  }
+
+  .loyalty-rewards__balance-label {
+    color: var(--color-text-light);
+  }
+
+  .loyalty-rewards__balance-value {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-secondary);
+    font-size: var(--font-size-lg);
+  }
+
+  .loyalty-rewards__filter {
+    min-width: 200px;
+  }
+
+  .loyalty-rewards__select {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .loyalty-rewards__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .loyalty-reward {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &.loyalty-reward--unavailable {
+      opacity: 0.5;
+      filter: grayscale(1);
+      pointer-events: none;
+    }
+  }
+
+  .loyalty-reward__image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loyalty-reward__icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+    color: var(--color-text-inverse);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4));
+
+    &--discount {
+      background: linear-gradient(135deg, var(--color-error), #ff6b35);
+    }
+
+    &--shipping {
+      background: linear-gradient(135deg, var(--color-success), #10b981);
+    }
+
+    &--experience {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    }
+  }
+
+  .loyalty-reward__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .loyalty-reward__content {
+    padding: var(--spacing-5);
+  }
+
+  .loyalty-reward__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+    line-height: 1.3;
+  }
+
+  .loyalty-reward__description {
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-4);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .loyalty-reward__value {
+    display: inline-block;
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .loyalty-reward__discount {
+    color: var(--color-success);
+  }
+
+  .loyalty-reward__cost {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .loyalty-reward__points {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-secondary);
+  }
+
+  .loyalty-reward__points-label {
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+  }
+
+  .loyalty-reward__redeem {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+
+      &:hover {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+        @include glow(none);
+      }
+    }
+  }
+
+  /* 积分历史 */
+  .loyalty-history {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+  }
+
+  .loyalty-history__table-wrapper {
+    overflow-x: auto;
+  }
+
+  .loyalty-history__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+
+  .loyalty-history__table th {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    text-align: left;
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .loyalty-history__table td {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .loyalty-history__table .loyalty-history__empty {
+    text-align: center;
+    color: var(--color-text-light);
+    font-style: italic;
+  }
+
+  /* 兑换模态框 */
+  .loyalty-redeem-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .loyalty-redeem-modal[hidden] {
+    display: none;
+  }
+
+  .loyalty-redeem-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+  }
+
+  .loyalty-redeem-modal__content {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-extra-large);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+    position: relative;
+  }
+
+  .loyalty-redeem-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .loyalty-redeem-modal__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .loyalty-redeem-modal__close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    padding: var(--spacing-2);
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+    }
+  }
+
+  .loyalty-redeem-modal__body {
+    padding: var(--spacing-6);
+  }
+
+  .loyalty-redeem-modal__reward {
+    display: flex;
+    gap: var(--spacing-4);
+    align-items: center;
+    margin-bottom: var(--spacing-6);
+    padding: var(--spacing-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+  }
+
+  .loyalty-redeem-modal__reward-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4));
+  }
+
+  .loyalty-redeem-modal__reward-content {
+    flex: 1;
+  }
+
+  .loyalty-redeem-modal__reward-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .loyalty-redeem-modal__reward-description {
+    color: var(--color-text-light);
+    line-height: 1.4;
+  }
+
+  .loyalty-redeem-modal__details {
+    margin-top: var(--spacing-6);
+  }
+
+  .loyalty-redeem-modal__points {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .loyalty-redeem-modal__points-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-base);
+  }
+
+  .loyalty-redeem-modal__points-label {
+      color: var(--color-text-light);
+      font-size: var(--font-size-sm);
+    }
+
+  .loyalty-redeem-modal__points-value {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+  .loyalty-redeem-modal__points-value[data-redeem-points] {
+      color: var(--color-error);
+    }
+
+  .loyalty-redeem-modal__terms {
+      padding: var(--spacing-3);
+      background: rgba(135, 206, 235, 0.1);
+      border-radius: var(--radius-base);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-light);
+      line-height: 1.4;
+    }
+
+  .loyalty-redeem-modal__footer {
+    display: flex;
+    gap: var(--spacing-4);
+    justify-content: flex-end;
+    padding: var(--spacing-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* 动画 */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .customer-loyalty {
+      padding: var(--spacing-8) 0;
+    }
+
+    .loyalty-title {
+      font-size: var(--font-size-2xl);
+    }
+
+    .loyalty-signup__content {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+      text-align: center;
+    }
+
+    .loyalty-signup__form {
+      margin-top: var(--spacing-4);
+    }
+
+    .loyalty-overview {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--spacing-4);
+    }
+
+    .loyalty-stats {
+      justify-content: center;
+    }
+
+    .loyalty-tiers__grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .loyalty-rewards__header {
+      flex-direction: column;
+      gap: var(--spacing-3);
+      align-items: stretch;
+    }
+
+    .loyalty-rewards__grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .loyalty-reward__image {
+      height: 150px;
+    }
+
+    .loyalty-redeem-modal__content {
+      width: 95%;
+    }
+  }
+
+  @include respond-to('md') {
+    .loyalty-tiers__grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    .loyalty-rewards__grid {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+  }
+
+  @include respond-to('lg') {
+    .loyalty-tiers__grid {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+
+    .loyalty-rewards__grid {
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+  }
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    .loyalty-tier,
+    .loyalty-reward,
+    .loyalty-status,
+    .loyalty-signup,
+    .loyalty-history {
+      border-width: 2px;
+    }
+
+    .form-input,
+    .loyalty-rewards__select {
+      border-width: 3px;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .btn {
+      border-width: 3px;
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    .loyalty-tier:hover,
+    .loyalty-reward:hover {
+      transform: none;
+    }
+
+    .loyalty-progress__fill {
+      transition: none;
+    }
+
+    .loyalty-redeem-modal {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    class CustomerLoyalty {
+      constructor(element) {
+        this.element = element;
+        this.customer = {{ customer | json }};
+        this.currentCategory = 'all';
+        this.selectedReward = null;
+        this.pointsHistory = [];
+
+        this.init();
+      }
+
+      init() {
+        this.bindEvents();
+        this.loadPointsHistory();
+        this.updateUI();
+      }
+
+      bindEvents() {
+        // 分类切换
+        this.element.querySelectorAll('[data-category]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            this.filterByCategory(e.target.dataset.category);
+          });
+        });
+
+        // 奖励过滤
+        const filterSelect = this.element.querySelector('[data-reward-filter]');
+        if (filterSelect) {
+          filterSelect.addEventListener('change', (e) => {
+            this.filterRewardsByCategory(e.target.value);
+          });
+        }
+
+        // 兑换按钮
+        this.element.querySelectorAll('[data-reward-id]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            this.initiateRedemption(e.target.dataset.rewardId);
+          });
+        });
+
+        // 注册表单
+        const signupForm = this.element.querySelector('[data-loyalty-signup-form]');
+        if (signupForm) {
+          signupForm.addEventListener('submit', (e) => {
+          this.handleSignup(e);
+        });
+        }
+
+        // 模态框事件
+        const modal = this.element.querySelector('[data-loyalty-redeem-modal]');
+        if (modal) {
+          this.setupModal(modal);
+        }
+      }
+
+      filterByCategory(category) {
+        this.currentCategory = category;
+
+        // 更新分类按钮状态
+        this.element.querySelectorAll('[data-category]').forEach(button => {
+          button.classList.toggle('active', button.dataset.category === category);
+        });
+
+        // 过滤显示奖励
+        this.filterRewardsByCategory(category);
+      }
+
+      filterRewardsByCategory(category) {
+        const rewards = this.element.querySelectorAll('[data-reward]');
+        rewards.forEach(reward => {
+          const shouldShow = category === 'all' || reward.dataset.category === category;
+          reward.style.display = shouldShow ? '' : 'none';
+        });
+      }
+
+      initiateRedemption(rewardId) {
+        this.selectedReward = rewardId;
+        const reward = this.element.querySelector(`[data-reward-id="${rewardId}"]`);
+
+        const pointsRequired = parseInt(reward.querySelector('.loyalty-reward__points').textContent);
+        const availablePoints = parseInt(this.element.querySelector('[data-available-points]').textContent);
+
+        const modal = this.element.querySelector('[data-loyalty-redeem-modal]');
+        this.showRedemptionModal(reward, pointsRequired, availablePoints);
+      }
+
+      showRedemptionModal(reward, pointsRequired, availablePoints) {
+        const modal = this.element.querySelector('[data-loyalty-redeem-modal]');
+        const title = reward.querySelector('.loyalty-reward__title').textContent;
+        const description = reward.querySelector('.loyalty-reward__description').textContent;
+
+        // 更新模态框内容
+        modal.querySelector('.loyalty-redeem-modal__reward-title').textContent = title;
+        modal.querySelector('.loyalty-redeem-modal__reward-description').textContent = description;
+
+        // 更新积分信息
+        modal.querySelector('[data-redeem-points]').textContent = pointsRequired;
+        modal.querySelector('[data-remaining-points]').textContent = availablePoints;
+
+        // 显示模态框
+        modal.removeAttribute('hidden');
+      }
+
+      setupModal(modal) {
+        const overlay = modal.querySelector('[data-redeem-overlay]');
+        const closeBtn = modal.querySelector('[data-redeem-close]');
+        const cancelBtn = modal.querySelector('[data-redeem-cancel]');
+        const confirmBtn = modal.querySelector('[data-redeem-confirm]');
+
+        // 关闭事件
+        [overlay, closeBtn].forEach(el => {
+          el.addEventListener('click', () => {
+            this.hideRedemptionModal();
+          });
+        });
+
+        // 取消按钮
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', () => {
+            this.hideRedemptionModal();
+          });
+        }
+
+        // 确认按钮
+        if (confirmBtn) {
+          confirmBtn.addEventListener('click', () => {
+            this.processRedemption();
+          });
+        }
+
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !modal.hasAttribute('hidden')) {
+            this.hideRedemptionModal();
+          }
+        });
+      }
+
+      hideRedemptionModal() {
+        const modal = this.element.querySelector('[data-loyalty-redeem-modal]');
+        modal.setAttribute('hidden', '');
+        this.selectedReward = null;
+      }
+
+      processRedemption() {
+        if (!this.selectedReward) return;
+
+        const reward = this.element.querySelector(`[data-reward-id="${this.selectedReward}"]`);
+        const pointsRequired = parseInt(reward.querySelector('.loyalty-redeem-modal__points-value').textContent);
+        const availablePoints = parseInt(this.element.querySelector('[data-available-points]').textContent);
+
+        if (availablePoints < pointsRequired) {
+          alert('{{ 'loyalty.insufficient_points' | t }}');
+          return;
+        }
+
+        // 模拟API调用
+        this.redeemReward(this.selectedReward, pointsRequired);
+
+        // 关闭模态框
+        this.hideRedemptionModal();
+
+        // 显示成功消息
+        this.showRedemptionSuccess(reward);
+      }
+
+      redeemReward(rewardId, pointsCost) {
+        // 模拟API调用
+        return fetch('/api/loyalty/redeem', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rewardId,
+            pointsCost,
+            customerId: this.customer.id,
+            timestamp: new Date().toISOString()
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            this.updatePointsAfterRedemption(data);
+          } else {
+            throw new Error(data.error);
+          }
+        })
+        .catch(error => {
+          console.error('兑换失败:', error);
+          alert('{{ 'loyalty.redeem_failed' | t }}');
+        });
+      }
+
+      updatePointsAfterRedemption(result) {
+        const newBalance = result.newBalance;
+
+        // 更新显示
+        if (this.element.querySelector('[data-available-points]')) {
+          this.element.querySelector('[data-available-points]').textContent = newBalance;
+        }
+
+        if (this.element.querySelector('[data-points]')) {
+          this.element.querySelector('[data-points]').textContent = newBalance;
+        }
+
+        // 添加到历史记录
+        this.addToHistory({
+          date: new Date().toISOString(),
+          description: result.description,
+          type: 'redeem',
+          points: -pointsCost,
+          balance: newBalance
+        });
+
+        // 显示成功消息
+        this.showRedemptionSuccess(null, {
+          points: pointsCost,
+          balance: newBalance
+        });
+
+        // 更新进度条
+        this.updateProgress();
+      }
+
+      showRedemptionSuccess(reward, customData = {}) {
+        const points = customData.points || parseInt(reward?.querySelector('.loyalty-redeem-modal__points-value').textContent);
+        const balance = customData.balance || parseInt(this.element.querySelector('[data-available-points]').textContent);
+
+        // 显示成功消息
+        const successMessage = `成功兑换，花费 ${points} 积分，当前余额 ${balance} 积分`;
+
+        const notification = document.createElement('div');
+        notification.className = 'loyalty-notification loyalty-notification--success';
+        notification.innerHTML = `
+          <div class="loyalty-notification__content">
+            <div class="loyalty-notification__icon">✓</div>
+            <div class="loyalty-notification__text">${successMessage}</div>
+          </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-success);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-4);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-large);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+          `;
+
+        document.body.appendChild(notification);
+
+        // 3秒后自动移除
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+              if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+              }
+            }, 300);
+          }
+        }, 3000);
+      }
+
+      handleSignup(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        // 模拟注册API调用
+        this.createLoyaltyAccount(data);
+      }
+
+      createLoyaltyAccount(data) {
+        // 模拟API调用
+        return fetch('/api/loyalty/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // 刷新页面以更新会员状态
+            window.location.reload();
+          } else {
+            alert('{{ 'loyalty.signup_failed' | t }}: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('注册失败:', error);
+          alert('{{ 'loyalty.signup_error' | t }}');
+        });
+      }
+
+      loadPointsHistory() {
+        // 模拟加载积分历史
+        const mockHistory = [
+          {
+            date: '2024-01-15T10:30:00Z',
+            description: '购买商品获得积分',
+            type: 'earn',
+            points: 50,
+            balance: 500
+          },
+          {
+            date: '2024-01-10T14:20:00Z',
+            description: '使用积分兑换折扣券',
+            type: 'redeem',
+            points: -200,
+            balance: 450
+          },
+          {
+            {
+            date: '2024-01-05T09:15:00Z',
+            description: '评论获得积分',
+            type: 'earn',
+            points: 25,
+            balance: 475
+          }
+        ];
+
+        this.pointsHistory = mockHistory;
+        this.renderPointsHistory();
+      }
+
+      renderPointsHistory() {
+        const tbody = this.element.querySelector('[data-points-history] tbody');
+        if (!tbody) return;
+
+        // 清空现有内容
+        tbody.innerHTML = '';
+
+        if (this.pointsHistory.length === 0) {
+          const emptyRow = document.createElement('tr');
+          emptyRow.className = 'loyalty-history__empty';
+          emptyRow.innerHTML = `
+            <td colspan="6">{{ 'loyalty.no_history' | t }}</td>
+          `;
+          tbody.appendChild(emptyRow);
+          return;
+        }
+
+        // 添加历史记录
+        this.pointsHistory.forEach(record => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${this.formatDate(record.date)}</td>
+            <td>${record.description}</td>
+            <td>
+              <span class="loyalty-history__type loyalty-history__type--${record.type}">
+                ${this.getTypeLabel(record.type)}
+              </span>
+            </td>
+            <td>
+              <span class="loyalty-history__points loyalty-history__points--${record.type}">
+                ${record.points > 0 ? '+' : ''}${record.points}
+              </span>
+            </td>
+            <td>${record.balance}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      getTypeLabel(type) {
+        const labels = {
+          earn: '{{ 'loyalty.earn' | t }}',
+          redeem: '{{ 'loyalty.redeem' | t }}',
+          expire: '{{ 'loyalty.expire' | t }}',
+          bonus: '{{ 'loyalty.bonus' | t }}'
+        };
+        return labels[type] || type;
+      }
+
+      formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+
+      updateUI() {
+        // 更新积分显示
+        if (this.customer) {
+          const points = this.customer.metafields.loyalty.points || 0;
+          if (this.element.querySelector('[data-available-points]')) {
+            this.element.querySelector('[data-available-points]').textContent = points;
+          }
+          if (this.element.querySelector('[data-points]')) {
+            this.element.querySelector('[data-points]').textContent = points;
+          }
+          this.updateProgress();
+        }
+      }
+
+      updateProgress() {
+        if (!this.customer) return;
+
+        const currentLevel = this.customer.metafields.loyalty.level || 'Bronze';
+        const levelRequirements = {
+          'Bronze': 0,
+          'Silver': 1000,
+          'Gold': 2500,
+          'Platinum': 5000
+        };
+
+        const currentPoints = parseInt(this.customer.metafields.loyalty.points) || 0;
+        const nextLevel = this.getNextLevel(currentLevel);
+        const currentLevelPoints = levelRequirements[currentLevel] || 0;
+        const nextLevelPoints = levelRequirements[nextLevel] || 0;
+
+        const progress = currentPoints === nextLevel ? 100 :
+          ((currentPoints - currentLevelPoints) / (nextLevel - currentLevelPoints)) * 100;
+
+        if (this.element.querySelector('[data-progress-fill]')) {
+          this.element.querySelector('[data-progress-fill]').style.width = `${progress}%`;
+        }
+
+        if (this.element.querySelector('[data-remaining-points]')) {
+          const remaining = Math.max(0, nextLevelPoints - currentPoints);
+          this.element.querySelector('[data-remaining-points]').textContent = remaining;
+        }
+
+        if (this.element.querySelector('[data-next-tier]')) {
+          this.element.querySelector('[data-next-tier]').textContent = nextLevel;
+        }
+      }
+
+      getNextLevel(currentLevel) {
+        const levels = ['Bronze', 'Silver', 'Gold', 'Platinum'];
+        const currentIndex = levels.indexOf(currentLevel);
+        return Math.min(currentIndex + 1, levels.length - 1);
+      }
+    }
+
+    // 初始化所有忠诚度区块
+    document.querySelectorAll('[data-customer-loyalty]').forEach(section => {
+      new CustomerLoyalty(section);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "会员忠诚度计划",
+  "class": "customer-loyalty-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "区块标题",
+      "default": "会员专享"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_signup",
+      "label": "显示注册表单",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tiers",
+      "label": "显示会员等级",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rewards",
+      "label": "显示积分兑换",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_history",
+      "label": "显示积分历史",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "compact",
+      "label": "使用紧凑布局",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "完整会员计划",
+      "category": "Customer"
+    },
+    {
+      "name": "简单会员计划",
+      "category": "Customer",
+      "settings": {
+        "compact": true
+      }
+    },
+    {
+      "name": "积分兑换专区",
+      "category": "Customer",
+      "settings": {
+        "show_signup": false,
+        "show_tiers": false
+      }
+    }
+  ]
+}
+{% endschema %}

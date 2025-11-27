@@ -1,0 +1,238 @@
+[
+  {
+    "name": "主题信息",
+    "settings": [
+      {
+        "type": "header",
+        "content": "主题设置"
+      },
+      {
+        "type": "paragraph",
+        "content": "Sci-Fi Store Theme - 科幻风格Shopify主题，具有白色主色调和天空蓝强调色，配以精美的发光按钮效果。"
+      }
+    ]
+  },
+  {
+    "name": "颜色设置",
+    "settings": [
+      {
+        "type": "header",
+        "content": "品牌颜色"
+      },
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "主色调",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary",
+        "label": "次色调",
+        "default": "#87ceeb"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "强调色",
+        "default": "#4a90e2"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "文字颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "color_text_light",
+        "label": "浅色文字",
+        "default": "#666666"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "label": "边框颜色",
+        "default": "#e5e5e5"
+      },
+      {
+        "type": "header",
+        "content": "背景颜色"
+      },
+      {
+        "type": "color",
+        "id": "color_body_bg",
+        "label": "页面背景",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_header_bg",
+        "label": "头部背景",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "color_footer_bg",
+        "label": "页脚背景",
+        "default": "#f8f8f8"
+      }
+    ]
+  },
+  {
+    "name": "字体设置",
+    "settings": [
+      {
+        "type": "header",
+        "content": "字体选择"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "label": "标题字体",
+        "default": "helvetica_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "正文字体",
+        "default": "helvetica_n4"
+      },
+      {
+        "type": "range",
+        "id": "type_base_size",
+        "label": "基础字体大小",
+        "min": 12,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 16
+      },
+      {
+        "type": "range",
+        "id": "type_header_size",
+        "label": "标题字体大小",
+        "min": 24,
+        "max": 48,
+        "step": 1,
+        "unit": "px",
+        "default": 32
+      }
+    ]
+  },
+  {
+    "name": "发光效果设置",
+    "settings": [
+      {
+        "type": "header",
+        "content": "按钮发光效果"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_button_glow",
+        "label": "启用按钮发光效果",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "glow_color",
+        "label": "发光颜色",
+        "default": "#87ceeb"
+      },
+      {
+        "type": "range",
+        "id": "glow_size",
+        "label": "发光大小",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "default": 8
+      },
+      {
+        "type": "range",
+        "id": "glow_intensity",
+        "label": "发光透明度",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "default": 60
+      },
+      {
+        "type": "header",
+        "content": "悬停动画"
+      },
+      {
+        "type": "range",
+        "id": "animation_duration",
+        "label": "动画持续时间",
+        "min": 100,
+        "max": 1000,
+        "step": 100,
+        "unit": "ms",
+        "default": 300
+      }
+    ]
+  },
+  {
+    "name": "社交媒体",
+    "settings": [
+      {
+        "type": "header",
+        "content": "社交媒体账号"
+      },
+      {
+        "type": "text",
+        "id": "social_twitter_link",
+        "label": "Twitter",
+        "placeholder": "https://twitter.com/yourusername"
+      },
+      {
+        "type": "text",
+        "id": "social_facebook_link",
+        "label": "Facebook",
+        "placeholder": "https://facebook.com/yourusername"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram_link",
+        "label": "Instagram",
+        "placeholder": "https://instagram.com/yourusername"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube_link",
+        "label": "YouTube",
+        "placeholder": "https://youtube.com/yourusername"
+      }
+    ]
+  },
+  {
+    "name": "联系信息",
+    "settings": [
+      {
+        "type": "header",
+        "content": "店铺信息"
+      },
+      {
+        "type": "text",
+        "id": "contact_phone",
+        "label": "电话号码",
+        "placeholder": "+86 123-456-7890"
+      },
+      {
+        "type": "text",
+        "id": "contact_email",
+        "label": "邮箱地址",
+        "placeholder": "support@yourstore.com"
+      },
+      {
+        "type": "text",
+        "id": "contact_address",
+        "label": "店铺地址",
+        "placeholder": "北京市朝阳区xxx街道xxx号"
+      }
+    ]
+  }
+]

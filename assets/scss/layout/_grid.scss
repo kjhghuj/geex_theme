@@ -1,0 +1,395 @@
+// ============================================
+// Grid System - 科幻主题响应式网格系统
+// ============================================
+
+// 容器样式
+.container {
+  width: 100%;
+  max-width: var(--page-width, 1200px);
+  margin: 0 auto;
+  padding: 0 var(--spacing-4);
+
+  @include respond-to('sm') {
+    padding: 0 var(--spacing-6);
+  }
+
+  @include respond-to('lg') {
+    padding: 0 var(--spacing-8);
+  }
+}
+
+// 流体容器
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--spacing-4);
+
+  @include respond-to('sm') {
+    padding: 0 var(--spacing-6);
+  }
+
+  @include respond-to('lg') {
+    padding: 0 var(--spacing-8);
+  }
+}
+
+// 12列网格系统
+.grid {
+  display: grid;
+  gap: var(--grid-desktop-horizontal-spacing, var(--spacing-6));
+  grid-template-columns: repeat(12, 1fr);
+
+  // 移动端网格适配
+  @include mobile-only {
+    gap: var(--grid-mobile-horizontal-spacing, var(--spacing-4));
+  }
+
+  // 特殊网格变体
+  &--compact {
+    gap: var(--spacing-4);
+
+    @include mobile-only {
+      gap: var(--spacing-3);
+    }
+  }
+
+  &--wide {
+    gap: var(--spacing-8);
+
+    @include mobile-only {
+      gap: var(--spacing-5);
+    }
+  }
+
+  &--no-gap {
+    gap: 0;
+  }
+}
+
+// 列跨度类
+@for $i from 1 through 12 {
+  .col-#{$i} {
+    grid-column: span #{$i};
+  }
+
+  .col-start-#{$i} {
+    grid-column-start: #{$i};
+  }
+}
+
+// 响应式列
+.grid {
+  // 移动端默认单列
+  &--mobile-#{$cols} {
+    @for $cols from 1 through 4 {
+      &-#{$cols} {
+        @include mobile-only {
+          grid-template-columns: repeat($cols, 1fr);
+        }
+      }
+    }
+  }
+
+  // 平板端列数
+  @for $cols from 1 through 6 {
+    &--tablet-#{$cols} {
+      @include respond-to('md') {
+        grid-template-columns: repeat($cols, 1fr);
+      }
+    }
+  }
+
+  // 桌面端列数
+  @for $cols from 1 through 12 {
+    &--desktop-#{$cols} {
+      @include respond-to('lg') {
+        grid-template-columns: repeat($cols, 1fr);
+      }
+    }
+  }
+}
+
+// 自动网格
+.grid-auto {
+  &--fit {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  &--fill {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  &--wide {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  &--narrow {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+// 产品网格
+.product-grid {
+  display: grid;
+  gap: var(--spacing-6);
+  grid-template-columns: repeat(1, 1fr);
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-8);
+  }
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-10);
+  }
+
+  @include respond-to('xl') {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  // 2列变体
+  &--columns-2 {
+    @include respond-to('lg') {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  // 5列变体
+  &--columns-5 {
+    @include respond-to('xl') {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+}
+
+// Flexbox 系统
+.flex {
+  display: flex;
+
+  &--inline {
+    display: inline-flex;
+  }
+
+  &--wrap {
+    flex-wrap: wrap;
+  }
+
+  &--nowrap {
+    flex-wrap: nowrap;
+  }
+
+  &--reverse {
+    flex-direction: row-reverse;
+
+    @include mobile-only {
+      flex-direction: column-reverse;
+    }
+  }
+
+  &--column {
+    flex-direction: column;
+
+    @include mobile-only {
+      flex-direction: column;
+    }
+
+    &-reverse {
+      flex-direction: column-reverse;
+
+      @include mobile-only {
+        flex-direction: column-reverse;
+      }
+    }
+  }
+}
+
+// Flex 对齐
+.flex {
+  &--start {
+    justify-content: flex-start;
+  }
+
+  &--center {
+    justify-content: center;
+  }
+
+  &--end {
+    justify-content: flex-end;
+  }
+
+  &--between {
+    justify-content: space-between;
+  }
+
+  &--around {
+    justify-content: space-around;
+  }
+
+  &--evenly {
+    justify-content: space-evenly;
+  }
+
+  // 交叉轴对齐
+  &--items-start {
+    align-items: flex-start;
+  }
+
+  &--items-center {
+    align-items: center;
+  }
+
+  &--items-end {
+    align-items: flex-end;
+  }
+
+  &--items-stretch {
+    align-items: stretch;
+  }
+
+  &--items-baseline {
+    align-items: baseline;
+  }
+}
+
+// 间距工具类
+.gap {
+  &-0 { gap: var(--spacing-0); }
+  &-1 { gap: var(--spacing-1); }
+  &-2 { gap: var(--spacing-2); }
+  &-3 { gap: var(--spacing-3); }
+  &-4 { gap: var(--spacing-4); }
+  &-5 { gap: var(--spacing-5); }
+  &-6 { gap: var(--spacing-6); }
+  &-8 { gap: var(--spacing-8); }
+  &-10 { gap: var(--spacing-10); }
+  &-12 { gap: var(--spacing-12); }
+  &-16 { gap: var(--spacing-16); }
+  &-20 { gap: var(--spacing-20); }
+}
+
+// 响应式间距
+@include mobile-only {
+  .gap-mobile-0 { gap: var(--spacing-0); }
+  .gap-mobile-2 { gap: var(--spacing-2); }
+  .gap-mobile-4 { gap: var(--spacing-4); }
+  .gap-mobile-6 { gap: var(--spacing-6); }
+}
+
+@include respond-to('md') {
+  .gap-tablet-4 { gap: var(--spacing-4); }
+  .gap-tablet-6 { gap: var(--spacing-6); }
+  .gap-tablet-8 { gap: var(--spacing-8); }
+}
+
+@include respond-to('lg') {
+  .gap-desktop-6 { gap: var(--spacing-6); }
+  .gap-desktop-8 { gap: var(--spacing-8); }
+  .gap-desktop-10 { gap: var(--spacing-10); }
+}
+
+// 页面布局
+.page-container {
+  max-width: var(--page-width, 1200px);
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-4);
+
+  @include respond-to('md') {
+    padding: var(--spacing-12) var(--spacing-6);
+  }
+
+  @include respond-to('lg') {
+    padding: var(--spacing-16) var(--spacing-8);
+  }
+}
+
+// 内容区块
+.section {
+  padding: var(--spacing-sections-mobile, var(--spacing-12)) 0;
+
+  @include respond-to('lg') {
+    padding: var(--spacing-sections-desktop, var(--spacing-20)) 0;
+  }
+
+  &--compact {
+    padding: var(--spacing-8) 0;
+
+    @include respond-to('lg') {
+      padding: var(--spacing-12) 0;
+    }
+  }
+
+  &--wide {
+    padding: var(--spacing-16) 0;
+
+    @include respond-to('lg') {
+      padding: var(--spacing-24) 0;
+    }
+  }
+
+  &--no-padding {
+    padding: 0;
+  }
+}
+
+// 两列布局
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+
+  @include respond-to('lg') {
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-12);
+  }
+
+  &--reverse {
+    @include respond-to('lg') {
+      grid-template-columns: 1fr 2fr;
+    }
+  }
+
+  &--equal {
+    @include respond-to('lg') {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+// 三列布局
+.three-column-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-6);
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-8);
+  }
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-10);
+  }
+
+  &--sidebar {
+    @include respond-to('lg') {
+      grid-template-columns: 1fr 3fr 1fr;
+    }
+  }
+}
+
+// 主内容区域
+.main-content {
+  flex: 1;
+  min-width: 0; // 防止flex项目溢出
+}
+
+// 侧边栏
+.sidebar {
+  width: 100%;
+
+  @include respond-to('lg') {
+    width: 320px;
+    flex-shrink: 0;
+  }
+}

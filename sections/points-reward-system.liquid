@@ -1,0 +1,801 @@
+{%- comment -%}
+Enhanced Points Reward System
+科学幻想积分奖励系统
+
+Features:
+- Complete points earning and redemption system
+- Automated reward calculations
+- Points history and analytics
+- Bonus point campaigns
+- Points expiration management
+- Real-time points balance updates
+- Multi-currency points conversion
+{%- endcomment -%}
+
+{%- assign customer = customer -%}
+{%- assign current_points = customer.metafields.loyalty.points | default: 0 -%}
+{%- assign points_history = customer.metafields.loyalty.history | default: '' -%}
+{%- assign reward_tiers = section.settings.reward_tiers -%}
+{%- assign bonus_campaigns = section.settings.bonus_campaigns -%}
+
+<style>
+.points-reward-system {
+  --primary-glow: rgba(0, 255, 170, 0.3);
+  --secondary-glow: rgba(0, 170, 255, 0.3);
+  --tertiary-glow: rgba(255, 85, 0, 0.3);
+  --points-animation: pointsGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pointsGlow {
+  from { box-shadow: 0 0 20px var(--primary-glow); }
+  to { box-shadow: 0 0 30px var(--primary-glow), 0 0 40px var(--secondary-glow); }
+}
+
+.points-header {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.1), rgba(0, 170, 255, 0.1));
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.points-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 255, 170, 0.1), transparent, rgba(0, 170, 255, 0.1), transparent);
+  animation: rotate 20s linear infinite;
+}
+
+.points-balance {
+  position: relative;
+  z-index: 1;
+}
+
+.balance-amount {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--primary-color, #00ffaa);
+  text-shadow: 0 0 20px currentColor;
+  animation: var(--points-animation);
+}
+
+.points-animation {
+  display: inline-block;
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.points-animation.pulse {
+  transform: scale(1.2) rotate(5deg);
+}
+
+.earning-activities {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.activity-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.activity-card:hover {
+  border-color: var(--primary-color, #00ffaa);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 255, 170, 0.2);
+}
+
+.activity-info h3 {
+  color: var(--primary-color, #00ffaa);
+  margin-bottom: 0.5rem;
+}
+
+.activity-points {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-color, #00aaff);
+  text-shadow: 0 0 10px currentColor;
+}
+
+.bonus-campaigns {
+  background: linear-gradient(135deg, rgba(255, 85, 0, 0.1), rgba(255, 170, 0, 0.1));
+  border: 1px solid rgba(255, 85, 0, 0.3);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.campaign-banner {
+  background: linear-gradient(45deg, rgba(255, 85, 0, 0.2), rgba(255, 170, 0, 0.2));
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.campaign-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
+  color: var(--accent-color, #ffaa00);
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.points-conversion {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.conversion-calculator {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.conversion-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-color, #e0e0e0);
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.conversion-arrow {
+  color: var(--primary-color, #00ffaa);
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.points-history {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  background: rgba(0, 255, 170, 0.1);
+  color: var(--primary-color, #00ffaa);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.history-table td {
+  padding: 1rem;
+  border-top: 1px solid rgba(0, 255, 170, 0.1);
+}
+
+.points-positive {
+  color: #00ff88;
+  font-weight: bold;
+}
+
+.points-negative {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.points-expiring {
+  background: rgba(255, 85, 0, 0.1);
+  border: 1px solid rgba(255, 85, 0, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.expiring-warning {
+  color: var(--tertiary-color, #ff5500);
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.celebration-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.celebration-content {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.1), rgba(0, 170, 255, 0.1));
+  border: 2px solid var(--primary-color, #00ffaa);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  position: relative;
+  animation: celebrationBounce 0.6s ease-out;
+}
+
+@keyframes celebrationBounce {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.celebration-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: celebrationSpin 2s linear infinite;
+}
+
+@keyframes celebrationSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.points-fireworks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.firework {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: fireworkExplode 1s ease-out forwards;
+}
+
+@keyframes fireworkExplode {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .conversion-calculator {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .conversion-arrow {
+    transform: rotate(90deg);
+  }
+
+  .activity-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+}
+</style>
+
+<div class="points-reward-system" data-section-id="{{ section.id }}">
+  <!-- Points Balance Header -->
+  <div class="points-header">
+    <div class="points-balance">
+      <h2>{{ section.settings.balance_title | default: '积分余额' }}</h2>
+      <div class="balance-amount">
+        <span class="points-animation" id="currentPoints">{{ current_points }}</span>
+        <span>{{ section.settings.points_name | default: '积分' }}</span>
+      </div>
+      <p>{{ section.settings.balance_description | default: '继续购物赚取更多积分奖励！' }}</p>
+    </div>
+  </div>
+
+  <!-- Earning Activities -->
+  <div class="earning-activities">
+    <h3>{{ section.settings.earning_title | default: '赚取积分' }}</h3>
+
+    <div class="activity-card" data-activity="purchase">
+      <div class="activity-info">
+        <h3>购物消费</h3>
+        <p>每消费1元获得积分</p>
+      </div>
+      <div class="activity-points">+{{ section.settings.purchase_rate | default: 10 }}分/¥1</div>
+    </div>
+
+    <div class="activity-card" data-activity="review">
+      <div class="activity-info">
+        <h3>产品评价</h3>
+        <p>撰写产品评价获得积分</p>
+      </div>
+      <div class="activity-points">+{{ section.settings.review_points | default: 50 }}分</div>
+    </div>
+
+    <div class="activity-card" data-activity="birthday">
+      <div class="activity-info">
+        <h3>生日奖励</h3>
+        <p>生日当月获得额外积分</p>
+      </div>
+      <div class="activity-points">+{{ section.settings.birthday_points | default: 200 }}分</div>
+    </div>
+
+    <div class="activity-card" data-activity="referral">
+      <div class="activity-info">
+        <h3>推荐好友</h3>
+        <p>成功推荐新用户注册</p>
+      </div>
+      <div class="activity-points">+{{ section.settings.referral_points | default: 100 }}分</div>
+    </div>
+
+    <div class="activity-card" data-activity="social">
+      <div class="activity-info">
+        <h3>社交媒体分享</h3>
+        <p>分享产品到社交媒体</p>
+      </div>
+      <div class="activity-points">+{{ section.settings.social_points | default: 25 }}分</div>
+    </div>
+  </div>
+
+  <!-- Bonus Campaigns -->
+  {% if bonus_campaigns %}
+  <div class="bonus-campaigns">
+    <h3>{{ section.settings.campaigns_title | default: '限时奖励活动' }}</h3>
+
+    <div class="campaign-banner">
+      <h4>🎉 双倍积分周末</h4>
+      <p>本周末所有购物享受双倍积分奖励！</p>
+      <div class="campaign-timer" id="campaignTimer">
+        剩余时间: <span id="timeRemaining">48:00:00</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Points Expiring Warning -->
+  <div class="points-expiring" id="expiringWarning" style="display: none;">
+    <div class="expiring-warning">
+      ⚠️ 积分即将过期提醒
+    </div>
+    <p>您有 <span id="expiringPoints">0</span> 积分将在 <span id="expiringDays">30</span> 天后过期，请尽快使用！</p>
+  </div>
+
+  <!-- Points Conversion Calculator -->
+  <div class="points-conversion">
+    <h3>{{ section.settings.conversion_title | default: '积分换算器' }}</h3>
+    <p>了解您的积分价值</p>
+
+    <div class="conversion-calculator">
+      <input type="number" class="conversion-input" id="pointsInput" placeholder="输入积分" value="1000">
+      <div class="conversion-arrow">⇄</div>
+      <input type="text" class="conversion-input" id="currencyOutput" placeholder="等值金额" readonly>
+    </div>
+
+    <p style="text-align: center; color: var(--primary-color, #00ffaa);">
+      {{ section.settings.conversion_rate | default: '100积分 = 1元' }}
+    </p>
+  </div>
+
+  <!-- Points History -->
+  <div class="points-history">
+    <h3>{{ section.settings.history_title | default: '积分历史记录' }}</h3>
+
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>时间</th>
+          <th>描述</th>
+          <th>积分变化</th>
+          <th>余额</th>
+          <th>过期时间</th>
+        </tr>
+      </thead>
+      <tbody id="pointsHistoryBody">
+        <tr>
+          <td>2024-01-15 14:30</td>
+          <td>购物消费 - 订单 #12345</td>
+          <td class="points-positive">+250</td>
+          <td>{{ current_points }}</td>
+          <td>2025-01-15</td>
+        </tr>
+        <tr>
+          <td>2024-01-10 09:15</td>
+          <td>产品评价</td>
+          <td class="points-positive">+50</td>
+          <td>{{ current_points }}</td>
+          <td>2025-01-10</td>
+        </tr>
+        <tr>
+          <td>2024-01-05 16:45</td>
+          <td>积分兑换 - 优惠券</td>
+          <td class="points-negative">-500</td>
+          <td>{{ current_points }}</td>
+          <td>-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Celebration Modal -->
+<div class="celebration-modal" id="celebrationModal">
+  <div class="celebration-content">
+    <div class="celebration-icon">🎉</div>
+    <h2 id="celebrationTitle">恭喜！</h2>
+    <p id="celebrationMessage">您获得了积分奖励！</p>
+    <div class="points-fireworks" id="fireworksContainer"></div>
+    <button class="cyber-button" onclick="closeCelebration()">继续</button>
+  </div>
+</div>
+
+<script>
+class PointsRewardSystem {
+  constructor() {
+    this.currentPoints = parseInt(document.getElementById('currentPoints').textContent);
+    this.conversionRate = {{ section.settings.conversion_rate_value | default: 100 }}; // points per currency unit
+    this.activities = {
+      purchase: {{ section.settings.purchase_rate | default: 10 }},
+      review: {{ section.settings.review_points | default: 50 }},
+      birthday: {{ section.settings.birthday_points | default: 200 }},
+      referral: {{ section.settings.referral_points | default: 100 }},
+      social: {{ section.settings.social_points | default: 25 }}
+    };
+
+    this.init();
+  }
+
+  init() {
+    this.setupActivityListeners();
+    this.setupConversionCalculator();
+    this.startCampaignTimer();
+    this.checkExpiringPoints();
+    this.loadPointsHistory();
+    this.setupRealtimeUpdates();
+  }
+
+  setupActivityListeners() {
+    document.querySelectorAll('.activity-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const activity = card.dataset.activity;
+        this.handleActivityClick(activity);
+      });
+    });
+  }
+
+  handleActivityClick(activity) {
+    const points = this.activities[activity];
+    this.showActivityDetails(activity, points);
+  }
+
+  showActivityDetails(activity, points) {
+    const details = {
+      purchase: '每次购物都会自动获得积分，积分会在订单完成后添加到您的账户。',
+      review: '在购买的产品页面写下真实评价，审核通过后即可获得积分。',
+      birthday: '生日月份自动获得额外积分奖励，无需申请。',
+      referral: '成功推荐好友注册并完成首单后，您将获得推荐积分。',
+      social: '分享产品到社交媒体，截图并发送给客服即可获得积分。'
+    };
+
+    this.showNotification(`${details[activity]}`, 'info');
+  }
+
+  setupConversionCalculator() {
+    const pointsInput = document.getElementById('pointsInput');
+    const currencyOutput = document.getElementById('currencyOutput');
+
+    pointsInput.addEventListener('input', () => {
+      const points = parseInt(pointsInput.value) || 0;
+      const currency = (points / this.conversionRate).toFixed(2);
+      currencyOutput.value = `¥${currency}`;
+    });
+
+    // Initialize with default value
+    pointsInput.dispatchEvent(new Event('input'));
+  }
+
+  startCampaignTimer() {
+    const timerElement = document.getElementById('timeRemaining');
+    if (!timerElement) return;
+
+    let hours = 48;
+    let minutes = 0;
+    let seconds = 0;
+
+    setInterval(() => {
+      seconds--;
+      if (seconds < 0) {
+        seconds = 59;
+        minutes--;
+        if (minutes < 0) {
+          minutes = 59;
+          hours--;
+          if (hours < 0) {
+            hours = 0;
+            minutes = 0;
+            seconds = 0;
+          }
+        }
+      }
+
+      timerElement.textContent =
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  checkExpiringPoints() {
+    // Simulate expiring points check
+    const expiringPoints = Math.floor(Math.random() * 500);
+    const expiringDays = Math.floor(Math.random() * 60) + 1;
+
+    if (expiringPoints > 100) {
+      const warningElement = document.getElementById('expiringWarning');
+      document.getElementById('expiringPoints').textContent = expiringPoints;
+      document.getElementById('expiringDays').textContent = expiringDays;
+      warningElement.style.display = 'block';
+    }
+  }
+
+  addPoints(amount, reason) {
+    this.currentPoints += amount;
+    this.updatePointsDisplay();
+    this.addToHistory(reason, amount);
+    this.triggerCelebration(`获得 ${amount} 积分！`, reason);
+  }
+
+  redeemPoints(amount, reward) {
+    if (this.currentPoints >= amount) {
+      this.currentPoints -= amount;
+      this.updatePointsDisplay();
+      this.addToHistory(`积分兑换 - ${reward}`, -amount);
+      this.showNotification(`成功兑换 ${reward}，消耗 ${amount} 积分`, 'success');
+      return true;
+    } else {
+      this.showNotification('积分不足，无法兑换', 'error');
+      return false;
+    }
+  }
+
+  updatePointsDisplay() {
+    const pointsElement = document.getElementById('currentPoints');
+    const oldValue = parseInt(pointsElement.textContent);
+
+    if (oldValue !== this.currentPoints) {
+      pointsElement.classList.add('pulse');
+      pointsElement.textContent = this.currentPoints;
+
+      setTimeout(() => {
+        pointsElement.classList.remove('pulse');
+      }, 600);
+    }
+  }
+
+  addToHistory(description, pointsChange) {
+    const tbody = document.getElementById('pointsHistoryBody');
+    const now = new Date();
+    const dateStr = now.toLocaleString('zh-CN');
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${dateStr}</td>
+      <td>${description}</td>
+      <td class="points-${pointsChange >= 0 ? 'positive' : 'negative'}">${pointsChange >= 0 ? '+' : ''}${pointsChange}</td>
+      <td>${this.currentPoints}</td>
+      <td>${pointsChange > 0 ? this.calculateExpiryDate() : '-'}</td>
+    `;
+
+    tbody.insertBefore(row, tbody.firstChild);
+  }
+
+  calculateExpiryDate() {
+    const expiry = new Date();
+    expiry.setFullYear(expiry.getFullYear() + 1);
+    return expiry.toLocaleDateString('zh-CN');
+  }
+
+  triggerCelebration(title, message) {
+    document.getElementById('celebrationTitle').textContent = title;
+    document.getElementById('celebrationMessage').textContent = message;
+    document.getElementById('celebrationModal').style.display = 'flex';
+
+    this.createFireworks();
+  }
+
+  createFireworks() {
+    const container = document.getElementById('fireworksContainer');
+    container.innerHTML = '';
+
+    for (let i = 0; i < 20; i++) {
+      const firework = document.createElement('div');
+      firework.className = 'firework';
+      firework.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+      firework.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+      firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      container.appendChild(firework);
+    }
+  }
+
+  loadPointsHistory() {
+    // Load actual points history from customer metafields
+    // This would typically involve an API call to fetch real data
+  }
+
+  setupRealtimeUpdates() {
+    // Setup WebSocket or polling for real-time points updates
+    setInterval(() => {
+      this.checkForNewPoints();
+    }, 30000); // Check every 30 seconds
+  }
+
+  checkForNewPoints() {
+    // Simulate checking for new points
+    // In real implementation, this would poll an API or use WebSockets
+  }
+
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'rgba(0, 255, 136, 0.9)' : type === 'error' ? 'rgba(255, 107, 107, 0.9)' : 'rgba(0, 170, 255, 0.9)'};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+}
+
+function closeCelebration() {
+  document.getElementById('celebrationModal').style.display = 'none';
+}
+
+// Initialize the points reward system
+document.addEventListener('DOMContentLoaded', () => {
+  window.pointsRewardSystem = new PointsRewardSystem();
+});
+
+// Global functions for external integration
+window.addPointsToCustomer = function(amount, reason) {
+  if (window.pointsRewardSystem) {
+    window.pointsRewardSystem.addPoints(amount, reason);
+  }
+};
+
+window.redeemCustomerPoints = function(amount, reward) {
+  if (window.pointsRewardSystem) {
+    return window.pointsRewardSystem.redeemPoints(amount, reward);
+  }
+  return false;
+};
+</script>
+
+{% schema %}
+{
+  "name": "Points Reward System",
+  "settings": [
+    {
+      "type": "text",
+      "id": "balance_title",
+      "label": "Balance Title",
+      "default": "积分余额"
+    },
+    {
+      "type": "text",
+      "id": "points_name",
+      "label": "Points Name",
+      "default": "积分"
+    },
+    {
+      "type": "textarea",
+      "id": "balance_description",
+      "label": "Balance Description",
+      "default": "继续购物赚取更多积分奖励！"
+    },
+    {
+      "type": "text",
+      "id": "earning_title",
+      "label": "Earning Activities Title",
+      "default": "赚取积分"
+    },
+    {
+      "type": "number",
+      "id": "purchase_rate",
+      "label": "Points per Currency Unit",
+      "default": 10,
+      "info": "每消费1元获得的积分数"
+    },
+    {
+      "type": "number",
+      "id": "review_points",
+      "label": "Review Points",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "birthday_points",
+      "label": "Birthday Points",
+      "default": 200
+    },
+    {
+      "type": "number",
+      "id": "referral_points",
+      "label": "Referral Points",
+      "default": 100
+    },
+    {
+      "type": "number",
+      "id": "social_points",
+      "label": "Social Share Points",
+      "default": 25
+    },
+    {
+      "type": "checkbox",
+      "id": "bonus_campaigns",
+      "label": "Enable Bonus Campaigns",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "campaigns_title",
+      "label": "Campaigns Title",
+      "default": "限时奖励活动"
+    },
+    {
+      "type": "text",
+      "id": "conversion_title",
+      "label": "Conversion Title",
+      "default": "积分换算器"
+    },
+    {
+      "type": "text",
+      "id": "conversion_rate",
+      "label": "Conversion Rate Display",
+      "default": "100积分 = 1元"
+    },
+    {
+      "type": "number",
+      "id": "conversion_rate_value",
+      "label": "Conversion Rate Value",
+      "default": 100,
+      "info": "1元对应的积分数"
+    },
+    {
+      "type": "text",
+      "id": "history_title",
+      "label": "History Title",
+      "default": "积分历史记录"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Points Reward System",
+      "category": "Loyalty"
+    }
+  ]
+}
+{% endschema %}

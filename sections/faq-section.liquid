@@ -1,0 +1,1867 @@
+{% comment %}
+  FAQ区块组件
+  提供可折叠的常见问题列表，支持搜索和分类
+
+  Parameters:
+  - title: FAQ标题（可选）
+  - category: FAQ分类（可选）
+  - max_items: 显示的最大项目数（可选）
+  - show_search: 是否显示搜索框（可选，默认true）
+  - collapsible: 是否支持折叠（可选，默认true）
+{% endcomment %}
+
+{%- assign section_title = title | default: 'Frequently Asked Questions' -%}
+{%- assign faq_category = category | default: nil -%}
+{%- assign max_items = max_items | default: 10 -%}
+{%- assign show_search = show_search | default: true -%}
+{%- assign is_collapsible = collapsible | default: true -%}
+
+<section class="faq-section" data-faq-section>
+  <div class="container">
+    <!-- FAQ头部 -->
+    <header class="faq-header">
+      <h2 class="faq-title">{{ section_title }}</h2>
+      {% if show_search %}
+        <div class="faq-search">
+          <div class="faq-search__wrapper">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" class="faq-search__icon">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M13 13l5 5" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+            <input type="search"
+                   class="faq-search__input"
+                   placeholder="{{ 'faq.search_placeholder' | t }}"
+                   data-faq-search>
+            <button type="button" class="faq-search__clear" data-faq-search-clear hidden>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="faq-search__results" data-faq-results hidden>
+            <span class="faq-search__count"></span>
+            <button type="button" class="faq-search__reset" data-faq-reset>
+              {{ 'faq.clear_search' | t }}
+            </button>
+          </div>
+        </div>
+      {% endif %}
+    </header>
+
+    <!-- FAQ分类标签 -->
+    <div class="faq-categories" data-faq-categories>
+      <button type="button" class="faq-category active" data-category="all">
+        {{ 'faq.all_categories' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="general">
+        {{ 'faq.category_general' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="orders">
+        {{ 'faq.category_orders' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="shipping">
+        {{ 'faq.category_shipping' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="returns">
+        {{ 'faq.category_returns' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="payments">
+        {{ 'faq.category_payments' | t }}
+      </button>
+      <button type="button" class="faq-category" data-category="account">
+        {{ 'faq.category_account' | t }}
+      </button>
+    </div>
+
+    <!-- FAQ列表 -->
+    <div class="faq-list" data-faq-list>
+      <!-- 通用问题 -->
+      <div class="faq-category-section" data-category-section="general">
+        <div class="faq-item" data-faq-item data-category="general">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.general_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.general_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="general">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.general_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.general_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 订单问题 -->
+      <div class="faq-category-section" data-category-section="orders">
+        <div class="faq-item" data-faq-item data-category="orders">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.orders_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.orders_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="orders">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.orders_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.orders_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 配送问题 -->
+      <div class="faq-category-section" data-category-section="shipping">
+        <div class="faq-item" data-faq-item data-category="shipping">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.shipping_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.shipping_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="shipping">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.shipping_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.shipping_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 退货问题 -->
+      <div class="faq-category-section" data-category-section="returns">
+        <div class="faq-item" data-faq-item data-category="returns">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.returns_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.returns_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="returns">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.returns_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.returns_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 支付问题 -->
+      <div class="faq-category-section" data-category-section="payments">
+        <div class="faq-item" data-faq-item data-category="payments">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.payments_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.payments_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="payments">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.payments_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.payments_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 账户问题 -->
+      <div class="faq-category-section" data-category-section="account">
+        <div class="faq-item" data-faq-item data-category="account">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.account_q1' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.account_a1' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item" data-faq-item data-category="account">
+          <button type="button" class="faq-question" data-faq-question>
+            <span class="faq-question__text">{{ 'faq.account_q2' | t }}</span>
+            <span class="faq-question__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 7h10M5 13h10M6 2l-2 4v8a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </span>
+          </button>
+          <div class="faq-answer" data-faq-answer>
+            <div class="faq-answer__content">
+              {{ 'faq.account_a2' | t }}
+            </div>
+            <div class="faq-answer__actions">
+              <button type="button" class="faq-action faq-action--helpful" data-faq-helpful="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+                </svg>
+                {{ 'faq.helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--not-helpful" data-faq-helpful="false">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.not_helpful' | t }}
+              </button>
+              <button type="button" class="faq-action faq-action--share" data-faq-share>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'faq.share' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 无结果提示 -->
+    <div class="faq-no-results" data-faq-no-results hidden>
+      <div class="no-results__icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+          <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M16 16l16 16M32 16l-16 16" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3 class="no-results__title">{{ 'faq.no_results_title' | t }}</h3>
+      <p class="no-results__description">{{ 'faq.no_results_description' | t }}</p>
+      <button type="button" class="btn btn--primary" data-faq-reset>
+        {{ 'faq.view_all_questions' | t }}
+      </button>
+    </div>
+
+    <!-- 联系支持 -->
+    <div class="faq-contact" data-faq-contact>
+      <h3 class="faq-contact__title">{{ 'faq.still_need_help' | t }}</h3>
+      <p class="faq-contact__description">{{ 'faq.contact_support_description' | t }}</p>
+      <div class="faq-contact__actions">
+        <button type="button" class="btn btn--primary" data-open-chat>
+          {{ 'faq.start_live_chat' | t }}
+        </button>
+        <a href="{{ pages[contact-us].url | default: '/pages/contact-us' }}" class="btn btn--secondary">
+          {{ 'faq.contact_us' | t }}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-section {
+    padding: var(--spacing-12) 0;
+    background: var(--color-bg-primary);
+  }
+
+  .faq-header {
+    text-align: center;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .faq-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-6);
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* FAQ搜索 */
+  .faq-search {
+    max-width: 600px;
+    margin: 0 auto var(--spacing-6);
+    position: relative;
+  }
+
+  .faq-search__wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:focus-within {
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .faq-search__icon {
+    flex-shrink: 0;
+    margin: 0 var(--spacing-4);
+    color: var(--color-text-light);
+  }
+
+  .faq-search__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: var(--spacing-4) 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+
+    &::placeholder {
+      color: var(--color-text-light);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .faq-search__clear {
+    flex-shrink: 0;
+    margin: 0 var(--spacing-2);
+    padding: var(--spacing-2);
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-error);
+      background: rgba(220, 53, 69, 0.1);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .faq-search__results {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+  }
+
+  .faq-search__count {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .faq-search__reset {
+    background: none;
+    border: none;
+    color: var(--color-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    text-decoration: underline;
+    padding: 0;
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  /* FAQ分类 */
+  .faq-categories {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-8);
+    padding: var(--spacing-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
+
+  .faq-category {
+    padding: var(--spacing-2) var(--spacing-4);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-primary);
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+      transform: translateY(-1px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &.active {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.5);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  /* FAQ列表 */
+  .faq-list {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-8);
+  }
+
+  .faq-category-section {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .faq-item {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-4);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:hover {
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.2);
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &[data-matched="true"] {
+      border-color: var(--color-accent);
+      @include glow(var(--glow-size-small, var(--color-accent), 0.3);
+    }
+
+    &[data-visible="false"] {
+      display: none;
+    }
+  }
+
+  .faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-5);
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    text-align: left;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-secondary);
+      background: rgba(135, 206, 235, 0.05);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-secondary);
+      box-shadow: 0 0 0 4px rgba(135, 206, 235, 0.2);
+    }
+
+    &[aria-expanded="true"] .faq-question__icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .faq-question__text {
+    flex: 1;
+    padding-right: var(--spacing-4);
+    line-height: 1.4;
+  }
+
+  .faq-question__icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--color-secondary);
+    transition: transform var(--duration-normal) var(--ease-out);
+  }
+
+  .faq-answer {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    max-height: 0;
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-sci-fi);
+
+    &[aria-hidden="false"] {
+      max-height: 500px;
+    }
+  }
+
+  .faq-answer__content {
+    padding: var(--spacing-5);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+
+    p {
+      margin: 0 0 var(--spacing-3);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul, ol {
+      margin: var(--spacing-3) 0;
+      padding-left: var(--spacing-6);
+
+      li {
+        margin-bottom: var(--spacing-2);
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    a {
+      color: var(--color-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all var(--duration-fast) var(--ease-out);
+
+      &:hover {
+        border-bottom-color: var(--color-secondary);
+      }
+    }
+
+    strong, b {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  .faq-answer__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-3) var(--spacing-5);
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .faq-action {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-primary);
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+    }
+
+    &--helpful {
+      &:hover {
+        background: rgba(40, 167, 69, 0.1);
+        border-color: var(--color-success);
+        color: var(--color-success);
+      }
+    }
+
+    &--not-helpful {
+      &:hover {
+        background: rgba(220, 53, 69, 0.1);
+        border-color: var(--color-error);
+        color: var(--color-error);
+      }
+    }
+
+    &.voted {
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border-color: var(--color-secondary);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  /* 无结果 */
+  .faq-no-results {
+    text-align: center;
+    padding: var(--spacing-12);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .no-results__icon {
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-4);
+    opacity: 0.5;
+  }
+
+  .no-results__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .no-results__description {
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-6);
+  }
+
+  /* 联系支持 */
+  .faq-contact {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-8);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+  }
+
+  .faq-contact__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .faq-contact__description {
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-6);
+  }
+
+  .faq-contact__actions {
+    display: flex;
+    gap: var(--spacing-4);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+    border: 2px solid transparent;
+
+    &:focus {
+      outline: none;
+    }
+
+    &--primary {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+
+      &:hover {
+        transform: translateY(-1px);
+        @include glow(var(--glow-size-medium, var(--color-secondary), 0.6);
+      }
+    }
+
+    &--secondary {
+      background: transparent;
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+
+      &:hover {
+        background: var(--color-bg-primary);
+        border-color: var(--color-secondary);
+        color: var(--color-secondary);
+      }
+    }
+  }
+
+  /* 高亮效果 */
+  .faq-item[data-highlighted="true"] {
+    border-color: var(--color-accent);
+    @include glow(var(--glow-size-medium, var(--color-accent), 0.4);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      background: linear-gradient(45deg, var(--color-accent), transparent);
+      border-radius: var(--radius-lg);
+      opacity: 0.1;
+      z-index: -1;
+      animation: highlightPulse 2s ease-in-out;
+    }
+  }
+
+  @keyframes highlightPulse {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .faq-section {
+      padding: var(--spacing-8) 0;
+    }
+
+    .faq-title {
+      font-size: var(--font-size-2xl);
+    }
+
+    .faq-categories {
+      gap: var(--spacing-2);
+    }
+
+    .faq-category {
+      font-size: var(--font-size-xs);
+      padding: var(--spacing-2) var(--spacing-3);
+    }
+
+    .faq-question {
+      padding: var(--spacing-4);
+      font-size: var(--font-size-sm);
+    }
+
+    .faq-answer__content {
+      padding: var(--spacing-4);
+    }
+
+    .faq-answer__actions {
+      padding: var(--spacing-3) var(--spacing-4);
+      flex-direction: column;
+      gap: var(--spacing-3);
+      align-items: stretch;
+    }
+
+    .faq-contact__actions {
+      flex-direction: column;
+    }
+  }
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    .faq-item,
+    .faq-contact {
+      border-width: 2px;
+    }
+
+    .faq-search__wrapper {
+      border-width: 3px;
+    }
+
+    .faq-category {
+      border-width: 2px;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .btn {
+      border-width: 3px;
+      font-weight: var(--font-weight-bold);
+    }
+
+    .faq-action {
+      border-width: 2px;
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    .faq-question__icon,
+    .faq-answer,
+    .faq-category:hover,
+    .btn:hover {
+      transition: none;
+    }
+
+    .faq-item:hover {
+      transform: none;
+    }
+
+    @keyframes highlightPulse {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    class FAQSection {
+      constructor(element) {
+        this.element = element;
+        this.searchInput = element.querySelector('[data-faq-search]');
+        this.searchClear = element.querySelector('[data-faq-search-clear]');
+        this.searchResults = element.querySelector('[data-faq-results]');
+        this.searchReset = element.querySelector('[data-faq-reset]');
+        this.faqList = element.querySelector('[data-faq-list]');
+        this.faqItems = element.querySelectorAll('[data-faq-item]');
+        this.categoryButtons = element.querySelectorAll('[data-category]');
+        this.noResults = element.querySelector('[data-faq-no-results]');
+        this.contactSection = element.querySelector('[data-faq-contact]');
+
+        this.currentCategory = 'all';
+        this.searchTerm = '';
+        this.visibleItems = [];
+
+        this.init();
+      }
+
+      init() {
+        this.bindEvents();
+        this.updateVisibleItems();
+      }
+
+      bindEvents() {
+        // 搜索功能
+        if (this.searchInput) {
+          this.searchInput.addEventListener('input', (e) => {
+            this.searchTerm = e.target.value.toLowerCase();
+            this.performSearch();
+          });
+
+          this.searchInput.addEventListener('focus', () => {
+            this.searchInput.parentElement.classList.add('search-focused');
+          });
+
+          this.searchInput.addEventListener('blur', () => {
+            this.searchInput.parentElement.classList.remove('search-focused');
+          });
+        }
+
+        if (this.searchClear) {
+          this.searchClear.addEventListener('click', () => {
+            this.clearSearch();
+          });
+        }
+
+        if (this.searchReset) {
+          this.searchReset.addEventListener('click', () => {
+            this.clearSearch();
+          });
+        }
+
+        // 分类切换
+        this.categoryButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            this.switchCategory(e.target.dataset.category);
+          });
+        });
+
+        // FAQ项目展开/收起
+        this.faqItems.forEach(item => {
+          const question = item.querySelector('[data-faq-question]');
+          const answer = item.querySelector('[data-faq-answer]');
+
+          question.addEventListener('click', () => {
+            const isExpanded = question.getAttribute('aria-expanded') === 'true';
+            const newExpanded = !isExpanded;
+
+            // 关闭其他项目
+            if (newExpanded) {
+              this.closeOtherItems(item);
+            }
+
+            question.setAttribute('aria-expanded', newExpanded);
+            answer.setAttribute('aria-hidden', !newExpanded);
+
+            // 平滑滚动到项目
+            if (newExpanded) {
+              setTimeout(() => {
+                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }, 100);
+            }
+
+            // 触发自定义事件
+            this.triggerFAQEvent(item, newExpanded ? 'open' : 'close');
+          });
+        });
+
+        // 有用/无用反馈
+        this.element.querySelectorAll('[data-faq-helpful]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            this.handleFeedback(e.target);
+          });
+        });
+
+        // 分享功能
+        this.element.querySelectorAll('[data-faq-share]').forEach(button => {
+          button.addEventListener('click', (e) => {
+            this.handleShare(e.target.closest('.faq-item'));
+          });
+        });
+
+        // 联系支持
+        const openChatButton = this.element.querySelector('[data-open-chat]');
+        if (openChatButton) {
+          openChatButton.addEventListener('click', () => {
+            this.openChat();
+          });
+        }
+
+        // 键盘导航支持
+        this.element.addEventListener('keydown', (e) => {
+          this.handleKeyboardNavigation(e);
+        });
+      }
+
+      switchCategory(category) {
+        this.currentCategory = category;
+
+        // 更新分类按钮状态
+        this.categoryButtons.forEach(button => {
+          button.classList.toggle('active', button.dataset.category === category);
+        });
+
+        // 过滤显示项目
+        this.updateVisibleItems();
+      }
+
+      performSearch() {
+        const hasSearch = this.searchTerm.length > 0;
+
+        // 显示/隐藏清除按钮
+        if (this.searchClear) {
+          this.searchClear.toggleAttribute('hidden', !hasSearch);
+        }
+
+        // 显示/隐藏搜索结果
+        if (this.searchResults) {
+          this.searchResults.toggleAttribute('hidden', !hasSearch);
+          if (hasSearch) {
+            const count = this.getMatchedItems().length;
+            this.searchResults.querySelector('.faq-search__count').textContent =
+              `找到 ${count} 个相关结果`;
+          }
+        }
+
+        // 更新可见项目
+        this.updateVisibleItems();
+      }
+
+      clearSearch() {
+        this.searchTerm = '';
+        this.searchInput.value = '';
+
+        if (this.searchClear) {
+          this.searchClear.setAttribute('hidden', '');
+        }
+
+        if (this.searchResults) {
+          this.searchResults.setAttribute('hidden', '');
+        }
+
+        this.updateVisibleItems();
+        this.searchInput.focus();
+      }
+
+      updateVisibleItems() {
+        let visibleCount = 0;
+        let visibleCategorySections = new Set();
+
+        this.faqItems.forEach(item => {
+          const isCategoryMatch = this.currentCategory === 'all' ||
+            item.dataset.category === this.currentCategory;
+          const isSearchMatch = this.searchTerm === '' ||
+            this.matchesSearch(item);
+
+          const shouldShow = isCategoryMatch && isSearchMatch;
+
+          if (shouldShow && visibleCount < 10) { // 限制显示数量
+            item.removeAttribute('data-visible');
+            item.style.display = '';
+            visibleCount++;
+            visibleCategorySections.add(item.dataset.category);
+          } else {
+            item.setAttribute('data-visible', 'false');
+            item.style.display = 'none';
+          }
+
+          // 更新搜索匹配高亮
+          const isMatched = isSearchMatch;
+          item.toggleAttribute('data-matched', isMatched);
+
+          if (isMatched && this.searchTerm) {
+            this.highlightSearchTerm(item);
+          } else {
+            this.removeHighlight(item);
+          }
+        });
+
+        // 显示/隐藏分类部分
+        document.querySelectorAll('[data-category-section]').forEach(section => {
+          if (visibleCategorySections.has(section.dataset.categorySection)) {
+            section.style.display = 'block';
+          } else {
+            section.style.display = 'none';
+          }
+        });
+
+        // 显示/隐藏无结果提示
+        if (this.noResults) {
+          const hasVisibleItems = visibleCount > 0;
+          this.noResults.toggleAttribute('hidden', hasVisibleItems);
+          this.faqList.style.display = hasVisibleItems ? 'block' : 'none';
+          this.contactSection.style.display = hasVisibleItems ? 'none' : 'block';
+        }
+
+        // 更新可见项目列表
+        this.visibleItems = Array.from(this.faqItems).filter(item =>
+          !item.hasAttribute('data-visible') ||
+          item.getAttribute('data-visible') !== 'false'
+        );
+      }
+
+      getMatchedItems() {
+        return Array.from(this.faqItems).filter(item =>
+          this.matchesSearch(item)
+        );
+      }
+
+      matchesSearch(item) {
+        if (this.searchTerm === '') return true;
+
+        const text = item.textContent.toLowerCase();
+        return text.includes(this.searchTerm);
+      }
+
+      highlightSearchTerm(item) {
+        const questionText = item.querySelector('.faq-question__text');
+        const answerText = item.querySelector('.faq-answer__content');
+
+        [questionText, answerText].forEach(element => {
+          if (!element) return;
+
+          const originalText = element.textContent;
+          const regex = new RegExp(`(${this.escapeRegex(this.searchTerm)})`, 'gi');
+          const highlightedText = originalText.replace(regex, '<mark>$1</mark>');
+          element.innerHTML = highlightedText;
+        });
+      }
+
+      removeHighlight(item) {
+        const questionText = item.querySelector('.faq-question__text');
+        const answerText = item.querySelector('.faq-answer__content');
+
+        [questionText, answerText].forEach(element => {
+          if (!element) return;
+          element.innerHTML = element.textContent;
+        });
+      }
+
+      escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
+
+      closeOtherItems(excludeItem) {
+        this.faqItems.forEach(item => {
+          if (item === excludeItem) return;
+
+          const question = item.querySelector('[data-faq-question]');
+          const answer = item.querySelector('[data-faq-answer]');
+
+          question.setAttribute('aria-expanded', 'false');
+          answer.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      handleFeedback(button) {
+        const isHelpful = button.dataset.faqHelpful === 'true';
+        const item = button.closest('.faq-item');
+        const actionContainer = button.parentElement;
+
+        // 移除现有投票状态
+        actionContainer.querySelectorAll('.faq-action').forEach(btn => {
+          btn.classList.remove('voted');
+        });
+
+        // 添加投票状态
+        button.classList.add('voted');
+
+        // 模拟发送反馈到服务器
+        this.sendFeedback(item, isHelpful);
+
+        // 显示感谢消息
+        this.showFeedbackMessage(actionContainer, isHelpful);
+
+        // 触发自定义事件
+        this.triggerFAQEvent(item, 'feedback', { helpful: isHelpful });
+      }
+
+      sendFeedback(item, helpful) {
+        const question = item.querySelector('.faq-question__text').textContent.trim();
+
+        // 模拟API调用
+        fetch('/api/faq/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            question,
+            helpful,
+            category: item.dataset.category,
+            timestamp: new Date().toISOString()
+          })
+        })
+        .catch(error => {
+          console.error('发送FAQ反馈失败:', error);
+        });
+      }
+
+      showFeedbackMessage(container, helpful) {
+        const message = helpful ?
+          '{{ 'faq.thank_you_feedback' | t }}' :
+          '{{ 'faq.sorry_feedback' | t }}';
+
+        // 创建消息元素
+        const messageEl = document.createElement('div');
+        messageEl.className = 'faq-feedback-message';
+        messageEl.textContent = message;
+        messageEl.style.cssText = `
+          display: inline-block;
+          margin-left: var(--spacing-3);
+          padding: var(--spacing-2) var(--spacing-3);
+          background: ${helpful ? 'var(--color-success)' : 'var(--color-error)'};
+          color: var(--color-text-inverse);
+          border-radius: var(--radius-base);
+          font-size: var(--font-size-xs);
+          animation: slideIn 0.3s ease-out;
+        `;
+
+        container.appendChild(messageEl);
+
+        // 3秒后移除消息
+        setTimeout(() => {
+          messageEl.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (messageEl.parentNode) {
+              messageEl.parentNode.removeChild(messageEl);
+            }
+          }, 300);
+        }, 3000);
+      }
+
+      handleShare(item) {
+        const question = item.querySelector('.faq-question__text').textContent.trim();
+        const url = `${window.location.origin}${window.location.pathname}#${item.dataset.faqItem || ''}`;
+
+        // 如果支持Web Share API
+        if (navigator.share) {
+          navigator.share({
+            title: 'FAQ',
+            text: question,
+            url: url
+          }).catch(error => {
+            console.log('分享被取消:', error);
+            this.showShareDialog(question, url);
+          });
+        } else {
+          this.showShareDialog(question, url);
+        }
+
+        // 触发自定义事件
+        this.triggerFAQEvent(item, 'share');
+      }
+
+      showShareDialog(title, url) {
+        // 创建分享对话框
+        const dialog = document.createElement('div');
+        dialog.className = 'faq-share-dialog';
+        dialog.innerHTML = `
+          <div class="faq-share-dialog__overlay"></div>
+          <div class="faq-share-dialog__content">
+            <div class="faq-share-dialog__header">
+              <h3>{{ 'faq.share_question' | t }}</h3>
+              <button type="button" class="faq-share-dialog__close">&times;</button>
+            </div>
+            <div class="faq-share-dialog__body">
+              <div class="faq-share-dialog__text">${title}</div>
+              <div class="faq-share-dialog__url">${url}</div>
+              <div class="faq-share-dialog__actions">
+                <button type="button" class="faq-share-copy" data-url="${url}">
+                  {{ 'faq.copy_link' | t }}
+                </button>
+                <div class="faq-share-dialog__social">
+                  <button type="button" class="faq-share-facebook" data-url="${url}" data-title="${title}">
+                    Facebook
+                  </button>
+                  <button type="button" class="faq-share-twitter" data-url="${url}" data-title="${title}">
+                    Twitter
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // 添加样式
+        const style = document.createElement('style');
+        style.textContent = `
+          .faq-share-dialog {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+          }
+
+          .faq-share-dialog__overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+          }
+
+          .faq-share-dialog__content {
+            position: relative;
+            max-width: 500px;
+            margin: 50px auto;
+            background: var(--color-bg-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-extra-large);
+            animation: slideUp 0.3s ease;
+          }
+
+          .faq-share-dialog__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-4);
+          }
+
+          .faq-share-dialog__close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--color-text-light);
+            padding: var(--spacing-2);
+            border-radius: var(--radius-base);
+            transition: all var(--duration-fast) var(--ease-out);
+
+            &:hover {
+              background: var(--color-bg-tertiary);
+              color: var(--color-text-primary);
+            }
+          }
+
+          .faq-share-dialog__text {
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--spacing-3);
+          }
+
+          .faq-share-dialog__url {
+            padding: var(--spacing-3);
+            background: var(--color-bg-secondary);
+            border-radius: var(--radius-base);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+            word-break: break-all;
+            margin-bottom: var(--spacing-4);
+          }
+
+          .faq-share-dialog__actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-3);
+          }
+
+          .faq-share-copy {
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--color-secondary);
+            color: var(--color-text-inverse);
+            border: none;
+            border-radius: var(--radius-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+
+            &:hover {
+              background: var(--color-accent);
+            }
+          }
+
+          .faq-share-dialog__social {
+            display: flex;
+            gap: var(--spacing-3);
+          }
+
+          .faq-share-facebook,
+          .faq-share-twitter {
+            flex: 1;
+            padding: var(--spacing-2);
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+
+            &:hover {
+              border-color: var(--color-secondary);
+              color: var(--color-secondary);
+            }
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        `;
+        document.head.appendChild(style);
+
+        // 事件绑定
+        dialog.querySelector('.faq-share-dialog__close').addEventListener('click', () => {
+          document.body.removeChild(dialog);
+        });
+
+        dialog.querySelector('.faq-share-dialog__overlay').addEventListener('click', () => {
+          document.body.removeChild(dialog);
+        });
+
+        dialog.querySelector('.faq-share-copy').addEventListener('click', (e) => {
+          const url = e.target.dataset.url;
+          navigator.clipboard.writeText(url).then(() => {
+            e.target.textContent = '{{ 'faq.copied' | t }}';
+            setTimeout(() => {
+              e.target.textContent = '{{ 'faq.copy_link' | t }}';
+            }, 2000);
+          });
+        });
+
+        dialog.querySelector('.faq-share-facebook').addEventListener('click', (e) => {
+          const url = e.target.dataset.url;
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        });
+
+        dialog.querySelector('.faq-share-twitter').addEventListener('click', (e) => {
+          const url = e.target.dataset.url;
+          const title = e.target.dataset.title;
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+        });
+
+        // 添加动画样式
+        const animationStyle = document.createElement('style');
+        animationStyle.textContent = `
+          @keyframes slideOut {
+            to { opacity: 0; transform: translateY(-10px); }
+          }
+        `;
+        document.head.appendChild(animationStyle);
+      }
+
+      openChat() {
+        // 尝试打开聊天组件
+        const chatToggle = document.querySelector('[data-chat-toggle]');
+        if (chatToggle) {
+          chatToggle.click();
+        } else {
+          // 如果没有聊天组件，滚动到联系表单
+          const contactForm = document.querySelector('#contact-form') ||
+            document.querySelector('.contact-section');
+          if (contactForm) {
+            contactForm.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      }
+
+      handleKeyboardNavigation(e) {
+        // ESC键关闭展开的项目
+        if (e.key === 'Escape') {
+          this.faqItems.forEach(item => {
+            const question = item.querySelector('[data-faq-question]');
+            const answer = item.querySelector('[data-faq-answer]');
+            question.setAttribute('aria-expanded', 'false');
+            answer.setAttribute('aria-hidden', 'true');
+          });
+        }
+
+        // Tab键导航
+        if (e.key === 'Tab') {
+          // 确保焦点在可见项目内
+          const focusableElements = this.element.querySelectorAll(
+            'button:not([disabled]), [href], input, select, textarea'
+          );
+          const visibleFocusable = Array.from(focusableElements).filter(el =>
+            !el.closest('[data-visible="false"]') &&
+            !el.closest('[hidden]')
+          );
+
+          if (visibleFocusable.length === 0) {
+            e.preventDefault();
+          }
+        }
+      }
+
+      triggerFAQEvent(item, action, data = {}) {
+        const event = new CustomEvent('faqInteraction', {
+          detail: {
+            action,
+            item,
+            category: item.dataset.category,
+            question: item.querySelector('.faq-question__text').textContent.trim(),
+            ...data
+          }
+        });
+        this.element.dispatchEvent(event);
+      }
+    }
+
+    // 初始化所有FAQ区块
+    document.querySelectorAll('[data-faq-section]').forEach(section => {
+      new FAQSection(section);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "FAQ区块",
+  "class": "faq-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "常见问题"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "显示搜索框",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "collapsible",
+      "label": "支持折叠展开",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_items",
+      "label": "最大显示项目数",
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "default_category",
+      "label": "默认显示分类",
+      "options": [
+        { "value": "all", "label": "全部" },
+        { "value": "general", "label": "通用问题" },
+        { "value": "orders", "label": "订单问题" },
+        { "value": "shipping", "label": "配送问题" },
+        { "value": "returns", "label": "退货问题" },
+        { "value": "payments", "label": "支付问题" },
+        { "value": "account", "label": "账户问题" }
+      ],
+      "default": "all"
+    }
+  ],
+  "presets": [
+    {
+      "name": "完整FAQ",
+      "category": "Help Center"
+    },
+    {
+      "name": "订单FAQ",
+      "category": "Orders"
+    },
+    {
+      "name": "配送FAQ",
+      "category": "Shipping"
+    }
+  ]
+}
+{% endschema %}

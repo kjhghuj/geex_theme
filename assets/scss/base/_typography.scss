@@ -1,0 +1,361 @@
+// ============================================
+// Typography - 科幻主题字体样式
+// ============================================
+
+// 基础排版
+html {
+  font-size: 16px; // 基础字体大小
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// 标题样式
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+  word-wrap: break-word;
+}
+
+h1 {
+  font-size: var(--font-size-5xl);
+  @include scifi-heading('5xl', true);
+
+  @include mobile-only {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+h2 {
+  font-size: var(--font-size-4xl);
+  @include scifi-heading('4xl', true);
+
+  @include mobile-only {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+h3 {
+  font-size: var(--font-size-3xl);
+  @include scifi-heading('3xl', true);
+
+  @include mobile-only {
+    font-size: var(--font-size-xl);
+  }
+}
+
+h4 {
+  font-size: var(--font-size-2xl);
+  @include scifi-heading('2xl', false);
+}
+
+h5 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h6 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+}
+
+// 段落样式
+p {
+  margin-bottom: var(--spacing-4);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  max-width: 65ch; // 最佳阅读宽度
+}
+
+// 链接样式
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  position: relative;
+
+  &:hover {
+    color: var(--color-accent);
+
+    &::after {
+      width: 100%;
+    }
+  }
+
+  &:focus {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  // 添加下划线效果
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+    transition: width var(--duration-normal) var(--ease-sci-fi);
+  }
+}
+
+// 列表样式
+ul, ol {
+  margin-bottom: var(--spacing-4);
+  padding-left: var(--spacing-6);
+}
+
+li {
+  margin-bottom: var(--spacing-2);
+  color: var(--color-text-secondary);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// 定义列表
+dt {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+dd {
+  margin-bottom: var(--spacing-2);
+  margin-left: var(--spacing-4);
+  color: var(--color-text-secondary);
+}
+
+// 引用样式
+blockquote {
+  margin: var(--spacing-8) 0;
+  padding: var(--spacing-6) var(--spacing-8);
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, rgba(135, 206, 235, 0.1) 100%);
+  border-left: 4px solid var(--color-secondary);
+  border-radius: var(--radius-lg);
+  font-style: italic;
+  position: relative;
+
+  &::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 4rem;
+    color: var(--color-secondary);
+    opacity: 0.3;
+    font-family: var(--font-family-heading);
+  }
+
+  p {
+    margin-bottom: 0;
+    color: var(--color-text-primary);
+  }
+
+  cite {
+    display: block;
+    margin-top: var(--spacing-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    font-style: normal;
+    text-align: right;
+
+    &::before {
+      content: '— ';
+    }
+  }
+}
+
+// 代码样式
+code {
+  font-family: var(--font-family-monospace);
+  font-size: 0.875em;
+  background: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
+}
+
+pre {
+  background: var(--color-bg-dark);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  margin: var(--spacing-6) 0;
+  border: 1px solid var(--color-border);
+  @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+
+  code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    border: none;
+  }
+}
+
+// 分隔线样式
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-secondary) 50%, transparent 100%);
+  margin: var(--spacing-12) 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--color-secondary);
+    border-radius: 50%;
+    @include glow(var(--glow-size-small));
+  }
+}
+
+// 表格样式
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-6) 0;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-small);
+}
+
+th, td {
+  padding: var(--spacing-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+th {
+  background: var(--color-bg-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-heading);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+}
+
+tbody tr {
+  transition: background-color var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  &:last-child td {
+    border-bottom: none;
+  }
+}
+
+// 强调和重要文本
+strong, b {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+em, i {
+  font-style: italic;
+}
+
+small {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+mark {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.3) 0%, rgba(135, 206, 235, 0.1) 100%);
+  color: var(--color-text-primary);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+// 删除文本
+del, s {
+  text-decoration: line-through;
+  color: var(--color-text-light);
+}
+
+// 插入文本
+ins, u {
+  text-decoration: none;
+  background: linear-gradient(90deg, transparent 60%, var(--color-secondary) 60%);
+  background-size: 2px 8px;
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+// 缩写和首字母缩写
+abbr, acronym {
+  text-decoration: dotted underline;
+  cursor: help;
+}
+
+// 文本选择样式
+::selection {
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  text-shadow: none;
+}
+
+// 响应式字体大小
+@include mobile-only {
+  html {
+    font-size: 14px;
+  }
+}
+
+@include tablet-up {
+  html {
+    font-size: 15px;
+  }
+}
+
+@include desktop-up {
+  html {
+    font-size: 16px;
+  }
+}
+
+// 流体字体大小
+h1, h2, h3, h4, h5, h6 {
+  @supports (font-size: clamp(1rem, 2vw, 2rem)) {
+    font-size: clamp(
+      var(--font-size-lg),
+      2.5vw,
+      var(--font-size-5xl)
+    );
+  }
+}

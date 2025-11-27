@@ -1,0 +1,520 @@
+{%- comment -%}
+订单详情页面模板
+显示单个订单的详细信息
+
+科幻主题 - 客户订单页面
+{%- endcomment -%}
+
+{%- layout 'theme' -%}
+
+{%- if customer -%}
+  {%- if order and order.customer_id == customer.id -%}
+    <div class="order-details">
+      <div class="container">
+        <!-- 订单标题 -->
+        <div class="order-header">
+          <h1>订单详情</h1>
+          <div class="order-number">
+            订单号: {{ order.name | default: order.order_number }}
+          </div>
+          <div class="order-date">
+            下单时间: {{ order.created_at | date: "%Y年%m月%d日 %H:%M" }}
+          </div>
+          <div class="order-status">
+            状态: {{ order.financial_status_label }}
+          </div>
+        </div>
+
+        <!-- 订单状态时间线 -->
+        <div class="order-timeline">
+          <div class="timeline-step completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">订单创建</div>
+              <div class="timeline-time">{{ order.created_at | date: "%m月%d日 %H:%M" }}</div>
+            </div>
+          </div>
+
+          {%- if order.financial_status == 'paid' -%}
+            <div class="timeline-step completed">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">付款成功</div>
+                <div class="timeline-time">{{ order.processed_at | date: "%m月%d日 %H:%M" }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if order.fulfillment_status == 'fulfilled' -%}
+            <div class="timeline-step completed">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">商品已发出</div>
+                <div class="timeline-time">{{ order.fulfillments[0].created_at | date: "%m月%d日 %H:%M" }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if order.cancelled_at -%}
+            <div class="timeline-step cancelled">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">订单已取消</div>
+                <div class="timeline-time">{{ order.cancelled_at | date: "%m月%d日 %H:%M" }}</div>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <!-- 订单内容 -->
+        <div class="order-content">
+          <!-- 商品列表 -->
+          <div class="order-items">
+            <h3>商品清单</h3>
+            <div class="items-table">
+              <div class="table-header">
+                <div class="table-cell product-col">商品</div>
+                <div class="table-cell price-col">价格</div>
+                <div class="table-cell quantity-col">数量</div>
+                <div class="table-cell total-col">小计</div>
+              </div>
+
+              {%- for line_item in order.line_items -%}
+                <div class="table-row">
+                  <div class="table-cell product-col">
+                    <div class="product-item">
+                      <div class="product-image">
+                        {%- if line_item.image -%}
+                          <img src="{{ line_item.image | image_url: width: 80 }}"
+                               alt="{{ line_item.title | escape }}"
+                               loading="lazy">
+                        {%- endif -%}
+                      </div>
+                      <div class="product-details">
+                        <h4 class="product-title">
+                          <a href="{{ line_item.url }}">{{ line_item.title }}</a>
+                        </h4>
+                        {%- if line_item.variant.title != 'Default Title' -%}
+                          <div class="product-variant">{{ line_item.variant.title }}</div>
+                        {%- endif -%}
+                        {%- if line_item.sku != blank -%}
+                          <div class="product-sku">SKU: {{ line_item.sku }}</div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-cell price-col">{{ line_item.final_price | money }}</div>
+                  <div class="table-cell quantity-col">{{ line_item.quantity }}</div>
+                  <div class="table-cell total-col">{{ line_item.final_line_price | money }}</div>
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+
+          <!-- 订单摘要 -->
+          <div class="order-summary">
+            <h3>订单摘要</h3>
+            <div class="summary-items">
+              <div class="summary-row">
+                <span class="summary-label">商品小计</span>
+                <span class="summary-value">{{ order.subtotal_price | money }}</span>
+              </div>
+
+              {%- if order.discounts_count > 0 -%}
+                <div class="summary-row discount">
+                  <span class="summary-label">折扣</span>
+                  <span class="summary-value">-{{ order.total_discount | money }}</span>
+                </div>
+              {%- endif -%}
+
+              {%- if order.shipping_price > 0 -%}
+                <div class="summary-row">
+                  <span class="summary-label">运费</span>
+                  <span class="summary-value">{{ order.shipping_price | money }}</span>
+                </div>
+              {%- endif -%}
+
+              {%- if order.tax_lines.size > 0 -%}
+                <div class="summary-row">
+                  <span class="summary-label">税费</span>
+                  <span class="summary-value">{{ order.tax_price | money }}</span>
+                </div>
+              {%- endif -%}
+
+              <div class="summary-divider"></div>
+
+              <div class="summary-row total">
+                <span class="summary-label">总计</span>
+                <span class="summary-value">{{ order.total_price | money }}</span>
+              </div>
+            </div>
+
+            <!-- 支付信息 -->
+            <div class="payment-info">
+              <h4>支付信息</h4>
+              <div class="payment-details">
+                <div class="payment-method">
+                  支付方式: {{ order.transactions[0].gateway | capitalize }}
+                </div>
+                {%- if order.transactions[0].payment_details.credit_card_number -%}
+                  <div class="payment-card">
+                    卡号: **** {{ order.transactions[0].payment_details.credit_card_number }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 地址信息 -->
+        <div class="order-addresses">
+          {%- if order.shipping_address -%}
+            <div class="address-card">
+              <h4>配送地址</h4>
+              <div class="address-content">
+                <div class="address-name">{{ order.shipping_address.name }}</div>
+                {%- if order.shipping_address.company -%}
+                  <div class="address-company">{{ order.shipping_address.company }}</div>
+                {%- endif -%}
+                <div class="address-street">{{ order.shipping_address.address1 }}</div>
+                {%- if order.shipping_address.address2 -%}
+                  <div class="address-street">{{ order.shipping_address.address2 }}</div>
+                {%- endif -%}
+                <div class="address-city">
+                  {{ order.shipping_address.city }}, {{ order.shipping_address.province }} {{ order.shipping_address.zip }}
+                </div>
+                <div class="address-country">{{ order.shipping_address.country }}</div>
+                {%- if order.shipping_address.phone -%}
+                  <div class="address-phone">{{ order.shipping_address.phone }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if order.billing_address -%}
+            <div class="address-card">
+              <h4>账单地址</h4>
+              <div class="address-content">
+                <div class="address-name">{{ order.billing_address.name }}</div>
+                {%- if order.billing_address.company -%}
+                  <div class="address-company">{{ order.billing_address.company }}</div>
+                {%- endif -%}
+                <div class="address-street">{{ order.billing_address.address1 }}</div>
+                {%- if order.billing_address.address2 -%}
+                  <div class="address-street">{{ order.billing_address.address2 }}</div>
+                {%- endif -%}
+                <div class="address-city">
+                  {{ order.billing_address.city }}, {{ order.billing_address.province }} {{ order.billing_address.zip }}
+                </div>
+                <div class="address-country">{{ order.billing_address.country }}</div>
+                {%- if order.billing_address.phone -%}
+                  <div class="address-phone">{{ order.billing_address.phone }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="order-actions">
+          <a href="{{ routes.account_url }}" class="btn btn-secondary">返回账户</a>
+
+          {%- unless order.cancelled_at -%}
+            {%- if order.financial_status == 'pending' -%}
+              <a href="{{ order.customer_url }}" class="btn btn-primary">继续付款</a>
+            {%- endif -%}
+
+            {%- if order.fulfillment_status == 'unfulfilled' and order.financial_status == 'paid' -%}
+              <button type="button" class="btn btn-outline" onclick="contactSupport()">
+                联系客服
+              </button>
+            {%- endif -%}
+          {%- endunless -%}
+
+          <button type="button" class="btn btn-outline" onclick="reorderProducts()">
+            再次购买
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .order-details {
+        padding: 2rem 0;
+        color: #ffffff;
+      }
+
+      .order-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .order-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #87ceeb, #00d4ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .order-number, .order-date, .order-status {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.5rem 0;
+      }
+
+      .order-timeline {
+        max-width: 600px;
+        margin: 0 auto 3rem;
+        position: relative;
+      }
+
+      .timeline-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .timeline-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #87ceeb;
+        margin-right: 1.5rem;
+        position: relative;
+      }
+
+      .timeline-content {
+        flex: 1;
+      }
+
+      .timeline-title {
+        font-weight: 600;
+        color: #87ceeb;
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline-time {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+      }
+
+      .order-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      @media (min-width: 768px) {
+        .order-content {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+
+      .order-items, .order-summary, .order-addresses {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+      }
+
+      .order-addresses {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .order-addresses {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .address-card h4 {
+        color: #87ceeb;
+        margin-bottom: 1rem;
+      }
+
+      .order-actions {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: 1px solid #87ceeb;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #87ceeb;
+        color: #ffffff;
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: #87ceeb;
+      }
+
+      .btn-outline {
+        background: transparent;
+        color: #ffffff;
+      }
+
+      .btn:hover {
+        background: rgba(135, 206, 235, 0.2);
+        transform: translateY(-2px);
+      }
+    </style>
+
+    <script>
+    function contactSupport() {
+      // 联系客服功能
+      alert('请联系客服处理订单问题');
+    }
+
+    function reorderProducts() {
+      // 重新购买功能
+      alert('正在跳转到商品页面...');
+    }
+    </script>
+
+  {%- else -%}
+    <div class="order-not-found">
+      <div class="container">
+        <div class="error-message">
+          <h2>订单未找到</h2>
+          <p>抱歉，找不到您要查看的订单。</p>
+          <a href="{{ routes.account_url }}" class="btn btn-primary">返回我的账户</a>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .order-not-found {
+        padding: 4rem 0;
+        text-align: center;
+      }
+
+      .error-message {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .error-message h2 {
+        color: #dc3545;
+        margin-bottom: 1rem;
+      }
+
+      .btn-primary {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #87ceeb;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+    </style>
+  {%- endif -%}
+{%- else -%}
+  <!-- 用户未登录，显示登录提示 -->
+  <div class="login-required">
+    <div class="container">
+      <div class="login-message">
+        <div class="login-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="10 17 15 12 10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>需要登录</h2>
+        <p>请登录您的账户以查看订单详情</p>
+        <div class="login-actions">
+          <a href="{{ routes.account_login_url }}" class="btn btn-primary">立即登录</a>
+          <a href="/" class="btn btn-secondary">返回首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .login-required {
+      padding: 4rem 0;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-message {
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .login-icon {
+      margin-bottom: 2rem;
+      color: #87ceeb;
+    }
+
+    .login-message h2 {
+      font-size: 2rem;
+      color: #87ceeb;
+      margin-bottom: 1rem;
+    }
+
+    .login-message p {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 2rem;
+    }
+
+    .login-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #87ceeb, #00d4ff);
+      color: #ffffff;
+      border: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #87ceeb;
+      border: 2px solid #87ceeb;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(135, 206, 235, 0.3);
+    }
+  </style>
+
+  <script>
+  // 自动重定向到登录页面（可选）
+  setTimeout(function() {
+    // 如果希望自动重定向，取消下面的注释
+    // window.location.href = "{{ routes.account_login_url }}";
+  }, 3000);
+  </script>
+{%- endif -%}

@@ -1,0 +1,1075 @@
+{%- comment -%}
+  客户账户页面模板
+  包含账户概览、订单历史、地址管理等功能
+{%- endcomment -%}
+
+{{ 'account.css' | asset_url | stylesheet_tag }}
+
+<div class="account-page" data-account-page>
+  <!-- 账户头部 -->
+  <div class="account-header">
+    <div class="container">
+      <div class="account-header__content">
+        <div class="account-welcome">
+          <h1 class="account-title">{{ 'customer.account.title' | t }}</h1>
+          <p class="account-greeting">
+            {%- if customer.first_name != blank -%}
+              {{ 'customer.account.welcome' | t: first_name: customer.first_name }}
+            {%- else -%}
+              {{ 'customer.account.welcome_back' | t }}
+            {%- endif -%}
+          </p>
+        </div>
+
+        <div class="account-avatar">
+          <div class="avatar-image">
+            {%- if customer.avatar -%}
+              <img src="{{ customer.avatar | image_url: width: 80, height: 80 }}"
+                   alt="{{ customer.name | escape }}"
+                   loading="lazy">
+            {%- else -%}
+              <div class="avatar-placeholder">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor">
+                  <path d="M20 20c5.523 0 10-4.477 10-10S25.523 0 20 0 10 4.477 10 10s4.477 10 10 10zm0 4c-6.627 0-20 3.373-20 10v6h40v-6c0-6.627-13.373-10-20-10z"/>
+                </svg>
+              </div>
+            {%- endif -%}
+          </div>
+          <button type="button" class="avatar-edit" data-avatar-edit>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M11.778 2.222l2 2a1 1 0 010 1.414L13 6l-4-4 1.778-1.778a1 1 0 011.414 0zM2 12l8-8 4 4-8 8H2v-4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 账户内容 -->
+  <div class="account-content">
+    <div class="container">
+      <div class="account-layout">
+        <!-- 侧边导航 -->
+        <aside class="account-sidebar" data-account-sidebar>
+          <nav class="account-nav" aria-label="账户导航">
+            <ul class="account-nav__list">
+              <li class="account-nav__item">
+                <a href="/account" class="account-nav__link account-nav__link--active">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm0-9a1 1 0 011 1v3a1 1 0 01-1 1H7a1 1 0 110-2h2V8a1 1 0 011-1z"/>
+                  </svg>
+                  账户概览
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/account/orders" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm1 2v12h10V4H5zm2 2h6v2H7V8zm0 4h6v2H7v-2zm0 4h4v2H7v-2z"/>
+                  </svg>
+                  订单历史
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/account/addresses" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-9h2v4h-2V7zm0 6h2v2h-2v-2z"/>
+                  </svg>
+                  地址管理
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/account/wishlist" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+                  </svg>
+                  愿望清单
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/pages/reviews" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 1l2.39 5.42L18 7.39l-4 3.54.91 5.83L10 14.17 5.09 16.76l.91-5.83-4-3.54 5.61-.97L10 1z"/>
+                  </svg>
+                  我的评价
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/pages/loyalty" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 1l2.39 5.42L18 7.39l-4 3.54.91 5.83L10 14.17 5.09 16.76l.91-5.83-4-3.54 5.61-.97L10 1z"/>
+                  </svg>
+                  会员积分
+                </a>
+              </li>
+              <li class="account-nav__item">
+                <a href="/pages/settings" class="account-nav__link">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-7h2v3a1 1 0 002 0V8a1 1 0 00-1-1H9a1 1 0 100 2z"/>
+                  </svg>
+                  账户设置
+                </a>
+              </li>
+              <li class="account-nav__divider"></li>
+              <li class="account-nav__item">
+                <a href="/account/logout" class="account-nav__link account-nav__link--logout">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M11 2a1 1 0 00-1 1v2a1 1 0 102 0V3h7v14h-7v-2a1 1 0 10-2 0v2a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1h-8zm-4 9a1 1 0 010-2H5.414l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L5.414 12H7z"/>
+                  </svg>
+                  退出登录
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- 快速统计 -->
+          <div class="account-stats">
+            <h3 class="stats-title">账户统计</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number" data-total-orders>{{ customer.orders.size }}</div>
+                <div class="stat-label">总订单</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number" data-total-spent>{{ customer.total_spent | money }}</div>
+                <div class="stat-label">总消费</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number" data-member-since>{{ customer.created_at | date: "%Y" }}</div>
+                <div class="stat-label">注册年份</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number" data-loyalty-points>0</div>
+                <div class="stat-label">积分</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="account-main" data-account-main>
+          <!-- 概览卡片 -->
+          <div class="overview-cards">
+            <!-- 最近订单 -->
+            <div class="overview-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm1 2v12h10V4H5zm2 2h6v2H7V8zm0 4h6v2H7v-2zm0 4h4v2H7v-2z"/>
+                  </svg>
+                  最近订单
+                </h3>
+                <a href="/account/orders" class="card-link">查看全部</a>
+              </div>
+              <div class="card-content">
+                {%- if customer.orders.size > 0 -%}
+                  {%- assign recent_orders = customer.orders | slice: 0, 3 -%}
+                  <div class="recent-orders">
+                    {%- for order in recent_orders -%}
+                      <div class="order-item">
+                        <div class="order-info">
+                          <div class="order-number">#{{ order.order_number }}</div>
+                          <div class="order-date">{{ order.created_at | date: "%Y年%m月%d日" }}</div>
+                        </div>
+                        <div class="order-status">
+                          <span class="status-badge status-{{ order.fulfillment_status | handle }}">{{ order.fulfillment_status_label }}</span>
+                        </div>
+                        <div class="order-total">{{ order.total_price | money }}</div>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                {%- else -%}
+                  <div class="empty-state">
+                    <p>您还没有任何订单</p>
+                    <a href="/collections/all" class="btn btn-primary btn--small">开始购物</a>
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <!-- 快速操作 -->
+            <div class="overview-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path d="M10 4a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
+                  </svg>
+                  快速操作
+                </h3>
+              </div>
+              <div class="card-content">
+                <div class="quick-actions">
+                  <a href="/account/addresses" class="quick-action">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <span>管理地址</span>
+                  </a>
+                  <a href="/pages/wishlist" class="quick-action">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    <span>查看愿望清单</span>
+                  </a>
+                  <a href="/pages/settings" class="quick-action">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                    </svg>
+                    <span>账户设置</span>
+                  </a>
+                  <a href="/pages/help" class="quick-action">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+                    </svg>
+                    <span>帮助中心</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 账户信息 -->
+          <div class="account-section">
+            <h2 class="section-title">账户信息</h2>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">姓名</div>
+                <div class="info-value">{{ customer.name }}</div>
+                <a href="/pages/settings" class="info-edit">编辑</a>
+              </div>
+              <div class="info-item">
+                <div class="info-label">邮箱</div>
+                <div class="info-value">{{ customer.email }}</div>
+                <a href="/pages/settings" class="info-edit">编辑</a>
+              </div>
+              <div class="info-item">
+                <div class="info-label">手机号</div>
+                <div class="info-value">{{ customer.phone | default: '未设置' }}</div>
+                <a href="/pages/settings" class="info-edit">编辑</a>
+              </div>
+              <div class="info-item">
+                <div class="info-label">默认地址</div>
+                <div class="info-value">
+                  {%- if customer.default_address -%}
+                    {{ customer.default_address.address1 }}, {{ customer.default_address.city }}
+                  {%- else -%}
+                    未设置
+                  {%- endif -%}
+                </div>
+                <a href="/account/addresses" class="info-edit">管理</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 推荐产品 -->
+          <div class="account-section">
+            <h2 class="section-title">为您推荐</h2>
+            <div class="recommendations-grid">
+              <!-- 这里可以根据用户购买历史和偏好显示推荐产品 -->
+              {%- assign recommended_products = collections.featured.products | slice: 0, 4 -%}
+              {%- for product in recommended_products -%}
+                <div class="recommendation-item">
+                  <div class="recommendation-image">
+                    <img src="{{ product.featured_image | image_url: width: 200, height: 200 }}"
+                         alt="{{ product.title | escape }}"
+                         loading="lazy">
+                  </div>
+                  <div class="recommendation-info">
+                    <h4 class="recommendation-title">{{ product.title }}</h4>
+                    <div class="recommendation-price">{{ product.price | money }}</div>
+                    <a href="{{ product.url }}" class="recommendation-link">查看详情</a>
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+
+          <!-- 活动通知 -->
+          <div class="account-section">
+            <h2 class="section-title">最新活动</h2>
+            <div class="notifications-list">
+              <div class="notification-item">
+                <div class="notification-icon notification-icon--success">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm3.5 7.5l-4 4a.5.5 0 01-.71 0l-2-2a.5.5 0 01.71-.71L9 12.09l3.65-3.65a.5.5 0 01.7.71z"/>
+                  </svg>
+                </div>
+                <div class="notification-content">
+                  <div class="notification-title">订单已发货</div>
+                  <div class="notification-description">您的订单 #1001 已发货，预计3-5天送达</div>
+                  <div class="notification-time">2小时前</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <div class="notification-icon notification-icon--info">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-7h2v4a1 1 0 102 0V8a1 1 0 00-1-1H9a1 1 0 100 2z"/>
+                  </svg>
+                </div>
+                <div class="notification-content">
+                  <div class="notification-title">新会员福利</div>
+                  <div class="notification-description">恭喜成为会员，获得100积分和专属优惠券</div>
+                  <div class="notification-time">1天前</div>
+                </div>
+              </div>
+              <div class="notification-item">
+                <div class="notification-icon notification-icon--warning">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-9h2v2h-2V7zm0 4h2v2h-2v-2z"/>
+                  </svg>
+                </div>
+                <div class="notification-content">
+                  <div class="notification-title">积分即将过期</div>
+                  <div class="notification-description">您有500积分将在30天后过期，尽快使用</div>
+                  <div class="notification-time">3天前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* 账户页面样式 */
+.account-page {
+  background: var(--color-bg-primary);
+  min-height: 100vh;
+}
+
+/* 账户头部 */
+.account-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-8) 0;
+}
+
+.account-header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-6);
+}
+
+.account-welcome {
+  flex: 1;
+}
+
+.account-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.account-greeting {
+  font-size: var(--font-size-lg);
+  opacity: 0.95;
+  margin: 0;
+}
+
+.account-avatar {
+  position: relative;
+}
+
+.avatar-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+
+.avatar-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--color-secondary);
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-primary);
+    transform: scale(1.1);
+  }
+}
+
+/* 账户内容 */
+.account-content {
+  padding: var(--spacing-8) 0;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--spacing-8);
+}
+
+/* 账户侧边栏 */
+.account-sidebar {
+  position: sticky;
+  top: var(--spacing-8);
+  height: fit-content;
+}
+
+.account-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-6);
+}
+
+.account-nav__item {
+  border-bottom: 1px solid var(--color-border-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.account-nav__divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--spacing-2) 0;
+}
+
+.account-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-5);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+
+  &--active {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &--logout {
+    color: var(--color-error);
+
+    &:hover {
+      background: var(--color-error);
+      color: white;
+    }
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* 账户统计 */
+.account-stats {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+}
+
+.stats-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+}
+
+.stat-item {
+  text-align: center;
+  padding: var(--spacing-3);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-light);
+}
+
+.stat-number {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* 主内容区域 */
+.account-main {
+  min-height: 600px;
+}
+
+/* 概览卡片 */
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+.overview-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-5) var(--spacing-6);
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+
+  svg {
+    color: var(--color-secondary);
+  }
+}
+
+.card-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    color: var(--color-secondary);
+    text-decoration: underline;
+  }
+}
+
+.card-content {
+  padding: var(--spacing-6);
+}
+
+/* 最近订单 */
+.recent-orders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.order-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--spacing-3);
+  align-items: center;
+  padding: var(--spacing-4);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-light);
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.order-number {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.order-date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.status-badge {
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+
+  &--unfulfilled {
+    background: var(--color-warning);
+    color: white;
+  }
+
+  &--partial {
+    background: var(--color-info);
+    color: white;
+  }
+
+  &--fulfilled {
+    background: var(--color-success);
+    color: white;
+  }
+}
+
+.order-total {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-6);
+
+  p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-4);
+  }
+}
+
+/* 快速操作 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-secondary);
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(135, 206, 235, 0.3);
+  }
+
+  span {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+  }
+
+  svg {
+    color: var(--color-secondary);
+    transition: color var(--duration-normal) var(--ease-sci-fi);
+  }
+
+  &:hover svg {
+    color: currentColor;
+  }
+}
+
+/* 账户区域 */
+.account-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.section-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+/* 信息网格 */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border-light);
+}
+
+.info-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.info-value {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+  margin: 0 var(--spacing-3);
+}
+
+.info-edit {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+  }
+}
+
+/* 推荐产品 */
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.recommendation-item {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-secondary);
+  }
+}
+
+.recommendation-image {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.recommendation-info {
+  padding: var(--spacing-4);
+}
+
+.recommendation-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+  line-height: var(--line-height-tight);
+}
+
+.recommendation-price {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-3);
+}
+
+.recommendation-link {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* 通知列表 */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.notification-item {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-secondary);
+  }
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &--success {
+    background: var(--color-success);
+    color: white;
+  }
+
+  &--info {
+    background: var(--color-info);
+    color: white;
+  }
+
+  &--warning {
+    background: var(--color-warning);
+    color: white;
+  }
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.notification-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+
+.notification-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .account-layout {
+    grid-template-columns: 250px 1fr;
+    gap: var(--spacing-6);
+  }
+
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-2);
+  }
+
+  .stat-number {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .account-header {
+    padding: var(--spacing-6) 0;
+  }
+
+  .account-header__content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-4);
+  }
+
+  .account-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .account-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+
+  .account-sidebar {
+    position: static;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-3);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .account-header__content {
+    padding: 0 var(--spacing-4);
+  }
+
+  .account-content {
+    padding: var(--spacing-6) 0;
+  }
+
+  .account-content .container {
+    padding: 0 var(--spacing-4);
+  }
+
+  .overview-cards {
+    gap: var(--spacing-4);
+  }
+
+  .card-header,
+  .card-content {
+    padding: var(--spacing-4);
+  }
+
+  .order-item {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+    text-align: center;
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+    text-align: left;
+  }
+
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 动画 */
+.overview-card,
+.account-section {
+  animation: fadeInUp 0.6s ease-out backwards;
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 0.1}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .overview-card,
+  .account-section {
+    animation: none;
+  }
+
+  .quick-action,
+  .recommendation-item,
+  .notification-item {
+    transition: none;
+  }
+}
+
+/* 无障碍支持 */
+.account-nav__link:focus-visible,
+.quick-action:focus-visible,
+.info-edit:focus-visible,
+.recommendation-link:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .overview-card,
+  .account-section {
+    border-width: 2px;
+  }
+
+  .info-item {
+    border-width: 2px;
+  }
+}
+</style>

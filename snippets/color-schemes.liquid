@@ -1,0 +1,49 @@
+{%- comment -%}
+  Color Schemes CSS
+  Generates CSS for all available color schemes
+{%- endcomment -%}
+
+<style>
+  :root {
+    /* Default color scheme */
+    --color-button: {{ settings.color_schemes.scheme-1.settings.primary.rgb }};
+    --color-button-text: {{ settings.color_schemes.scheme-1.settings.background.rgb }};
+    --color-secondary-button: {{ settings.color_schemes.scheme-1.settings.secondary.rgb }};
+    --color-secondary-button-text: {{ settings.color_schemes.scheme-1.settings.background.rgb }};
+    --color-link: {{ settings.color_schemes.scheme-1.settings.primary.rgb }};
+    --color-link-hover: {{ settings.color_schemes.scheme-1.settings.secondary.rgb }};
+    --color-heading: {{ settings.color_schemes.scheme-1.settings.text.rgb }};
+    --color-text: {{ settings.color_schemes.scheme-1.settings.text.rgb }};
+    --color-text-secondary: {{ settings.color_schemes.scheme-1.settings.secondary.rgb }};
+    --color-border: rgba({{ settings.color_schemes.scheme-1.settings.text.rgb }}, 0.1);
+    --color-badge: {{ settings.color_schemes.scheme-1.settings.primary.rgb }};
+    --color-badge-text: {{ settings.color_schemes.scheme-1.settings.background.rgb }};
+    --color-error: #ff0000;
+    --color-error-bg: rgba(255, 0, 0, 0.1);
+    --color-success: #00ff00;
+    --color-success-bg: rgba(0, 255, 0, 0.1);
+    --color-warning: #ffaa00;
+    --color-warning-bg: rgba(255, 170, 0, 0.1);
+    --color-info: #0099ff;
+    --color-info-bg: rgba(0, 153, 255, 0.1);
+  }
+
+  /* Additional color schemes if available */
+  {%- if settings.color_schemes.scheme-2 -%}
+    [data-color-scheme="scheme-2"] {
+      --color-background: {{ settings.color_schemes.scheme-2.settings.background.rgb }};
+      --color-foreground: {{ settings.color_schemes.scheme-2.settings.text.rgb }};
+      --color-primary: {{ settings.color_schemes.scheme-2.settings.primary.rgb }};
+      --color-secondary: {{ settings.color_schemes.scheme-2.settings.secondary.rgb }};
+    }
+  {%- endif -%}
+
+  {%- if settings.color_schemes.scheme-3 -%}
+    [data-color-scheme="scheme-3"] {
+      --color-background: {{ settings.color_schemes.scheme-3.settings.background.rgb }};
+      --color-foreground: {{ settings.color_schemes.scheme-3.settings.text.rgb }};
+      --color-primary: {{ settings.color_schemes.scheme-3.settings.primary.rgb }};
+      --color-secondary: {{ settings.color_schemes.scheme-3.settings.secondary.rgb }};
+    }
+  {%- endif -%}
+</style>

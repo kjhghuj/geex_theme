@@ -1,0 +1,1255 @@
+{%- comment -%}
+Performance Monitor System
+性能监控系统
+
+Features:
+- Real-time performance metrics tracking
+- Core Web Vitals monitoring (LCP, FID, CLS)
+- Page load time analysis
+- Resource usage monitoring
+- User experience metrics
+- Performance alerts and suggestions
+- A/B testing performance comparison
+- Network performance tracking
+- Error monitoring and reporting
+{%- endcomment -%}
+
+<style>
+.performance-monitor {
+  --primary-glow: rgba(0, 255, 170, 0.3);
+  --secondary-glow: rgba(0, 170, 255, 0.3);
+  --warning-glow: rgba(255, 170, 0, 0.3);
+  --danger-glow: rgba(255, 85, 0, 0.3);
+  --success-glow: rgba(0, 255, 136, 0.3);
+}
+
+.monitor-dashboard {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.05), rgba(0, 170, 255, 0.05));
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.monitor-title {
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.monitor-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-weight: 600;
+}
+
+.status-excellent {
+  background: rgba(0, 255, 136, 0.2);
+  border: 1px solid var(--success-glow);
+  color: var(--success-color, #00ff88);
+}
+
+.status-good {
+  background: rgba(0, 255, 170, 0.2);
+  border: 1px solid var(--primary-glow);
+  color: var(--primary-color, #00ffaa);
+}
+
+.status-warning {
+  background: rgba(255, 170, 0, 0.2);
+  border: 1px solid var(--warning-glow);
+  color: var(--warning-color, #ffaa00);
+}
+
+.status-poor {
+  background: rgba(255, 85, 0, 0.2);
+  border: 1px solid var(--danger-glow);
+  color: var(--danger-color, #ff5500);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.metric-title {
+  font-weight: 600;
+  color: var(--text-color, #e0e0e0);
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-color, #00ffaa);
+  text-shadow: 0 0 10px currentColor;
+}
+
+.metric-unit {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #a0a0a0);
+  margin-left: 0.25rem;
+}
+
+.metric-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.metric-chart {
+  height: 60px;
+  background: rgba(0, 255, 170, 0.05);
+  border-radius: 8px;
+  margin-top: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-line {
+  stroke: var(--primary-color, #00ffaa);
+  stroke-width: 2;
+  fill: none;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.chart-area {
+  fill: url(#chartGradient);
+  opacity: 0.3;
+}
+
+.performance-suggestions {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.suggestions-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.suggestions-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color, #00ffaa);
+}
+
+.suggestion-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(0, 255, 170, 0.05);
+  border-left: 3px solid var(--primary-color, #00ffaa);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.suggestion-item:hover {
+  background: rgba(0, 255, 170, 0.1);
+  transform: translateX(5px);
+}
+
+.suggestion-icon {
+  font-size: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.suggestion-content {
+  flex: 1;
+}
+
+.suggestion-title {
+  font-weight: 600;
+  color: var(--text-color, #e0e0e0);
+  margin-bottom: 0.25rem;
+}
+
+.suggestion-description {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.suggestion-impact {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.impact-high {
+  background: rgba(255, 85, 0, 0.2);
+  color: var(--danger-color, #ff5500);
+}
+
+.impact-medium {
+  background: rgba(255, 170, 0, 0.2);
+  color: var(--warning-color, #ffaa00);
+}
+
+.impact-low {
+  background: rgba(0, 255, 170, 0.2);
+  color: var(--primary-color, #00ffaa);
+}
+
+.resource-timeline {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.timeline-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color, #00ffaa);
+  margin-bottom: 1.5rem;
+}
+
+.timeline-container {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+}
+
+.timeline-event {
+  position: relative;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(0, 255, 170, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 170, 0.2);
+}
+
+.timeline-event::before {
+  content: '';
+  position: absolute;
+  left: -2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-color, #00ffaa);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.event-time {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #a0a0a0);
+  margin-bottom: 0.25rem;
+}
+
+.event-title {
+  font-weight: 600;
+  color: var(--text-color, #e0e0e0);
+  margin-bottom: 0.25rem;
+}
+
+.event-details {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.9rem;
+}
+
+.monitor-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.control-button {
+  background: linear-gradient(135deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.control-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 255, 170, 0.4);
+}
+
+.control-button.secondary {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  color: var(--primary-color, #00ffaa);
+}
+
+.control-button.secondary:hover {
+  border-color: var(--primary-color, #00ffaa);
+  background: rgba(0, 255, 170, 0.1);
+}
+
+.performance-report {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+  display: none;
+}
+
+.report-content {
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-color, #e0e0e0);
+}
+
+.report-section {
+  margin-bottom: 1.5rem;
+}
+
+.report-section h3 {
+  color: var(--primary-color, #00ffaa);
+  margin-bottom: 0.5rem;
+}
+
+.report-metric {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(0, 255, 170, 0.1);
+}
+
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitor-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .suggestion-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .timeline-container {
+    padding-left: 1rem;
+  }
+
+  .timeline-event::before {
+    left: -1.5rem;
+  }
+}
+</style>
+
+<div class="performance-monitor" data-section-id="{{ section.id }}">
+  <div class="monitor-dashboard">
+    <!-- Header -->
+    <div class="monitor-header">
+      <h2 class="monitor-title">{{ section.settings.title | default: '性能监控中心' }}</h2>
+      <div class="monitor-status status-good" id="overallStatus">
+        <span class="status-indicator"></span>
+        <span id="statusText">性能良好</span>
+      </div>
+    </div>
+
+    <!-- Core Web Vitals Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">LCP (最大内容绘制)</span>
+          <span class="metric-value" id="lcpValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="lcpStatus">
+          <span class="status-indicator"></span>
+          良好
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <defs>
+              <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#00ffaa;stop-opacity:0.6" />
+                <stop offset="100%" style="stop-color:#00ffaa;stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <polyline class="chart-line" id="lcpChart" points="" />
+            <polygon class="chart-area" id="lcpArea" points="" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">FID (首次输入延迟)</span>
+          <span class="metric-value" id="fidValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="fidStatus">
+          <span class="status-indicator"></span>
+          良好
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <polyline class="chart-line" id="fidChart" points="" />
+            <polygon class="chart-area" id="fidArea" points="" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">CLS (累积布局偏移)</span>
+          <span class="metric-value" id="clsValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="clsStatus">
+          <span class="status-indicator"></span>
+          良好
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <polyline class="chart-line" id="clsChart" points="" />
+            <polygon class="chart-area" id="clsArea" points="" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">FCP (首次内容绘制)</span>
+          <span class="metric-value" id="fcpValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="fcpStatus">
+          <span class="status-indicator"></span>
+          良好
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <polyline class="chart-line" id="fcpChart" points="" />
+            <polygon class="chart-area" id="fcpArea" points="" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">TTI (可交互时间)</span>
+          <span class="metric-value" id="ttiValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="ttiStatus">
+          <span class="status-indicator"></span>
+          良好
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <polyline class="chart-line" id="ttiChart" points="" />
+            <polygon class="chart-area" id="ttiArea" points="" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">页面大小</span>
+          <span class="metric-value" id="pageSizeValue">--</span>
+        </div>
+        <div class="metric-status status-good" id="pageSizeStatus">
+          <span class="status-indicator"></span>
+          适中
+        </div>
+        <div class="metric-chart">
+          <svg width="100%" height="100%" viewBox="0 0 300 60">
+            <polyline class="chart-line" id="pageSizeChart" points="" />
+            <polygon class="chart-area" id="pageSizeArea" points="" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Suggestions -->
+    <div class="performance-suggestions">
+      <div class="suggestions-header">
+        <span class="suggestions-title">🚀 性能优化建议</span>
+      </div>
+      <div class="suggestion-list" id="suggestionsList">
+        <!-- Suggestions will be dynamically added -->
+      </div>
+    </div>
+
+    <!-- Resource Timeline -->
+    <div class="resource-timeline">
+      <div class="timeline-header">📊 资源加载时间线</div>
+      <div class="timeline-container" id="resourceTimeline">
+        <!-- Timeline events will be dynamically added -->
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="monitor-controls">
+      <button class="control-button" onclick="runPerformanceTest()">
+        运行性能测试
+      </button>
+      <button class="control-button secondary" onclick="exportPerformanceReport()">
+        导出报告
+      </button>
+      <button class="control-button secondary" onclick="clearPerformanceData()">
+        清除数据
+      </button>
+      <button class="control-button" onclick="toggleAutoMonitoring()">
+        <span id="autoMonitoringText">启用自动监控</span>
+      </button>
+    </div>
+
+    <!-- Performance Report -->
+    <div class="performance-report" id="performanceReport">
+      <div class="report-content" id="reportContent">
+        <!-- Report content will be generated here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+class PerformanceMonitor {
+  constructor() {
+    this.metrics = {
+      lcp: [],
+      fid: [],
+      cls: [],
+      fcp: [],
+      tti: [],
+      pageSize: []
+    };
+    this.thresholds = {
+      lcp: { good: 2500, poor: 4000 },
+      fid: { good: 100, poor: 300 },
+      cls: { good: 0.1, poor: 0.25 },
+      fcp: { good: 1800, poor: 3000 },
+      tti: { good: 3800, poor: 7300 },
+      pageSize: { good: 1000000, poor: 3000000 } // bytes
+    };
+    this.autoMonitoring = false;
+    this.monitoringInterval = null;
+    this.resourceData = [];
+    this.startTime = performance.now();
+
+    this.init();
+  }
+
+  init() {
+    this.setupPerformanceObserver();
+    this.measureInitialMetrics();
+    this.trackResourceLoading();
+    this.startRealTimeMonitoring();
+    this.generateSuggestions();
+  }
+
+  setupPerformanceObserver() {
+    if ('PerformanceObserver' in window) {
+      // Core Web Vitals observer
+      const vitalsObserver = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          if (entry.entryType === 'largest-contentful-paint') {
+            this.updateMetric('lcp', entry.startTime);
+          } else if (entry.entryType === 'first-input') {
+            this.updateMetric('fid', entry.processingStart - entry.startTime);
+          } else if (entry.entryType === 'layout-shift') {
+            if (!entry.hadRecentInput) {
+              this.updateMetric('cls', entry.value);
+            }
+          }
+        });
+      });
+
+      vitalsObserver.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
+
+      // Navigation timing observer
+      const navObserver = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          if (entry.entryType === 'navigation') {
+            this.updateMetric('fcp', entry.responseStart - entry.requestStart);
+            this.updateMetric('tti', entry.domInteractive - entry.requestStart);
+          }
+        });
+      });
+
+      navObserver.observe({ entryTypes: ['navigation'] });
+    }
+  }
+
+  measureInitialMetrics() {
+    // Measure initial page load metrics
+    window.addEventListener('load', () => {
+      const loadTime = performance.now() - this.startTime;
+      this.addTimelineEvent('页面加载完成', `耗时: ${loadTime.toFixed(2)}ms`);
+
+      // Calculate page size
+      this.calculatePageSize();
+    });
+  }
+
+  calculatePageSize() {
+    const resources = performance.getEntriesByType('resource');
+    let totalSize = 0;
+
+    resources.forEach(resource => {
+      if (resource.transferSize) {
+        totalSize += resource.transferSize;
+      }
+    });
+
+    this.updateMetric('pageSize', totalSize);
+  }
+
+  trackResourceLoading() {
+    if ('PerformanceObserver' in window) {
+      const resourceObserver = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          if (entry.entryType === 'resource') {
+            this.resourceData.push({
+              name: entry.name,
+              type: this.getResourceType(entry.name),
+              startTime: entry.startTime,
+              duration: entry.duration,
+              size: entry.transferSize || 0
+            });
+
+            // Add significant resources to timeline
+            if (entry.duration > 100) {
+              this.addTimelineEvent(
+                `加载 ${this.getResourceType(entry.name)}`,
+                `${entry.name.split('/').pop()} - ${entry.duration.toFixed(2)}ms`
+              );
+            }
+          }
+        });
+      });
+
+      resourceObserver.observe({ entryTypes: ['resource'] });
+    }
+  }
+
+  getResourceType(url) {
+    const extension = url.split('.').pop()?.toLowerCase();
+    const typeMap = {
+      'js': 'JavaScript',
+      'css': 'CSS',
+      'png': '图片',
+      'jpg': '图片',
+      'jpeg': '图片',
+      'gif': '图片',
+      'svg': '图片',
+      'webp': '图片',
+      'woff': '字体',
+      'woff2': '字体',
+      'ttf': '字体'
+    };
+    return typeMap[extension] || '其他资源';
+  }
+
+  updateMetric(type, value) {
+    this.metrics[type].push({
+      value: value,
+      timestamp: Date.now()
+    });
+
+    // Keep only last 10 measurements for charts
+    if (this.metrics[type].length > 10) {
+      this.metrics[type] = this.metrics[type].slice(-10);
+    }
+
+    this.updateMetricDisplay(type);
+    this.updateOverallStatus();
+  }
+
+  updateMetricDisplay(type) {
+    const recentData = this.metrics[type].slice(-5);
+    if (recentData.length === 0) return;
+
+    const latestValue = recentData[recentData.length - 1].value;
+    const averageValue = recentData.reduce((sum, item) => sum + item.value, 0) / recentData.length;
+
+    // Update value display
+    const valueElement = document.getElementById(`${type}Value`);
+    if (valueElement) {
+      let displayValue = latestValue;
+      let unit = 'ms';
+
+      if (type === 'cls') {
+        displayValue = latestValue.toFixed(3);
+        unit = '';
+      } else if (type === 'pageSize') {
+        displayValue = (latestValue / 1024 / 1024).toFixed(2);
+        unit = 'MB';
+      }
+
+      valueElement.innerHTML = `${displayValue}<span class="metric-unit">${unit}</span>`;
+    }
+
+    // Update status
+    const statusElement = document.getElementById(`${type}Status`);
+    if (statusElement) {
+      const threshold = this.thresholds[type];
+      let status, statusClass;
+
+      if (latestValue <= threshold.good) {
+        status = '优秀';
+        statusClass = 'status-excellent';
+      } else if (latestValue <= threshold.poor) {
+        status = '良好';
+        statusClass = 'status-good';
+      } else {
+        status = '需优化';
+        statusClass = 'status-warning';
+      }
+
+      statusElement.className = `metric-status ${statusClass}`;
+      statusElement.innerHTML = `<span class="status-indicator"></span>${status}`;
+    }
+
+    // Update chart
+    this.updateChart(type, recentData);
+  }
+
+  updateChart(type, data) {
+    const chartLine = document.getElementById(`${type}Chart`);
+    const chartArea = document.getElementById(`${type}Area`);
+
+    if (!chartLine || !chartArea || data.length === 0) return;
+
+    const width = 300;
+    const height = 60;
+    const padding = 5;
+
+    // Find min and max values for scaling
+    const values = data.map(d => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const range = maxValue - minValue || 1;
+
+    // Generate points
+    const points = data.map((item, index) => {
+      const x = padding + (index / (data.length - 1)) * (width - 2 * padding);
+      const y = height - padding - ((item.value - minValue) / range) * (height - 2 * padding);
+      return `${x},${y}`;
+    }).join(' ');
+
+    // Update line chart
+    chartLine.setAttribute('points', points);
+
+    // Update area chart
+    const areaPoints = `${padding},${height} ${points} ${width - padding},${height}`;
+    chartArea.setAttribute('points', areaPoints);
+  }
+
+  updateOverallStatus() {
+    const metrics = ['lcp', 'fid', 'cls', 'fcp', 'tti'];
+    let score = 0;
+    let total = 0;
+
+    metrics.forEach(type => {
+      const data = this.metrics[type];
+      if (data.length > 0) {
+        const latestValue = data[data.length - 1].value;
+        const threshold = this.thresholds[type];
+
+        total++;
+        if (latestValue <= threshold.good) {
+          score += 2;
+        } else if (latestValue <= threshold.poor) {
+          score += 1;
+        }
+      }
+    });
+
+    const percentage = total > 0 ? (score / (total * 2)) * 100 : 0;
+    const statusElement = document.getElementById('overallStatus');
+    const statusText = document.getElementById('statusText');
+
+    let status, statusClass;
+    if (percentage >= 80) {
+      status = '性能优秀';
+      statusClass = 'status-excellent';
+    } else if (percentage >= 60) {
+      status = '性能良好';
+      statusClass = 'status-good';
+    } else if (percentage >= 40) {
+      status = '需要优化';
+      statusClass = 'status-warning';
+    } else {
+      status = '性能较差';
+      statusClass = 'status-poor';
+    }
+
+    statusElement.className = `monitor-status ${statusClass}`;
+    statusText.textContent = status;
+  }
+
+  generateSuggestions() {
+    const suggestions = this.analyzePerformance();
+    const suggestionsList = document.getElementById('suggestionsList');
+
+    if (suggestions.length === 0) {
+      suggestionsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary, #a0a0a0);">🎉 性能表现优秀，无需优化！</p>';
+      return;
+    }
+
+    suggestionsList.innerHTML = suggestions.map(suggestion => `
+      <div class="suggestion-item">
+        <div class="suggestion-icon">${suggestion.icon}</div>
+        <div class="suggestion-content">
+          <div class="suggestion-title">${suggestion.title}</div>
+          <div class="suggestion-description">${suggestion.description}</div>
+          <span class="suggestion-impact impact-${suggestion.impact}">
+            ${suggestion.impact === 'high' ? '高影响' : suggestion.impact === 'medium' ? '中影响' : '低影响'}
+          </span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  analyzePerformance() {
+    const suggestions = [];
+    const metrics = this.metrics;
+
+    // Analyze Largest Contentful Paint
+    if (metrics.lcp.length > 0) {
+      const latestLCP = metrics.lcp[metrics.lcp.length - 1].value;
+      if (latestLCP > this.thresholds.lcp.poor) {
+        suggestions.push({
+          icon: '🖼️',
+          title: '优化最大内容绘制时间',
+          description: 'LCP过慢会影响用户体验。建议压缩图片、使用CDN、优化关键渲染路径。',
+          impact: 'high'
+        });
+      }
+    }
+
+    // Analyze First Input Delay
+    if (metrics.fid.length > 0) {
+      const latestFID = metrics.fid[metrics.fid.length - 1].value;
+      if (latestFID > this.thresholds.fid.poor) {
+        suggestions.push({
+          icon: '⚡',
+          title: '减少首次输入延迟',
+          description: 'FID过高表示页面响应较慢。建议减少JavaScript执行时间、优化第三方脚本。',
+          impact: 'high'
+        });
+      }
+    }
+
+    // Analyze Cumulative Layout Shift
+    if (metrics.cls.length > 0) {
+      const latestCLS = metrics.cls[metrics.cls.length - 1].value;
+      if (latestCLS > this.thresholds.cls.poor) {
+        suggestions.push({
+          icon: '📐',
+          title: '减少累积布局偏移',
+          description: 'CLS过大会影响页面稳定性。建议为图片和广告设置尺寸属性、避免动态内容插入。',
+          impact: 'medium'
+        });
+      }
+    }
+
+    // Analyze page size
+    if (metrics.pageSize.length > 0) {
+      const latestSize = metrics.pageSize[metrics.pageSize.length - 1].value;
+      if (latestSize > this.thresholds.pageSize.poor) {
+        suggestions.push({
+          icon: '💾',
+          title: '优化页面大小',
+          description: '页面过大会影响加载速度。建议压缩图片、启用Gzip、移除未使用的资源。',
+          impact: 'high'
+        });
+      }
+    }
+
+    // Check for heavy resources
+    const heavyResources = this.resourceData.filter(resource => resource.size > 500000);
+    if (heavyResources.length > 0) {
+      suggestions.push({
+        icon: '📦',
+        title: '优化大型资源文件',
+        description: `发现 ${heavyResources.length} 个大型资源文件。建议压缩图片、使用现代格式（WebP）、启用懒加载。`,
+        impact: 'medium'
+      });
+    }
+
+    return suggestions;
+  }
+
+  addTimelineEvent(title, details) {
+    const timeline = document.getElementById('resourceTimeline');
+    const event = document.createElement('div');
+    event.className = 'timeline-event';
+
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('zh-CN');
+
+    event.innerHTML = `
+      <div class="event-time">${timeString}</div>
+      <div class="event-title">${title}</div>
+      <div class="event-details">${details}</div>
+    `;
+
+    timeline.insertBefore(event, timeline.firstChild);
+
+    // Keep only last 10 events
+    while (timeline.children.length > 10) {
+      timeline.removeChild(timeline.lastChild);
+    }
+  }
+
+  startRealTimeMonitoring() {
+    // Monitor performance every 30 seconds
+    setInterval(() => {
+      if (this.autoMonitoring) {
+        this.collectRealTimeMetrics();
+      }
+    }, 30000);
+  }
+
+  collectRealTimeMetrics() {
+    // Collect current performance metrics
+    const navigation = performance.getEntriesByType('navigation')[0];
+    if (navigation) {
+      const loadTime = navigation.loadEventEnd - navigation.loadEventStart;
+      this.addTimelineEvent('性能检测', `页面加载时间: ${loadTime.toFixed(2)}ms`);
+    }
+  }
+
+  exportPerformanceReport() {
+    const report = this.generateReport();
+    const reportElement = document.getElementById('performanceReport');
+    const reportContent = document.getElementById('reportContent');
+
+    reportContent.innerHTML = report;
+    reportElement.style.display = 'block';
+
+    // Scroll to report
+    reportElement.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  generateReport() {
+    const timestamp = new Date().toLocaleString('zh-CN');
+    let report = `
+      <div class="report-section">
+        <h3>性能检测报告</h3>
+        <p>生成时间: ${timestamp}</p>
+      </div>
+    `;
+
+    // Core Web Vitals section
+    report += `
+      <div class="report-section">
+        <h3>Core Web Vitals</h3>
+    `;
+
+    ['lcp', 'fid', 'cls', 'fcp', 'tti'].forEach(type => {
+      const data = this.metrics[type];
+      if (data.length > 0) {
+        const latest = data[data.length - 1];
+        const average = data.reduce((sum, item) => sum + item.value, 0) / data.length;
+
+        report += `
+          <div class="report-metric">
+            <span>${type.toUpperCase()} 平均值: ${this.formatMetricValue(type, average)}</span>
+            <span>最新值: ${this.formatMetricValue(type, latest.value)}</span>
+          </div>
+        `;
+      }
+    });
+
+    report += `</div>`;
+
+    // Resource analysis
+    if (this.resourceData.length > 0) {
+      const totalSize = this.resourceData.reduce((sum, resource) => sum + resource.size, 0);
+      const totalTime = Math.max(...this.resourceData.map(r => r.startTime + r.duration));
+
+      report += `
+        <div class="report-section">
+          <h3>资源分析</h3>
+          <div class="report-metric">
+            <span>总资源数量: ${this.resourceData.length}</span>
+            <span>总大小: ${(totalSize / 1024 / 1024).toFixed(2)}MB</span>
+          </div>
+          <div class="report-metric">
+            <span>总加载时间: ${totalTime.toFixed(2)}ms</span>
+            <span>平均资源大小: ${(totalSize / this.resourceData.length / 1024).toFixed(2)}KB</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Suggestions section
+    const suggestions = this.analyzePerformance();
+    if (suggestions.length > 0) {
+      report += `
+        <div class="report-section">
+          <h3>优化建议</h3>
+      `;
+
+      suggestions.forEach(suggestion => {
+        report += `
+          <div style="margin: 1rem 0; padding: 1rem; background: rgba(0, 255, 170, 0.05); border-left: 3px solid var(--primary-color, #00ffaa);">
+            <strong>${suggestion.icon} ${suggestion.title}</strong><br>
+            ${suggestion.description}<br>
+            <small>影响程度: ${suggestion.impact === 'high' ? '高' : suggestion.impact === 'medium' ? '中' : '低'}</small>
+          </div>
+        `;
+      });
+
+      report += `</div>`;
+    }
+
+    return report;
+  }
+
+  formatMetricValue(type, value) {
+    if (type === 'cls') {
+      return value.toFixed(3);
+    } else if (type === 'pageSize') {
+      return (value / 1024 / 1024).toFixed(2) + 'MB';
+    } else {
+      return value.toFixed(2) + 'ms';
+    }
+  }
+
+  clearPerformanceData() {
+    this.metrics = {
+      lcp: [],
+      fid: [],
+      cls: [],
+      fcp: [],
+      tti: [],
+      pageSize: []
+    };
+    this.resourceData = [];
+
+    // Clear displays
+    ['lcp', 'fid', 'cls', 'fcp', 'tti', 'pageSize'].forEach(type => {
+      const valueElement = document.getElementById(`${type}Value`);
+      if (valueElement) valueElement.textContent = '--';
+
+      const statusElement = document.getElementById(`${type}Status`);
+      if (statusElement) {
+        statusElement.className = 'metric-status status-good';
+        statusElement.innerHTML = '<span class="status-indicator"></span>良好';
+      }
+
+      // Clear charts
+      const chartLine = document.getElementById(`${type}Chart`);
+      const chartArea = document.getElementById(`${type}Area`);
+      if (chartLine) chartLine.setAttribute('points', '');
+      if (chartArea) chartArea.setAttribute('points', '');
+    });
+
+    // Clear timeline
+    document.getElementById('resourceTimeline').innerHTML = '';
+    document.getElementById('performanceReport').style.display = 'none';
+
+    this.addTimelineEvent('数据清除', '所有性能数据已清除');
+    this.showNotification('性能数据已清除', 'success');
+  }
+
+  toggleAutoMonitoring() {
+    this.autoMonitoring = !this.autoMonitoring;
+    const button = document.getElementById('autoMonitoringText');
+
+    if (this.autoMonitoring) {
+      button.textContent = '禁用自动监控';
+      this.showNotification('自动监控已启用', 'success');
+      this.addTimelineEvent('自动监控', '开始实时性能监控');
+    } else {
+      button.textContent = '启用自动监控';
+      this.showNotification('自动监控已禁用', 'info');
+      this.addTimelineEvent('自动监控', '停止实时性能监控');
+    }
+  }
+
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'rgba(0, 255, 136, 0.9)' : type === 'error' ? 'rgba(255, 107, 107, 0.9)' : 'rgba(0, 170, 255, 0.9)'};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+}
+
+// Global functions for button clicks
+function runPerformanceTest() {
+  if (window.performanceMonitor) {
+    window.performanceMonitor.addTimelineEvent('性能测试', '开始运行完整性能测试');
+    window.performanceMonitor.generateSuggestions();
+    window.performanceMonitor.showNotification('性能测试完成', 'success');
+  }
+}
+
+function exportPerformanceReport() {
+  if (window.performanceMonitor) {
+    window.performanceMonitor.exportPerformanceReport();
+  }
+}
+
+function clearPerformanceData() {
+  if (window.performanceMonitor) {
+    window.performanceMonitor.clearPerformanceData();
+  }
+}
+
+function toggleAutoMonitoring() {
+  if (window.performanceMonitor) {
+    window.performanceMonitor.toggleAutoMonitoring();
+  }
+}
+
+// Initialize the performance monitor
+document.addEventListener('DOMContentLoaded', () => {
+  window.performanceMonitor = new PerformanceMonitor();
+});
+</script>
+
+{% schema %}
+{
+  "name": "Performance Monitor",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "性能监控中心"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_monitoring",
+      "label": "Enable Auto Monitoring",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_suggestions",
+      "label": "Show Performance Suggestions",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "track_resources",
+      "label": "Track Resource Loading",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "monitoring_interval",
+      "label": "Monitoring Interval (seconds)",
+      "min": 10,
+      "max": 120,
+      "step": 10,
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Performance Monitor",
+      "category": "Performance"
+    }
+  ]
+}
+{% endschema %}

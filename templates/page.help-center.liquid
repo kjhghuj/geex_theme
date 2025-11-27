@@ -1,0 +1,1391 @@
+{% comment %}
+  帮助中心页面模板
+  提供完整的帮助文档、FAQ、联系支持等功能
+{% endcomment %}
+
+<div class="help-center">
+  <!-- 页面头部 -->
+  <header class="help-center__header">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a></li>
+          <li aria-current="page">{{ 'help_center.title' | t }}</li>
+        </ol>
+      </nav>
+
+      <div class="help-center__hero">
+        <h1 class="help-center__title">{{ page.title | default: '帮助中心' }}</h1>
+        <p class="help-center__description">{{ page.content | strip_html | truncate: 200 | default: '我们随时为您提供帮助和支持' }}</p>
+
+        <!-- 搜索框 -->
+        <div class="help-center__search">
+          <form action="{{ routes.search_url }}" method="get" class="help-search-form">
+            <input type="hidden" name="type" value="page,article">
+            <div class="help-search__wrapper">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" class="help-search__icon">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M13 13l5 5" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              <input type="search"
+                     name="q"
+                     placeholder="{{ 'help_center.search_placeholder' | t }}"
+                     class="help-search__input"
+                     aria-label="{{ 'help_center.search_help' | t }}">
+              <button type="submit" class="help-search__button">
+                {{ 'help_center.search' | t }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 快速链接 -->
+  <section class="help-center__quick-links">
+    <div class="container">
+      <div class="quick-links__grid">
+        <a href="#order-help" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M6 4h20l-2 20H8L6 4z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M12 12h8M12 16h8M12 20h4" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.order_help' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.order_help_desc' | t }}</p>
+        </a>
+
+        <a href="#shipping-info" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M8 4h16v4H8V4z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="10" cy="24" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="22" cy="24" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.shipping_info' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.shipping_info_desc' | t }}</p>
+        </a>
+
+        <a href="#returns-exchanges" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M16 4l-8 8h5v12h6V12h5l-8-8z" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M4 24h24" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.returns_exchanges' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.returns_exchanges_desc' | t }}</p>
+        </a>
+
+        <a href="#payment-billing" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <rect x="4" y="10" width="24" height="16" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M4 14h24M10 4v6M22 4v6" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.payment_billing' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.payment_billing_desc' | t }}</p>
+        </a>
+
+        <a href="#account-settings" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <circle cx="16" cy="10" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M6 28c0-5.5 4.5-10 10-10s10 4.5 10 10" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.account_settings' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.account_settings_desc' | t }}</p>
+        </a>
+
+        <a href="#contact-support" class="quick-link__card">
+          <div class="quick-link__icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14c1.9 0 3.7-.5 5.2-1.4L30 30l-1.4-6.8C29.5 21.7 30 19.9 30 18c0-7.7-6.3-14-14-14z"/>
+              <circle cx="16" cy="16" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="quick-link__title">{{ 'help_center.contact_support' | t }}</h3>
+          <p class="quick-link__description">{{ 'help_center.contact_support_desc' | t }}</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主要内容区 -->
+  <div class="container">
+    <div class="help-center__content">
+      <div class="help-center__main">
+        <!-- 热门文章 -->
+        <section class="help-section">
+          <h2 class="help-section__title">{{ 'help_center.popular_articles' | t }}</h2>
+          <div class="help-articles__grid">
+            <!-- 动态加载热门文章 -->
+            <article class="help-article">
+              <div class="help-article__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                  <path d="M9 11h6M9 15h6" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+              <div class="help-article__content">
+                <h3 class="help-article__title">
+                  <a href="#">{{ 'help_center.article_1_title' | t }}</a>
+                </h3>
+                <p class="help-article__excerpt">{{ 'help_center.article_1_excerpt' | t }}</p>
+                <div class="help-article__meta">
+                  <span class="help-article__category">{{ 'help_center.category_order' | t }}</span>
+                  <span class="help-article__views">1.2k {{ 'help_center.views' | t }}</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="help-article">
+              <div class="help-article__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="2" y="7" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M7 7V4c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v3" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="12" cy="13" r="1" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="help-article__content">
+                <h3 class="help-article__title">
+                  <a href="#">{{ 'help_center.article_2_title' | t }}</a>
+                </h3>
+                <p class="help-article__excerpt">{{ 'help_center.article_2_excerpt' | t }}</p>
+                <div class="help-article__meta">
+                  <span class="help-article__category">{{ 'help_center.category_shipping' | t }}</span>
+                  <span class="help-article__views">856 {{ 'help_center.views' | t }}</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="help-article">
+              <div class="help-article__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/>
+                  <path d="M16 10l-4 4-4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+              <div class="help-article__content">
+                <h3 class="help-article__title">
+                  <a href="#">{{ 'help_center.article_3_title' | t }}</a>
+                </h3>
+                <p class="help-article__excerpt">{{ 'help_center.article_3_excerpt' | t }}</p>
+                <div class="help-article__meta">
+                  <span class="help-article__category">{{ 'help_center.category_payment' | t }}</span>
+                  <span class="help-article__views">623 {{ 'help_center.views' | t }}</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="help-article">
+              <div class="help-article__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
+                  <path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+              <div class="help-article__content">
+                <h3 class="help-article__title">
+                  <a href="#">{{ 'help_center.article_4_title' | t }}</a>
+                </h3>
+                <p class="help-article__excerpt">{{ 'help_center.article_4_excerpt' | t }}</p>
+                <div class="help-article__meta">
+                  <span class="help-article__category">{{ 'help_center.category_account' | t }}</span>
+                  <span class="help-article__views">445 {{ 'help_center.views' | t }}</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 分类指南 -->
+        <section id="order-help" class="help-section">
+          <h2 class="help-section__title">{{ 'help_center.order_help' | t }}</h2>
+          <div class="help-topics">
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 2h16v12H2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 16v2h10v-2M5 2v4M15 2v4" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.order_status' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.track_order' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.order_delayed' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.modify_order' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.cancel_order' | t }}</a></li>
+              </ul>
+            </div>
+
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="2" y="5" width="16" height="10" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M5 5V3c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="10" cy="10" r="1" fill="currentColor"/>
+                </svg>
+                {{ 'help_center.payment_issues' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.payment_declined' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.refund_status' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.update_payment' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.payment_methods' | t }}</a></li>
+              </ul>
+            </div>
+
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 2l-8 8h5v8h6v-8h5l-8-8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.product_issues' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.wrong_item' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.damaged_item' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.missing_parts' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.product_defect' | t }}</a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="shipping-info" class="help-section">
+          <h2 class="help-section__title">{{ 'help_center.shipping_info' | t }}</h2>
+          <div class="help-topics">
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="3" y="6" width="14" height="8" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="7" cy="16" r="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="13" cy="16" r="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.shipping_methods' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.standard_shipping' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.express_shipping' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.international_shipping' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.free_shipping' | t }}</a></li>
+              </ul>
+            </div>
+
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M10 6v4l3 3" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.delivery_times' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.processing_time' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.delivery_estimate' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.weekend_delivery' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.holiday_delays' | t }}</a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="returns-exchanges" class="help-section">
+          <h2 class="help-section__title">{{ 'help_center.returns_exchanges' | t }}</h2>
+          <div class="help-topics">
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M4 10l6-6v4h6v4h-6v4l-6-6z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.return_policy' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.return_period' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.return_conditions' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.non_returnable' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.exchange_process' | t }}</a></li>
+              </ul>
+            </div>
+
+            <div class="help-topic">
+              <h3 class="help-topic__title">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M7 7h6M7 10h6" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.refund_process' | t }}
+              </h3>
+              <ul class="help-topic__links">
+                <li><a href="#">{{ 'help_center.initiate_return' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.refund_timeline' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.refund_methods' | t }}</a></li>
+                <li><a href="#">{{ 'help_center.partial_refunds' | t }}</a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 联系支持 -->
+        <section id="contact-support" class="help-section">
+          <h2 class="help-section__title">{{ 'help_center.contact_support' | t }}</h2>
+          <div class="contact-options">
+            <div class="contact-option">
+              <div class="contact-option__icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                  <path d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14c1.9 0 3.7-.5 5.2-1.4L30 30l-1.4-6.8C29.5 21.7 30 19.9 30 18c0-7.7-6.3-14-14-14z"/>
+                </svg>
+              </div>
+              <h3 class="contact-option__title">{{ 'help_center.live_chat' | t }}</h3>
+              <p class="contact-option__description">{{ 'help_center.live_chat_desc' | t }}</p>
+              <div class="contact-option__status">
+                <span class="status-indicator status-indicator--online"></span>
+                {{ 'help_center.agents_online' | t }}
+              </div>
+              <button type="button" class="btn btn--primary contact-option__action" onclick="openChat()">
+                {{ 'help_center.start_chat' | t }}
+              </button>
+            </div>
+
+            <div class="contact-option">
+              <div class="contact-option__icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                  <rect x="6" y="6" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M10 2v4M22 2v4M6 10h20" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+              <h3 class="contact-option__title">{{ 'help_center.email_support' | t }}</h3>
+              <p class="contact-option__description">{{ 'help_center.email_support_desc' | t }}</p>
+              <a href="mailto:support@example.com" class="btn btn--secondary contact-option__action">
+                {{ 'help_center.send_email' | t }}
+              </a>
+            </div>
+
+            <div class="contact-option">
+              <div class="contact-option__icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                  <path d="M2 8l14 8 14-8M2 8h28M2 8v16c0 1.1.9 2 2 2h24c1.1 0 2-.9 2-2V8" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+              </div>
+              <h3 class="contact-option__title">{{ 'help_center.phone_support' | t }}</h3>
+              <p class="contact-option__description">{{ 'help_center.phone_support_desc' | t }}</p>
+              <a href="tel:400-123-4567" class="btn btn--secondary contact-option__action">
+                400-123-4567
+              </a>
+            </div>
+          </div>
+
+          <!-- 工作时间 -->
+          <div class="support-hours">
+            <h3 class="support-hours__title">{{ 'help_center.support_hours' | t }}</h3>
+            <div class="support-hours__schedule">
+              <div class="schedule-item">
+                <span class="schedule-day">{{ 'help_center.monday_friday' | t }}</span>
+                <span class="schedule-time">9:00 AM - 6:00 PM</span>
+              </div>
+              <div class="schedule-item">
+                <span class="schedule-day">{{ 'help_center.saturday' | t }}</span>
+                <span class="schedule-time">10:00 AM - 4:00 PM</span>
+              </div>
+              <div class="schedule-item">
+                <span class="schedule-day">{{ 'help_center.sunday' | t }}</span>
+                <span class="schedule-time">{{ 'help_center.closed' | t }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 侧边栏 -->
+      <aside class="help-center__sidebar">
+        <!-- 快速搜索 -->
+        <div class="sidebar-widget">
+          <h3 class="sidebar-widget__title">{{ 'help_center.quick_search' | t }}</h3>
+          <form class="sidebar-search">
+            <input type="search" placeholder="{{ 'help_center.search_keywords' | t }}" class="sidebar-search__input">
+            <button type="submit" class="sidebar-search__button">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M11 11l4 4" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- 热门话题 -->
+        <div class="sidebar-widget">
+          <h3 class="sidebar-widget__title">{{ 'help_center.popular_topics' | t }}</h3>
+          <ul class="sidebar-topics">
+            <li><a href="#">{{ 'help_center.track_my_order' | t }}</a></li>
+            <li><a href="#">{{ 'help_center.return_item' | t }}</a></li>
+            <li><a href="#">{{ 'help_center.change_address' | t }}</a></li>
+            <li><a href="#">{{ 'help_center.payment_failed' | t }}</a></li>
+            <li><a href="#">{{ 'help_center.create_account' | t }}</a></li>
+          </ul>
+        </div>
+
+        <!-- 下载中心 -->
+        <div class="sidebar-widget">
+          <h3 class="sidebar-widget__title">{{ 'help_center.downloads' | t }}</h3>
+          <ul class="sidebar-downloads">
+            <li>
+              <a href="#" class="download-link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2v10M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.user_guide' | t }}
+              </a>
+            </li>
+            <li>
+              <a href="#" class="download-link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2v10M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.size_guide' | t }}
+              </a>
+            </li>
+            <li>
+              <a href="#" class="download-link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 2v10M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                {{ 'help_center.warranty_info' | t }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 联系信息 -->
+        <div class="sidebar-widget">
+          <h3 class="sidebar-widget__title">{{ 'help_center.contact_info' | t }}</h3>
+          <div class="contact-info">
+            <div class="contact-info__item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="2" y="4" width="12" height="8" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M2 4l6 4 6-4" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              <span>support@example.com</span>
+            </div>
+            <div class="contact-info__item">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M3 5v6l5 3 5-3V5l-5-3-5 3z" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              <span>400-123-4567</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- 客服聊天组件 -->
+{% render 'customer-support-chat' %}
+
+<style>
+  .help-center {
+    background: var(--color-bg-primary);
+    min-height: 100vh;
+  }
+
+  .help-center__header {
+    background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+    padding: var(--spacing-8) 0 var(--spacing-12);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(135, 206, 235, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+  }
+
+  .help-center__hero {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .help-center__title {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .help-center__description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-light);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-8);
+  }
+
+  .help-center__search {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .help-search__wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:focus-within {
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .help-search__icon {
+    flex-shrink: 0;
+    margin: 0 var(--spacing-4);
+    color: var(--color-text-light);
+  }
+
+  .help-search__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: var(--spacing-4) 0;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+
+    &::placeholder {
+      color: var(--color-text-light);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .help-search__button {
+    flex-shrink: 0;
+    padding: var(--spacing-3) var(--spacing-6);
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    border: none;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-accent);
+      @include glow(var(--glow-size-small, var(--color-accent), 0.4);
+    }
+  }
+
+  /* 快速链接 */
+  .help-center__quick-links {
+    padding: var(--spacing-8) 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .quick-links__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .quick-link__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-6);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-xl);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--duration-normal) var(--ease-out);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+
+    &:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .quick-link__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-4);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4);
+  }
+
+  .quick-link__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .quick-link__description {
+    color: var(--color-text-light);
+    line-height: 1.4;
+  }
+
+  /* 主要内容区 */
+  .help-center__content {
+    padding: var(--spacing-12) 0;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--spacing-12);
+  }
+
+  .help-center__main {
+    min-width: 0;
+  }
+
+  .help-section {
+    margin-bottom: var(--spacing-12);
+  }
+
+  .help-section__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-6);
+    position: relative;
+    padding-left: var(--spacing-4);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(to bottom, var(--color-secondary), var(--color-accent));
+      border-radius: var(--radius-full);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+  }
+
+  /* 文章网格 */
+  .help-articles__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .help-article {
+    display: flex;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:hover {
+      border-color: var(--color-secondary);
+      transform: translateY(-2px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.2);
+    }
+  }
+
+  .help-article__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--color-bg-secondary);
+    color: var(--color-secondary);
+    border-radius: var(--radius-base);
+  }
+
+  .help-article__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .help-article__title {
+    margin-bottom: var(--spacing-2);
+
+    a {
+      color: var(--color-text-primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-base);
+      line-height: 1.3;
+
+      &:hover {
+        color: var(--color-secondary);
+      }
+    }
+  }
+
+  .help-article__excerpt {
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .help-article__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+  }
+
+  .help-article__category {
+    background: var(--color-bg-tertiary);
+    color: var(--color-secondary);
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* 主题列表 */
+  .help-topics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .help-topic {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    border: 1px solid var(--color-border);
+  }
+
+  .help-topic__title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+
+    svg {
+      color: var(--color-secondary);
+    }
+  }
+
+  .help-topic__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: var(--spacing-3);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-text-primary);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      transition: color var(--duration-fast) var(--ease-out);
+      padding-left: var(--spacing-2);
+      position: relative;
+
+      &::before {
+        content: '›';
+        position: absolute;
+        left: 0;
+        color: var(--color-secondary);
+        transition: transform var(--duration-fast) var(--ease-out);
+      }
+
+      &:hover {
+        color: var(--color-secondary);
+
+        &::before {
+          transform: translateX(2px);
+        }
+      }
+    }
+  }
+
+  /* 联系选项 */
+  .contact-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+  }
+
+  .contact-option {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    text-align: center;
+    border: 1px solid var(--color-border);
+    transition: all var(--duration-normal) var(--ease-out);
+    @include scifi-card();
+
+    &:hover {
+      border-color: var(--color-secondary);
+      transform: translateY(-2px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .contact-option__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-xl);
+    margin: 0 auto var(--spacing-4);
+    @include glow(var(--glow-size-medium, var(--color-secondary), 0.4);
+  }
+
+  .contact-option__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .contact-option__description {
+    color: var(--color-text-light);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .contact-option__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-success);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    @include glow(var(--glow-size-small, currentColor, 0.6);
+
+    &--online {
+      background: var(--color-success);
+    }
+
+    &--offline {
+      background: var(--color-text-light);
+    }
+  }
+
+  .contact-option__action {
+    margin: 0 auto;
+    min-width: 140px;
+  }
+
+  /* 工作时间 */
+  .support-hours {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    border: 1px solid var(--color-border);
+  }
+
+  .support-hours__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+    text-align: center;
+  }
+
+  .support-hours__schedule {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .schedule-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-3) 0;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .schedule-day {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+
+  .schedule-time {
+    color: var(--color-text-light);
+  }
+
+  /* 侧边栏 */
+  .help-center__sidebar {
+    position: sticky;
+    top: var(--spacing-6);
+    height: fit-content;
+  }
+
+  .sidebar-widget {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .sidebar-widget__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .sidebar-search {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+
+    &:focus-within {
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .sidebar-search__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-sm);
+
+    &::placeholder {
+      color: var(--color-text-light);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .sidebar-search__button {
+    padding: var(--spacing-3);
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-secondary);
+      background: rgba(135, 206, 235, 0.1);
+    }
+  }
+
+  .sidebar-topics {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: var(--spacing-3);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-text-primary);
+      text-decoration: none;
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      transition: all var(--duration-fast) var(--ease-out);
+      display: block;
+      padding: var(--spacing-2);
+      border-radius: var(--radius-base);
+
+      &:hover {
+        color: var(--color-secondary);
+        background: rgba(135, 206, 235, 0.1);
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  .sidebar-downloads {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: var(--spacing-3);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .download-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-fast) var(--ease-out);
+    padding: var(--spacing-2);
+    border-radius: var(--radius-base);
+
+    &:hover {
+      color: var(--color-secondary);
+      background: rgba(135, 206, 235, 0.1);
+      transform: translateX(4px);
+    }
+
+    svg {
+      color: var(--color-secondary);
+    }
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .contact-info__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+
+    svg {
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .help-center__header {
+      padding: var(--spacing-6) 0 var(--spacing-8);
+    }
+
+    .help-center__title {
+      font-size: var(--font-size-3xl);
+    }
+
+    .help-center__content {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-8);
+    }
+
+    .help-center__sidebar {
+      position: static;
+    }
+
+    .quick-links__grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .help-articles__grid,
+    .contact-options,
+    .help-topics {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .help-article {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  @include respond-to('md') {
+    .help-center__content {
+      gap: var(--spacing-8);
+    }
+  }
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    .help-article,
+    .help-topic,
+    .contact-option,
+    .sidebar-widget {
+      border-width: 2px;
+    }
+
+    .help-search__wrapper,
+    .sidebar-search {
+      border-width: 3px;
+    }
+
+    .btn {
+      border-width: 3px;
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    .quick-link__card:hover,
+    .help-article:hover,
+    .contact-option:hover {
+      transform: none;
+    }
+
+    .help-topic__links a:hover::before,
+    .sidebar-topics a:hover,
+    .download-link:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 平滑滚动到锚点
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#') {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }
+      });
+    });
+
+    // 搜索功能增强
+    const searchInputs = document.querySelectorAll('input[type="search"]');
+    searchInputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-focused');
+      });
+
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-focused');
+      });
+    });
+
+    // 文章点击追踪
+    document.querySelectorAll('.help-article__title a, .help-topic__links a').forEach(link => {
+      link.addEventListener('click', function() {
+        const title = this.textContent.trim();
+        const section = this.closest('.help-section')?.querySelector('.help-section__title')?.textContent.trim();
+
+        // 触发自定义事件用于分析
+        const helpClickEvent = new CustomEvent('helpCenterClick', {
+          detail: {
+            article: title,
+            section: section,
+            url: this.href
+          }
+        });
+        document.dispatchEvent(helpClickEvent);
+
+        console.log('Help Center Click:', { section, article: title });
+      });
+    });
+
+    // 联系选项点击追踪
+    document.querySelectorAll('.contact-option__action').forEach(button => {
+      button.addEventListener('click', function() {
+        const method = this.closest('.contact-option').querySelector('.contact-option__title').textContent.trim();
+
+        const contactEvent = new CustomEvent('helpCenterContact', {
+          detail: {
+            method: method
+          }
+        });
+        document.dispatchEvent(contactEvent);
+
+        console.log('Contact Method:', method);
+      });
+    });
+
+    // 打开聊天功能
+    window.openChat = function() {
+      // 触发聊天组件
+      const chatToggle = document.querySelector('[data-chat-toggle]');
+      if (chatToggle) {
+        chatToggle.click();
+      }
+    };
+
+    // 搜索建议
+    const searchSuggestions = [
+      '如何跟踪订单',
+      '退货政策',
+      '修改收货地址',
+      '支付失败',
+      '账号注册'
+    ];
+
+    const helpSearchInput = document.querySelector('.help-search__input');
+    if (helpSearchInput) {
+      helpSearchInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+
+        if (value.length > 0) {
+          // 这里可以实现搜索建议显示逻辑
+          const suggestions = searchSuggestions.filter(suggestion =>
+            suggestion.toLowerCase().includes(value)
+          );
+
+          if (suggestions.length > 0) {
+            // 可以显示搜索建议下拉框
+            console.log('搜索建议:', suggestions);
+          }
+        }
+      });
+    }
+
+    // 侧边栏搜索
+    const sidebarSearchForm = document.querySelector('.sidebar-search');
+    if (sidebarSearchForm) {
+      sidebarSearchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = this.querySelector('input').value.trim();
+        if (query) {
+          // 执行搜索
+          window.location.href = `/search?q=${encodeURIComponent(query)}&type=page,article`;
+        }
+      });
+    }
+
+    // 文件下载追踪
+    document.querySelectorAll('.download-link').forEach(link => {
+      link.addEventListener('click', function() {
+        const fileName = this.textContent.trim();
+
+        const downloadEvent = new CustomEvent('helpCenterDownload', {
+          detail: {
+            file: fileName
+          }
+        });
+        document.dispatchEvent(downloadEvent);
+
+        console.log('Help Center Download:', fileName);
+      });
+    });
+
+    // 滚动时的视觉增强
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', function() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      // 添加滚动类到body
+      if (scrollTop > lastScrollTop && scrollTop > 100) {
+        document.body.classList.add('scrolling-down');
+        document.body.classList.remove('scrolling-up');
+      } else {
+        document.body.classList.remove('scrolling-down');
+        document.body.classList.add('scrolling-up');
+      }
+
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+
+    // 高亮当前部分
+    const sections = document.querySelectorAll('.help-section[id]');
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px',
+      threshold: 0
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+
+          // 更新active状态
+          document.querySelectorAll('.help-topic__links a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+  });
+</script>

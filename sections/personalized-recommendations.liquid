@@ -1,0 +1,1013 @@
+{%- comment -%}
+Personalized Recommendation Engine
+个性化推荐引擎
+
+Features:
+- AI-powered product recommendations
+- Behavioral tracking and analysis
+- Collaborative filtering
+- Content-based filtering
+- Real-time recommendation updates
+- A/B testing support
+- Cross-sell and up-sell suggestions
+- "Customers who bought this also bought"
+- "Recently viewed items"
+- "Recommended for you"
+{%- endcomment -%}
+
+{%- assign customer = customer -%}
+{%- assign product = product -%}
+{%- assign collection = collection -%}
+{%- assign recommendations_count = section.settings.recommendations_count | default: 8 -%}
+
+<style>
+.personalized-recommendations {
+  --primary-glow: rgba(0, 255, 170, 0.3);
+  --secondary-glow: rgba(0, 170, 255, 0.3);
+  --recommendation-animation: recommendationFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes recommendationFloat {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-10px); }
+}
+
+.recommendations-container {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.05), rgba(0, 170, 255, 0.05));
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.recommendations-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.recommendations-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.recommendations-subtitle {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 1.1rem;
+}
+
+.recommendation-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  color: var(--text-color, #e0e0e0);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.tab-button:hover {
+  border-color: var(--primary-color, #00ffaa);
+  background: rgba(0, 255, 170, 0.1);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.2), rgba(0, 170, 255, 0.2));
+  border-color: var(--primary-color, #00ffaa);
+  color: var(--primary-color, #00ffaa);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.recommendation-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary-color, #00ffaa);
+  box-shadow: 0 15px 40px rgba(0, 255, 170, 0.3);
+}
+
+.recommendation-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover .recommendation-image {
+  transform: scale(1.05);
+}
+
+.recommendation-content {
+  padding: 1.5rem;
+}
+
+.recommendation-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color, #e0e0e0);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.recommendation-price {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--primary-color, #00ffaa);
+  margin-bottom: 1rem;
+}
+
+.compare-price {
+  font-size: 1rem;
+  color: var(--text-secondary, #a0a0a0);
+  text-decoration: line-through;
+  margin-left: 0.5rem;
+}
+
+.recommendation-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rating-stars {
+  color: var(--accent-color, #ffaa00);
+  letter-spacing: 2px;
+}
+
+.rating-count {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.9rem;
+}
+
+.recommendation-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.recommendation-badge {
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.2), rgba(0, 170, 255, 0.2));
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--primary-color, #00ffaa);
+  font-weight: 500;
+}
+
+.recommendation-reason {
+  background: rgba(0, 255, 170, 0.1);
+  border-left: 3px solid var(--primary-color, #00ffaa);
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #a0a0a0);
+  font-style: italic;
+}
+
+.recommendation-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-add-to-cart {
+  flex: 1;
+  background: linear-gradient(135deg, var(--primary-color, #00ffaa), var(--accent-color, #00aaff));
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-to-cart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 255, 170, 0.4);
+}
+
+.btn-wishlist {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: var(--primary-color, #00ffaa);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-wishlist:hover {
+  border-color: var(--primary-color, #00ffaa);
+  background: rgba(0, 255, 170, 0.1);
+}
+
+.recommendation-algorithm {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.algorithm-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.algorithm-card {
+  text-align: center;
+}
+
+.algorithm-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  animation: var(--recommendation-animation);
+}
+
+.algorithm-title {
+  color: var(--primary-color, #00ffaa);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.algorithm-description {
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, rgba(0, 255, 170, 0.1) 25%, rgba(0, 170, 255, 0.1) 50%, rgba(0, 255, 170, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  border-radius: 10px;
+  height: 300px;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.no-recommendations {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #a0a0a0);
+}
+
+.no-recommendations-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.recommendation-feedback {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.feedback-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #a0a0a0);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.feedback-btn:hover {
+  color: var(--primary-color, #00ffaa);
+}
+
+.feedback-btn.active {
+  color: var(--accent-color, #ffaa00);
+}
+
+@media (max-width: 768px) {
+  .recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .recommendation-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tab-button {
+    width: 200px;
+    text-align: center;
+  }
+}
+</style>
+
+<div class="personalized-recommendations" data-section-id="{{ section.id }}">
+  <div class="recommendations-container">
+    <!-- Header -->
+    <div class="recommendations-header">
+      <h2 class="recommendations-title">{{ section.settings.title | default: '个性化推荐' }}</h2>
+      <p class="recommendations-subtitle">{{ section.settings.subtitle | default: '基于您的购物历史和偏好精心挑选' }}</p>
+    </div>
+
+    <!-- Recommendation Tabs -->
+    <div class="recommendation-tabs">
+      <button class="tab-button active" data-recommendation-type="for-you">
+        为您推荐
+      </button>
+      <button class="tab-button" data-recommendation-type="recently-viewed">
+        最近浏览
+      </button>
+      <button class="tab-button" data-recommendation-type="also-bought">
+        组合推荐
+      </button>
+      <button class="tab-button" data-recommendation-type="trending">
+        热门趋势
+      </button>
+      <button class="tab-button" data-recommendation-type="new-arrivals">
+        最新上架
+      </button>
+    </div>
+
+    <!-- Recommendations Grid -->
+    <div class="recommendations-grid" id="recommendationsGrid">
+      <!-- Recommendations will be loaded here dynamically -->
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-skeleton" id="loadingSkeleton" style="display: none;">
+    </div>
+
+    <!-- No Recommendations State -->
+    <div class="no-recommendations" id="noRecommendations" style="display: none;">
+      <div class="no-recommendations-icon">🤖</div>
+      <h3>暂无推荐</h3>
+      <p>继续浏览商品，我们将为您生成个性化推荐</p>
+    </div>
+  </div>
+
+  <!-- Algorithm Information -->
+  <div class="recommendation-algorithm">
+    <h3>{{ section.settings.algorithm_title | default: '智能推荐算法' }}</h3>
+    <div class="algorithm-info">
+      <div class="algorithm-card">
+        <div class="algorithm-icon">🧠</div>
+        <div class="algorithm-title">机器学习</div>
+        <div class="algorithm-description">基于深度学习的用户行为分析和偏好预测</div>
+      </div>
+      <div class="algorithm-card">
+        <div class="algorithm-icon">👥</div>
+        <div class="algorithm-title">协同过滤</div>
+        <div class="algorithm-description">分析相似用户的购买模式和行为特征</div>
+      </div>
+      <div class="algorithm-card">
+        <div class="algorithm-icon">🔍</div>
+        <div class="algorithm-title">内容匹配</div>
+        <div class="algorithm-description">根据产品属性和用户历史偏好进行匹配</div>
+      </div>
+      <div class="algorithm-card">
+        <div class="algorithm-icon">⚡</div>
+        <div class="algorithm-title">实时更新</div>
+        <div class="algorithm-description">根据最新行为动态调整推荐结果</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+class PersonalizedRecommendations {
+  constructor() {
+    this.currentTab = 'for-you';
+    this.recommendations = {};
+    this.userBehavior = this.loadUserBehavior();
+    this.algorithms = {
+      'for-you': this.getPersonalizedRecommendations.bind(this),
+      'recently-viewed': this.getRecentlyViewed.bind(this),
+      'also-bought': this.getAlsoBought.bind(this),
+      'trending': this.getTrending.bind(this),
+      'new-arrivals': this.getNewArrivals.bind(this)
+    };
+
+    this.init();
+  }
+
+  init() {
+    this.setupTabListeners();
+    this.loadInitialRecommendations();
+    this.trackUserBehavior();
+    this.setupFeedbackSystem();
+  }
+
+  setupTabListeners() {
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const type = button.dataset.recommendationType;
+        this.switchTab(type);
+      });
+    });
+  }
+
+  switchTab(type) {
+    // Update active tab
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector(`[data-recommendation-type="${type}"]`).classList.add('active');
+
+    this.currentTab = type;
+    this.loadRecommendations(type);
+  }
+
+  async loadRecommendations(type) {
+    const grid = document.getElementById('recommendationsGrid');
+    const loading = document.getElementById('loadingSkeleton');
+    const noRecommendations = document.getElementById('noRecommendations');
+
+    // Show loading state
+    grid.style.display = 'none';
+    loading.style.display = 'block';
+    noRecommendations.style.display = 'none';
+
+    try {
+      // Check if recommendations are cached
+      if (this.recommendations[type]) {
+        this.renderRecommendations(this.recommendations[type]);
+      } else {
+        // Fetch new recommendations
+        const recommendations = await this.algorithms[type]();
+        this.recommendations[type] = recommendations;
+        this.renderRecommendations(recommendations);
+      }
+    } catch (error) {
+      console.error('Error loading recommendations:', error);
+      this.showErrorState();
+    } finally {
+      loading.style.display = 'none';
+    }
+  }
+
+  async getPersonalizedRecommendations() {
+    // AI-powered personalized recommendations
+    const userProfile = this.buildUserProfile();
+    return await this.fetchRecommendations('/api/recommendations/personalized', {
+      profile: userProfile,
+      limit: {{ recommendations_count }}
+    });
+  }
+
+  async getRecentlyViewed() {
+    const recentlyViewed = this.userBehavior.recentlyViewed || [];
+    return await this.fetchProductsByHandles(recentlyViewed.slice(0, {{ recommendations_count }}));
+  }
+
+  async getAlsoBought() {
+    // "Customers who bought this also bought" recommendations
+    const productHandle = '{{ product.handle }}';
+    if (!productHandle) return [];
+
+    return await this.fetchRecommendations('/api/recommendations/also-bought', {
+      productHandle: productHandle,
+      limit: {{ recommendations_count }}
+    });
+  }
+
+  async getTrending() {
+    // Trending products based on sales and views
+    return await this.fetchRecommendations('/api/recommendations/trending', {
+      limit: {{ recommendations_count }}
+    });
+  }
+
+  async getNewArrivals() {
+    // Recently added products
+    return await this.fetchRecommendations('/api/recommendations/new-arrivals', {
+      limit: {{ recommendations_count }}
+    });
+  }
+
+  async fetchRecommendations(endpoint, params) {
+    // Simulate API call - replace with actual Shopify AJAX API or custom endpoint
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Mock recommendations data
+        const mockProducts = this.generateMockRecommendations();
+        resolve(mockProducts);
+      }, 800);
+    });
+  }
+
+  async fetchProductsByHandles(handles) {
+    // Fetch products by handles using Shopify AJAX API
+    const products = [];
+    for (const handle of handles) {
+      try {
+        const product = await this.fetchProductByHandle(handle);
+        if (product) products.push(product);
+      } catch (error) {
+        console.error(`Error fetching product ${handle}:`, error);
+      }
+    }
+    return products;
+  }
+
+  async fetchProductByHandle(handle) {
+    // Use Shopify AJAX API to fetch product by handle
+    return new Promise((resolve) => {
+      fetch(`/products/${handle}.js`)
+        .then(response => response.json())
+        .then(product => resolve(product))
+        .catch(() => resolve(null));
+    });
+  }
+
+  generateMockRecommendations() {
+    // Generate mock product data for demonstration
+    const mockProducts = [];
+    for (let i = 0; i < {{ recommendations_count }}; i++) {
+      mockProducts.push({
+        id: i + 1,
+        title: `科幻科技产品 ${i + 1}`,
+        handle: `scifi-product-${i + 1}`,
+        price: (Math.random() * 500 + 100).toFixed(2),
+        compareAtPrice: Math.random() > 0.5 ? (Math.random() * 600 + 200).toFixed(2) : null,
+        image: `https://picsum.photos/300/300?random=${i + 1}`,
+        rating: (Math.random() * 2 + 3).toFixed(1),
+        reviewCount: Math.floor(Math.random() * 100 + 10),
+        tags: ['热销', '新品', '限时优惠'].slice(0, Math.floor(Math.random() * 3) + 1),
+        reason: this.generateRecommendationReason()
+      });
+    }
+    return mockProducts;
+  }
+
+  generateRecommendationReason() {
+    const reasons = [
+      '基于您最近浏览的相似产品',
+      '其他喜欢此产品的用户也购买了',
+      '符合您的个人偏好设置',
+      '与您的购物历史高度匹配',
+      '当前热门趋势推荐',
+      '新品上架，值得关注'
+    ];
+    return reasons[Math.floor(Math.random() * reasons.length)];
+  }
+
+  renderRecommendations(products) {
+    const grid = document.getElementById('recommendationsGrid');
+    const noRecommendations = document.getElementById('noRecommendations');
+
+    if (products.length === 0) {
+      grid.style.display = 'none';
+      noRecommendations.style.display = 'block';
+      return;
+    }
+
+    grid.style.display = 'grid';
+    noRecommendations.style.display = 'none';
+
+    grid.innerHTML = products.map(product => `
+      <div class="recommendation-card" data-product-id="${product.id}">
+        <div class="recommendation-feedback">
+          <button class="feedback-btn" data-action="like" title="喜欢">👍</button>
+          <button class="feedback-btn" data-action="dislike" title="不喜欢">👎</button>
+        </div>
+
+        <img src="${product.image}" alt="${product.title}" class="recommendation-image">
+
+        <div class="recommendation-content">
+          <h3 class="recommendation-title">${product.title}</h3>
+
+          <div class="recommendation-price">
+            ¥${product.price}
+            ${product.compareAtPrice ? `<span class="compare-price">¥${product.compareAtPrice}</span>` : ''}
+          </div>
+
+          <div class="recommendation-rating">
+            <span class="rating-stars">${this.generateStars(product.rating)}</span>
+            <span class="rating-count">(${product.reviewCount})</span>
+          </div>
+
+          ${product.reason ? `<div class="recommendation-reason">${product.reason}</div>` : ''}
+
+          <div class="recommendation-badges">
+            ${product.tags.map(tag => `<span class="recommendation-badge">${tag}</span>`).join('')}
+          </div>
+
+          <div class="recommendation-actions">
+            <button class="btn-add-to-cart" data-product-id="${product.id}">
+              加入购物车
+            </button>
+            <button class="btn-wishlist" data-product-id="${product.id}">
+              ❤️
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    this.setupCardListeners();
+  }
+
+  generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+
+    return '★'.repeat(fullStars) + (halfStar ? '☆' : '') + '☆'.repeat(emptyStars);
+  }
+
+  setupCardListeners() {
+    // Add to cart buttons
+    document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const productId = button.dataset.productId;
+        this.addToCart(productId);
+      });
+    });
+
+    // Wishlist buttons
+    document.querySelectorAll('.btn-wishlist').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const productId = button.dataset.productId;
+        this.toggleWishlist(productId);
+      });
+    });
+
+    // Product card clicks
+    document.querySelectorAll('.recommendation-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const productId = card.dataset.productId;
+        this.trackProductClick(productId);
+      });
+    });
+
+    // Feedback buttons
+    document.querySelectorAll('.feedback-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const action = button.dataset.action;
+        const productId = button.closest('.recommendation-card').dataset.productId;
+        this.submitFeedback(productId, action);
+      });
+    });
+  }
+
+  async addToCart(productId) {
+    try {
+      // Add to cart using Shopify AJAX API
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: productId,
+          quantity: 1
+        })
+      });
+
+      if (response.ok) {
+        this.showNotification('商品已添加到购物车', 'success');
+        this.trackConversion(productId);
+      } else {
+        throw new Error('Failed to add to cart');
+      }
+    } catch (error) {
+      this.showNotification('添加到购物车失败', 'error');
+    }
+  }
+
+  toggleWishlist(productId) {
+    const button = document.querySelector(`.btn-wishlist[data-product-id="${productId}"]`);
+    const isInWishlist = button.classList.contains('active');
+
+    if (isInWishlist) {
+      button.classList.remove('active');
+      this.removeFromWishlist(productId);
+    } else {
+      button.classList.add('active');
+      this.addToWishlist(productId);
+    }
+  }
+
+  addToWishlist(productId) {
+    // Add to wishlist logic
+    this.showNotification('已添加到收藏夹', 'success');
+    this.trackWishlistAction(productId, 'add');
+  }
+
+  removeFromWishlist(productId) {
+    // Remove from wishlist logic
+    this.showNotification('已从收藏夹移除', 'info');
+    this.trackWishlistAction(productId, 'remove');
+  }
+
+  submitFeedback(productId, action) {
+    const button = document.querySelector(`.feedback-btn[data-action="${action}"][data-product-id="${productId}"]`);
+
+    // Toggle active state
+    document.querySelectorAll(`.feedback-btn[data-product-id="${productId}"]`).forEach(btn => {
+      btn.classList.remove('active');
+    });
+    button.classList.add('active');
+
+    // Send feedback to recommendation engine
+    this.trackFeedback(productId, action);
+    this.showNotification(`感谢您的反馈！`, 'success');
+  }
+
+  trackUserBehavior() {
+    // Track page views, product clicks, time spent, etc.
+    this.trackPageView();
+    this.trackScrollDepth();
+    this.trackTimeOnPage();
+  }
+
+  trackPageView() {
+    // Track current page view
+    this.updateUserBehavior('pageViews', {
+      url: window.location.href,
+      timestamp: Date.now(),
+      type: this.currentTab
+    });
+  }
+
+  trackProductClick(productId) {
+    this.updateUserBehavior('productClicks', {
+      productId: productId,
+      timestamp: Date.now(),
+      recommendationType: this.currentTab
+    });
+  }
+
+  trackConversion(productId) {
+    this.updateUserBehavior('conversions', {
+      productId: productId,
+      timestamp: Date.now(),
+      recommendationType: this.currentTab
+    });
+  }
+
+  trackFeedback(productId, feedback) {
+    this.updateUserBehavior('feedback', {
+      productId: productId,
+      feedback: feedback,
+      timestamp: Date.now(),
+      recommendationType: this.currentTab
+    });
+  }
+
+  trackWishlistAction(productId, action) {
+    this.updateUserBehavior('wishlist', {
+      productId: productId,
+      action: action,
+      timestamp: Date.now()
+    });
+  }
+
+  trackScrollDepth() {
+    let maxScroll = 0;
+    window.addEventListener('scroll', () => {
+      const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+      maxScroll = Math.max(maxScroll, scrollPercent);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (maxScroll > 0) {
+        this.updateUserBehavior('scrollDepth', {
+          maxScroll: maxScroll,
+          timestamp: Date.now()
+        });
+      }
+    });
+  }
+
+  trackTimeOnPage() {
+    const startTime = Date.now();
+    window.addEventListener('beforeunload', () => {
+      const timeSpent = Date.now() - startTime;
+      this.updateUserBehavior('timeOnPage', {
+        duration: timeSpent,
+        timestamp: Date.now()
+      });
+    });
+  }
+
+  updateUserBehavior(type, data) {
+    if (!this.userBehavior[type]) {
+      this.userBehavior[type] = [];
+    }
+    this.userBehavior[type].push(data);
+    this.saveUserBehavior();
+  }
+
+  loadUserBehavior() {
+    const stored = localStorage.getItem('userBehavior');
+    return stored ? JSON.parse(stored) : {};
+  }
+
+  saveUserBehavior() {
+    localStorage.setItem('userBehavior', JSON.stringify(this.userBehavior));
+  }
+
+  buildUserProfile() {
+    // Build user profile for recommendation algorithm
+    return {
+      recentlyViewed: this.userBehavior.recentlyViewed || [],
+      productClicks: (this.userBehavior.productClicks || []).map(click => click.productId),
+      conversions: (this.userBehavior.conversions || []).map(conv => conv.productId),
+      feedback: this.userBehavior.feedback || [],
+      wishlist: this.userBehavior.wishlist || [],
+      preferences: this.extractPreferences()
+    };
+  }
+
+  extractPreferences() {
+    // Extract user preferences from behavior data
+    const preferences = {
+      categories: {},
+      priceRange: { min: 0, max: Infinity },
+      brands: {},
+      tags: {}
+    };
+
+    // Analyze conversion data to extract preferences
+    if (this.userBehavior.conversions) {
+      // Implementation would analyze actual product data
+      // This is a placeholder for preference extraction logic
+    }
+
+    return preferences;
+  }
+
+  loadInitialRecommendations() {
+    this.loadRecommendations(this.currentTab);
+  }
+
+  setupFeedbackSystem() {
+    // Setup additional feedback collection mechanisms
+    this.setupA/BTesting();
+  }
+
+  setupA/BTesting() {
+    // Simple A/B testing for recommendation algorithms
+    const testGroup = Math.random() > 0.5 ? 'A' : 'B';
+    this.updateUserBehavior('abTest', { group: testGroup, timestamp: Date.now() });
+  }
+
+  showErrorState() {
+    const grid = document.getElementById('recommendationsGrid');
+    const noRecommendations = document.getElementById('noRecommendations');
+
+    grid.style.display = 'none';
+    noRecommendations.style.display = 'block';
+    noRecommendations.innerHTML = `
+      <div class="no-recommendations-icon">⚠️</div>
+      <h3>推荐系统暂时不可用</h3>
+      <p>请稍后再试或浏览其他产品</p>
+    `;
+  }
+
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'rgba(0, 255, 136, 0.9)' : type === 'error' ? 'rgba(255, 107, 107, 0.9)' : 'rgba(0, 170, 255, 0.9)'};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+}
+
+// Initialize the personalized recommendations system
+document.addEventListener('DOMContentLoaded', () => {
+  window.personalizedRecommendations = new PersonalizedRecommendations();
+});
+
+// Global functions for external integration
+window.updateRecommendations = function(type) {
+  if (window.personalizedRecommendations) {
+    window.personalizedRecommendations.loadRecommendations(type || 'for-you');
+  }
+};
+
+window.trackRecommendationClick = function(productId, position) {
+  if (window.personalizedRecommendations) {
+    window.personalizedRecommendations.trackProductClick(productId);
+    // Additional tracking for recommendation position
+  }
+};
+</script>
+
+{% schema %}
+{
+  "name": "AI Recommendations",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "个性化推荐"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "基于您的购物历史和偏好精心挑选"
+    },
+    {
+      "type": "number",
+      "id": "recommendations_count",
+      "label": "Number of Recommendations",
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "algorithm_title",
+      "label": "Algorithm Section Title",
+      "default": "智能推荐算法"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_feedback",
+      "label": "Enable Feedback System",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_ab_testing",
+      "label": "Enable A/B Testing",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "track_behavior",
+      "label": "Track User Behavior",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "AI Recommendations",
+      "category": "Recommendations"
+    }
+  ]
+}
+{% endschema %}

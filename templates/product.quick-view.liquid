@@ -1,0 +1,292 @@
+{%- comment -%}
+  产品快速查看模板
+  用于AJAX请求返回产品快速查看数据
+{%- endcomment -%}
+
+{%- layout none -%}
+
+{%- capture product_json -%}
+{
+  "id": {{ product.id | json }},
+  "title": {{ product.title | json }},
+  "handle": {{ product.handle | json }},
+  "description": {{ product.description | json }},
+  "price": {{ product.price | json }},
+  "compare_at_price": {{ product.compare_at_price | json }},
+  "available": {{ product.available | json }},
+  "images": [
+    {%- for image in product.images limit: 5 -%}
+      {
+        "src": {{ image | img_url: 'master' | json }},
+        "alt": {{ image.alt | json }},
+        "width": {{ image.width | json }},
+        "height": {{ image.height | json }}
+      }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ],
+  "variants": [
+    {%- for variant in product.variants -%}
+      {
+        "id": {{ variant.id | json }},
+        "title": {{ variant.title | json }},
+        "price": {{ variant.price | json }},
+        "compare_at_price": {{ variant.compare_at_price | json }},
+        "available": {{ variant.available | json }},
+        "option1": {{ variant.option1 | json }},
+        "option2": {{ variant.option2 | json }},
+        "option3": {{ variant.option3 | json }}
+      }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ],
+  "options": [
+    {%- for option in product.options -%}
+      {{ option | json }}{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ],
+  "tags": [
+    {%- for tag in product.tags limit: 10 -%}
+      {{ tag | json }}{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ],
+  "type": {{ product.type | json }},
+  "vendor": {{ product.vendor | json }}
+}
+{%- endcapture -%}
+
+<script id="ProductJson-quick-view" type="application/json">
+{{ product_json }}
+</script>
+
+<!-- 简化的产品HTML结构 -->
+<div class="quick-view-product-data" data-product-id="{{ product.id }}" data-product-handle="{{ product.handle }}" data-product-available="{{ product.available }}">
+
+  <!-- 产品标题 -->
+  <h1 class="product-title">{{ product.title }}</h1>
+
+  <!-- 产品价格 -->
+  <div class="price-container">
+    <span class="price-item{% if product.compare_at_price > product.price %} price-item--sale{% endif %}">
+      {{ product.price | money }}
+    </span>
+    {% if product.compare_at_price > product.price %}
+      <s class="price-item price-item--regular">
+        {{ product.compare_at_price | money }}
+      </s>
+    {% endif %}
+  </div>
+
+  <!-- 产品描述 -->
+  <div class="product-description">
+    {{ product.description | strip_html | truncate: 200 }}
+  </div>
+
+  <!-- 产品图片 -->
+  <div class="product-gallery">
+    {%- for image in product.images limit: 5 -%}
+      <div class="product-slide" data-image-index="{{ forloop.index0 }}">
+        <img src="{{ image | img_url: '600x600', crop: 'center' }}"
+             alt="{{ image.alt | escape }}"
+             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+             width="{{ image.width }}"
+             height="{{ image.height }}">
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <!-- 产品变体 -->
+  <div class="product-variants">
+    {%- for variant in product.variants -%}
+      <div class="variant-data"
+           data-variant-id="{{ variant.id }}"
+           data-variant-title="{{ variant.title }}"
+           data-variant-price="{{ variant.price }}"
+           data-variant-available="{{ variant.available }}">
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <!-- 产品选项 -->
+  <div class="product-options">
+    {%- for product_option in product.options_with_values -%}
+      <div class="option-{{ product_option.name | handle }}" data-option-name="{{ product_option.name }}">
+        {%- for value in product_option.values -%}
+          <div class="option-value" data-option-value="{{ value }}">{{ value }}</div>
+        {%- endfor -%}
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <!-- 库存状态 -->
+  <div class="stock-status">
+    {%- if product.available -%}
+      <span class="in-stock">{{ 'products.product.in_stock' | t }}</span>
+    {%- else -%}
+      <span class="out-of-stock">{{ 'products.product.sold_out' | t }}</span>
+    {%- endif -%}
+  </div>
+
+  <!-- 产品评分 (如果有评论应用) -->
+  {%- if product.metafields.reviews.rating.value -%}
+    <div class="product-rating" data-rating="{{ product.metafields.reviews.rating.value }}">
+      <div class="rating-stars">
+        {%- assign rating = product.metafields.reviews.rating.value | round -%}
+        {%- for i in (1..5) -%}
+          <span class="star{% if i <= rating %} filled{% endif %}">★</span>
+        {%- endfor -%}
+      </div>
+      <span class="rating-count">({{ product.metafields.reviews.rating_count }})</span>
+    </div>
+  {%- endif -%}
+
+  <!-- 产品标签 -->
+  {%- if product.tags.size > 0 -%}
+    <div class="product-tags">
+      {%- for tag in product.tags limit: 3 -%}
+        <span class="product-tag">{{ tag }}</span>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <!-- 附加信息 -->
+  <div class="product-meta">
+    {%- if product.type != blank -%}
+      <div class="product-type">
+        <strong>{{ 'products.product.type' | t }}:</strong> {{ product.type }}
+      </div>
+    {%- endif -%}
+
+    {%- if product.vendor != blank -%}
+      <div class="product-vendor">
+        <strong>{{ 'products.product.vendor' | t }}:</strong> {{ product.vendor }}
+      </div>
+    {%- endif -%}
+
+    {%- assign current_variant = product.selected_or_first_available_variant -%}
+    <div class="product-sku">
+      <strong>{{ 'products.product.sku' | t }}:</strong> {{ current_variant.sku | default: 'N/A' }}
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* 快速查看数据样式 */
+.quick-view-product-data {
+  display: none;
+}
+
+.product-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.price-container {
+  margin-bottom: 1rem;
+}
+
+.price-item {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.price-item--sale {
+  color: var(--color-error);
+}
+
+.price-item--regular {
+  font-size: 1rem;
+  opacity: 0.7;
+  text-decoration: line-through;
+  margin-left: 0.5rem;
+}
+
+.product-description {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.product-gallery {
+  display: none;
+}
+
+.product-variants,
+.product-options {
+  display: none;
+}
+
+.stock-status {
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.in-stock {
+  color: var(--color-success);
+}
+
+.out-of-stock {
+  color: var(--color-error);
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 0.125rem;
+}
+
+.star {
+  color: var(--color-border-light);
+  font-size: 1rem;
+}
+
+.star.filled {
+  color: var(--color-warning);
+}
+
+.rating-count {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.product-tag {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-base);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.product-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.product-meta strong {
+  color: var(--color-text-primary);
+}
+
+.product-meta > div {
+  margin-bottom: 0.25rem;
+}
+
+.product-meta > div:last-child {
+  margin-bottom: 0;
+}
+</style>

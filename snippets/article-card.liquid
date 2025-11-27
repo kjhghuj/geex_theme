@@ -1,0 +1,376 @@
+{% comment %}
+  文章卡片组件
+  用于在博客列表和相关文章中展示文章预览
+
+  Parameters:
+  - article: 文章对象（必需）
+  - show_excerpt: 是否显示摘要（可选，默认true）
+  - show_tags: 是否显示标签（可选，默认true）
+  - show_date: 是否显示日期（可选，默认true）
+  - show_author: 是否显示作者（可选，默认false）
+  - compact: 是否使用紧凑模式（可选，默认false）
+{% endcomment %}
+
+{% assign show_excerpt = show_excerpt | default: true %}
+{% assign show_tags = show_tags | default: true %}
+{% assign show_date = show_date | default: true %}
+{% assign show_author = show_author | default: false %}
+{% assign compact = compact | default: false %}
+
+<article class="article-card{% if compact %} article-card--compact{% endif %}">
+  <a href="{{ article.url }}" class="article-card__link">
+    <!-- 文章图片 -->
+    {% if article.image %}
+      <div class="article-card__image-wrapper">
+        <img src="{{ article.image | image_url: width: 800, height: 400 }}"
+             alt="{{ article.image.alt | escape }}"
+             loading="lazy"
+             width="800"
+             height="400"
+             class="article-card__image">
+        <div class="article-card__image-overlay"></div>
+      </div>
+    {% endif %}
+
+    <!-- 文章内容 -->
+    <div class="article-card__content">
+      <!-- 文章标签 -->
+      {% if show_tags and article.tags.size > 0 %}
+        <div class="article-card__tags">
+          {% for tag in article.tags limit: 3 %}
+            <span class="article-card__tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- 文章标题 -->
+      <h2 class="article-card__title">{{ article.title }}</h2>
+
+      <!-- 文章摘要 -->
+      {% if show_excerpt and article.excerpt != blank %}
+        <div class="article-card__excerpt">
+          {{ article.excerpt | strip_html | truncate: 150 }}
+        </div>
+      {% elsif show_excerpt and article.content != blank %}
+        <div class="article-card__excerpt">
+          {{ article.content | strip_html | truncate: 150 }}
+        </div>
+      {% endif %}
+
+      <!-- 文章元信息 -->
+      <div class="article-card__meta">
+        <div class="article-card__meta-left">
+          {% if show_date %}
+            <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
+                  class="article-card__date">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <rect x="2" y="4" width="10" height="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M4 2v2M10 2v2M2 6h10" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              {{ article.published_at | date: format: 'date_short' }}
+            </time>
+          {% endif %}
+
+          {% if show_author and article.author %}
+            <span class="article-card__author">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <circle cx="7" cy="5" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                <path d="M2 12c0-2.5 2-4.5 4.5-4.5S11 9.5 11 12" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              {{ article.author }}
+            </span>
+          {% endif %}
+
+          {% if blog.comments_enabled? %}
+            <span class="article-card__comments">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <path d="M7 1C3.5 1 0.5 4 0.5 7.5c0 2 1 3.8 2.5 4.8V13l2.3-1.2c0.5 0.1 1.1 0.2 1.7 0.2 3.5 0 6.5-3 6.5-6.5S10.5 1 7 1z" stroke="currentColor" stroke-width="1" fill="none"/>
+              </svg>
+              {{ article.comments_count }} {{ 'blog.article.comments' | t }}
+            </span>
+          {% endif %}
+        </div>
+
+        {% unless compact %}
+          <div class="article-card__read-time">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M7 4v3l2 2" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+            {{ 'blog.article.reading_time_minutes' | t: minutes: article.content | strip_html | strip | split: ' ' | size | divided_by: 200 | ceil }}
+          </div>
+        {% endunless %}
+      </div>
+
+      <!-- 阅读更多按钮 -->
+      <div class="article-card__action">
+        <span class="article-card__read-more">
+          {{ 'blog.article.read_more' | t }}
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .article-card {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-sci-fi);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+    position: relative;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-large);
+      border-color: var(--color-secondary);
+
+      .article-card__image {
+        transform: scale(1.05);
+      }
+
+      .article-card__image-overlay {
+        background: linear-gradient(180deg, transparent 0%, rgba(135, 206, 235, 0.2) 100%);
+      }
+
+      .article-card__read-more {
+        color: var(--color-secondary);
+        transform: translateX(4px);
+      }
+    }
+
+    &--compact {
+      .article-card__image-wrapper {
+        height: 180px;
+      }
+
+      .article-card__excerpt {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .article-card__read-time {
+        display: none;
+      }
+    }
+  }
+
+  .article-card__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+  }
+
+  .article-card__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+  }
+
+  .article-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-sci-fi);
+  }
+
+  .article-card__image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+    transition: background var(--duration-normal) var(--ease-out);
+    pointer-events: none;
+  }
+
+  .article-card__content {
+    padding: var(--spacing-6);
+    height: calc(100% - 240px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .article-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .article-card__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-1) var(--spacing-2);
+    background: rgba(135, 206, 235, 0.1);
+    color: var(--color-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border: 1px solid rgba(135, 206, 235, 0.2);
+  }
+
+  .article-card__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    margin: 0 0 var(--spacing-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 0;
+  }
+
+  .article-card__excerpt {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin: 0 0 var(--spacing-4);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .article-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+    flex-wrap: wrap;
+  }
+
+  .article-card__meta-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    flex-wrap: wrap;
+  }
+
+  .article-card__date,
+  .article-card__author,
+  .article-card__comments {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+  }
+
+  .article-card__read-time {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+  }
+
+  .article-card__action {
+    margin-top: auto;
+    text-align: right;
+  }
+
+  .article-card__read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    transition: all var(--duration-fast) var(--ease-out);
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .article-card {
+      &:hover {
+        transform: translateY(-2px);
+      }
+    }
+
+    .article-card__content {
+      padding: var(--spacing-4);
+    }
+
+    .article-card__title {
+      font-size: var(--font-size-lg);
+    }
+
+    .article-card__meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-2);
+    }
+
+    .article-card__meta-left {
+      flex-wrap: wrap;
+    }
+
+    .article-card__action {
+      margin-top: var(--spacing-3);
+    }
+
+    &--compact {
+      .article-card__image-wrapper {
+        height: 160px;
+      }
+    }
+  }
+
+  @include respond-to('md') {
+    .article-card__excerpt {
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  @include respond-to('lg') {
+    .article-card__content {
+      padding: var(--spacing-8);
+    }
+  }
+</style>
+
+<script>
+  // 文章卡片加载动画
+  document.addEventListener('DOMContentLoaded', function() {
+    const articleCards = document.querySelectorAll('.article-card');
+
+    if ('IntersectionObserver' in window) {
+      const cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+            }, index * 100);
+            cardObserver.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '50px 0px'
+      });
+
+      articleCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+        cardObserver.observe(card);
+      });
+    }
+  });
+</script>

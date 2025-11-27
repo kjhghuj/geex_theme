@@ -1,0 +1,111 @@
+{%- comment -%}
+  面包屑导航组件
+  显示用户当前在网站中的位置
+{%- endcomment -%}
+
+<nav class="breadcrumb" role="navigation" aria-label="面包屑导航">
+  <div class="container">
+    <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+      <!-- 首页 -->
+      <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a href="{{ routes.root_url }}" itemprop="item" class="breadcrumb-link">
+          <span itemprop="name">{{ 'general.breadcrumbs.home' | t }}</span>
+        </a>
+        <meta itemprop="position" content="1" />
+      </li>
+
+      <!-- 产品系列 -->
+      {%- if product.collections.size > 0 -%}
+        {%- assign main_collection = product.collections[0] -%}
+        <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="{{ main_collection.url }}" itemprop="item" class="breadcrumb-link">
+            <span itemprop="name">{{ main_collection.title }}</span>
+          </a>
+          <meta itemprop="position" content="2" />
+        </li>
+      {%- endif -%}
+
+      <!-- 当前产品 -->
+      <li class="breadcrumb-item active" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name" class="breadcrumb-current">{{ product.title }}</span>
+        <meta itemprop="item" content="{{ shop.url }}{{ product.url }}" />
+        <meta itemprop="position" content="{% if product.collections.size > 0 %}3{% else %}2{% endif %}" />
+      </li>
+    </ol>
+  </div>
+</nav>
+
+<style>
+/* 面包屑样式 */
+.breadcrumb {
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-2) 0;
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-secondary);
+
+  &:not(:last-child)::after {
+    content: '/';
+    color: var(--color-text-light);
+    opacity: 0.5;
+  }
+}
+
+.breadcrumb-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    color: var(--color-secondary);
+    background: rgba(135, 206, 235, 0.1);
+    text-shadow: 0 0 6px var(--glow-primary);
+  }
+}
+
+.breadcrumb-current {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .breadcrumb {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .breadcrumb-list {
+    font-size: var(--font-size-xs);
+    gap: var(--spacing-1);
+  }
+
+  .breadcrumb-item {
+    &:not(:last-child)::after {
+      margin: 0 var(--spacing-1);
+    }
+  }
+
+  .breadcrumb-link,
+  .breadcrumb-current {
+    padding: var(--spacing-1);
+  }
+}
+</style>

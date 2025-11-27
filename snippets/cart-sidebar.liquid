@@ -1,0 +1,1213 @@
+{%- comment -%}
+  购物车侧边栏组件
+  滑出式购物车，支持快速添加商品和结账
+{%- endcomment -%}
+
+<div class="cart-sidebar" id="cart-sidebar" data-cart-sidebar aria-hidden="true">
+  <div class="cart-sidebar-content">
+    <!-- 购物车头部 -->
+    <div class="cart-sidebar-header">
+      <h2 class="cart-sidebar-title">
+        {{ 'layout.cart.title' | t }}
+        <span class="cart-count" data-cart-count>{{ cart.item_count }}</span>
+      </h2>
+      <button type="button"
+              class="cart-close btn btn-icon btn-ghost"
+              data-cart-close
+              aria-label="{{ 'layout.cart.close' | t }}">
+        <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 购物车主体 -->
+    <div class="cart-sidebar-body">
+      <!-- 购物车商品列表 -->
+      <div class="cart-items" data-cart-items>
+        {%- if cart.items.size == 0 -%}
+          <!-- 空购物车状态 -->
+          <div class="cart-empty">
+            <div class="cart-empty-content">
+              <div class="cart-empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 2L7 17h13l-2-15H9zm0 2h8l-1.5 11H10.5L9 4z"/>
+                  <path d="M9 13h6M9 16h6"/>
+                  <circle cx="10" cy="21" r="1"/>
+                  <circle cx="18" cy="21" r="1"/>
+                </svg>
+              </div>
+              <h3 class="cart-empty-title">{{ 'cart.general.empty' | t }}</h3>
+              <p class="cart-empty-description">{{ 'cart.general.empty_message' | t }}</p>
+              <a href="{{ routes.all_products_collection_url }}" class="btn btn-primary">
+                {{ 'cart.general.continue_shopping' | t }}
+              </a>
+            </div>
+          </div>
+        {%- else -%}
+          <!-- 有商品时显示商品列表 -->
+          <div class="cart-items-list" data-cart-items-list>
+            {%- for item in cart.items -%}
+              <div class="cart-item" data-cart-item-id="{{ item.key }}">
+                <!-- 商品图片 -->
+                <div class="cart-item-image">
+                  <a href="{{ item.url }}" class="cart-item-link">
+                    {%- if item.image -%}
+                      <img src="{{ item.image | image_url: width: 100, height: 100 }}"
+                           srcset="{{ item.image | image_url: width: 100 }} 1x, {{ item.image | image_url: width: 200 }} 2x"
+                           alt="{{ item.image.alt | default: item.product.title | escape }}"
+                           loading="lazy"
+                           class="cart-item-img"
+                           width="{{ item.image.width }}"
+                           height="{{ item.image.height }}">
+                    {%- else -%}
+                      {{ 'product-1' | placeholder_svg_tag: 'cart-item-img placeholder' }}
+                    {%- endif -%}
+                  </a>
+                </div>
+
+                <!-- 商品信息 -->
+                <div class="cart-item-details">
+                  <div class="cart-item-info">
+                    <h4 class="cart-item-title">
+                      <a href="{{ item.url }}" class="cart-item-link">
+                        {{ item.product.title }}
+                      </a>
+                    </h4>
+
+                    <!-- 变体信息 -->
+                    {%- unless item.product.has_only_default_variant -%}
+                      <div class="cart-item-variants">
+                        {%- for option in item.options_with_values -%}
+                          <div class="cart-item-variant">
+                            <span class="variant-label">{{ option.name }}:</span>
+                            <span class="variant-value">{{ option.value }}</span>
+                          </div>
+                        {%- endfor -%}
+                      </div>
+                    {%- endunless -%}
+
+                    <!-- 商品属性 -->
+                    {%- assign propertySize = item.properties | size -%}
+                    {%- if propertySize > 0 -%}
+                      <div class="cart-item-properties">
+                        {%- for property in item.properties -%}
+                          {%- assign propertyFirstChar = property.first | first -%}
+                          {%- unless property.last == blank or propertyFirstChar == '_' -%}
+                            <div class="cart-item-property">
+                              <span class="property-label">{{ property.first }}:</span>
+                              <span class="property-value">{{ property.last }}</span>
+                            </div>
+                          {%- endunless -%}
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+
+                    <!-- 价格 -->
+                    <div class="cart-item-price">
+                      {%- if item.original_price != item.final_price -%}
+                        <div class="price-row">
+                          <span class="price-original">{{ item.original_price | money }}</span>
+                          <span class="price-current">{{ item.final_price | money }}</span>
+                        </div>
+                      {%- else -%}
+                        <span class="price-current">{{ item.final_price | money }}</span>
+                      {%- endif -%}
+
+                      <!-- 折扣标签 -->
+                      {%- if item.discount_amount > 0 -%}
+                        <div class="item-discount">
+                          <span class="discount-badge">{{ item.discount_amount | money }} {{ 'cart.general.discount' | t }}</span>
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  </div>
+
+                  <!-- 数量和删除按钮 -->
+                  <div class="cart-item-actions">
+                    <div class="cart-item-quantity">
+                      <button type="button"
+                              class="quantity-btn quantity-btn-minus"
+                              data-minus-quantity="{{ item.key }}"
+                              aria-label="{{ 'cart.general.decrease_quantity' | t }}">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                          <path d="M2 7a1 1 0 011-1h8a1 1 0 110 2H3a1 1 0 01-1-1z"/>
+                        </svg>
+                      </button>
+
+                      <input type="number"
+                             name="updates[]"
+                             id="updates_{{ item.key }}"
+                             value="{{ item.quantity }}"
+                             min="0"
+                             class="quantity-input"
+                             data-quantity-input="{{ item.key }}"
+                             aria-label="{{ 'cart.general.quantity' | t }}">
+
+                      <button type="button"
+                              class="quantity-btn quantity-btn-plus"
+                              data-plus-quantity="{{ item.key }}"
+                              aria-label="{{ 'cart.general.increase_quantity' | t }}">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                          <path d="M7 2a1 1 0 011 1v3h3a1 1 0 110 2H8v3a1 1 0 11-2 0V8H3a1 1 0 110-2h3V3a1 1 0 011-1z"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- 删除按钮 -->
+                    <button type="button"
+                            class="cart-item-remove btn btn-ghost btn-icon"
+                            data-remove-item="{{ item.key }}"
+                            aria-label="{{ 'cart.general.remove' | t }}: {{ item.product.title | escape }}">
+                      <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6a.5.5 0 0 0 .5-.5z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h2a1 1 0 0 1 1 1h2a1 1 0 0 1 1 1h2a1 1 0 0 1 1 1v1zM4.446 4.036a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-7z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- 免费配送提示 -->
+      {%- if section.settings.show_free_shipping_reminder -%}
+        <div class="cart-shipping-reminder">
+          {%- assign freeShippingThreshold = section.settings.free_shipping_threshold | times: 100 -%}
+          {%- if cart.total_price >= freeShippingThreshold -%}
+            <div class="shipping-success">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 1 1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+              </svg>
+              <span>{{ 'cart.general.free_shipping' | t }}</span>
+            </div>
+          {%- else -%}
+            {%- assign remainingAmount = freeShippingThreshold | minus: cart.total_price -%}
+            <div class="shipping-progress">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1 8a7 7 0 1 1 13.958 1.5A4.5 4.5 0 0 1 12.5 10a4.5 4.5 0 0 1-7.458 3.5A7 7 0 0 1 1 8zm7.071 0A6 6 0 1 0 2.929 8c0-1.657.68-3.157 1.775-4.243.146.144.339.12.484-.025.324-.277.628-.548.865-.432.5-.835.973-1.186 1.46-.475.678-1.694 1.395-3.126 1.395a.75.75 0 0 0 0-1.5c1.822 0 3.481-1.07 4.377-2.11.716-.861 1.2-1.673 1.482-2.384.293-.74.476-1.527.521-2.41.014-.229-.146-.283-.376-.283-.34 0-.63.17-.756.412-.102.191-.1.526-.143.76a6 6 0 0 0 1.247 1.247c.456.456 1.041.751 1.673.882A6 6 0 0 0 8.07 8z"/>
+              </svg>
+              <div class="shipping-text">
+                <span class="shipping-current">{{ 'cart.general.free_shipping_progress' | t: amount: remainingAmount }}</span>
+                <div class="shipping-bar">
+                  <div class="shipping-progress-bar" style="width: {{ cart.total_price | times: 100 | divided_by: freeShippingThreshold }}%"></div>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- 购物车底部 -->
+    {%- unless cart.items.size == 0 -%}
+      <div class="cart-sidebar-footer">
+        <!-- 小计和费用 -->
+        <div class="cart-subtotal">
+          <div class="subtotal-row">
+            <span class="subtotal-label">{{ 'cart.general.subtotal' | t }}</span>
+            <span class="subtotal-value" data-cart-subtotal="{{ cart.total_price }}">{{ cart.total_price | money }}</span>
+          </div>
+
+          <!-- 折扣信息 -->
+          {%- if cart.cart_level_discount_applications.size > 0 -%}
+            <div class="discounts-list">
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <div class="discount-item">
+                  <span class="discount-title">{{ discount.title }}</span>
+                  <span class="discount-value">-{{ discount.total_allocated_amount | money }}</span>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          <!-- 税费提示 -->
+          {%- if section.settings.show_tax_notice -%}
+            <div class="tax-notice">
+              <span>{{ 'cart.general.shipping_at_checkout' | t }}</span>
+              <span>{{ 'cart.general.taxes_at_checkout' | t }}</span>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <!-- 优惠券码输入 -->
+        {%- if section.settings.show_discount_code -%}
+          <div class="discount-code-form">
+            <form class="discount-form" action="/cart" method="post">
+              <input type="hidden" name="discount" value="{{ cart.discount_applications.size }}">
+              <div class="discount-field">
+                <input type="text"
+                       name="discount.code"
+                       class="discount-input"
+                       placeholder="{{ 'cart.general.discount_placeholder' | t }}"
+                       value="{{ cart.discount_applications.first.code }}"
+                       {% if cart.discount_applications.first %}readonly{% endif %}>
+                <button type="submit" class="discount-btn btn btn-ghost">
+                  {%- if cart.discount_applications.size > 0 -%}
+                    {{ 'cart.general.remove' | t }}
+                  {%- else -%}
+                    {{ 'cart.general.apply' | t }}
+                  {%- endif -%}
+                </button>
+              </div>
+            </form>
+          </div>
+        {%- endif -%}
+
+        <!-- 操作按钮 -->
+        <div class="cart-actions">
+          <a href="{{ routes.cart_url }}" class="btn btn-ghost btn-full view-cart-btn">
+            {{ 'cart.general.view_cart' | t }}
+          </a>
+
+          <a href="{{ routes.checkout_url }}" class="btn btn-primary btn-full checkout-btn">
+            {{ 'cart.general.checkout' | t }}
+            <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.5 8a.5.5 0 0 1 .5.5H15a.5.5 0 0 1 0 1H11a2.5 2.5 0 0 0 0-5H1a.5.5 0 0 1 0-1h4.5z" clip-rule="evenodd"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- 安全结账信息 -->
+        {%- if section.settings.show_security_badges -%}
+          <div class="security-badges">
+            <div class="security-text">{{ 'cart.general.secure_checkout' | t }}</div>
+            <div class="security-icons">
+              <svg class="security-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+              <svg class="security-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="1" y="3" width="22" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line x1="1" y1="7" x2="23" y2="7" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endunless -%}
+  </div>
+
+  <!-- 背景遮罩 -->
+  <div class="cart-overlay" data-cart-overlay></div>
+</div>
+
+<!-- 购物车成功通知 -->
+<div class="cart-notification" id="cart-notification" data-cart-notification>
+  <div class="notification-content">
+    <div class="notification-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path fill-rule="evenodd" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="notification-message">
+      <span class="notification-title">{{ 'cart.general.added_to_cart' | t }}</span>
+      <span class="notification-product" data-notification-product></span>
+    </div>
+    <button type="button" class="notification-close" data-cart-notification-close>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<style>
+/* 购物车侧边栏 */
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  background: var(--color-bg-primary);
+  border-left: 1px solid var(--color-border);
+  box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+  z-index: var(--z-modal-backdrop);
+  transition: right var(--duration-normal) var(--ease-sci-fi);
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-sidebar.active {
+  right: 0;
+}
+
+@media (min-width: 768px) {
+  .cart-sidebar {
+    width: 400px;
+  }
+}
+
+.cart-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 购物车头部 */
+.cart-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-6);
+  border-bottom: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.cart-sidebar-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-primary);
+}
+
+.cart-count {
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-full);
+  @include glow(var(--glow-size-small, var(--color-secondary), 0.7);
+}
+
+/* 购物车主体 */
+.cart-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-4);
+}
+
+/* 空购物车状态 */
+.cart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.cart-empty-content {
+  padding: var(--spacing-8);
+}
+
+.cart-empty-icon {
+  margin-bottom: var(--spacing-4);
+  color: var(--color-text-light);
+}
+
+.cart-empty-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text-primary);
+}
+
+.cart-empty-description {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-6);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 购物车商品列表 */
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-small);
+  }
+}
+
+.cart-item-image {
+  grid-row: span 2;
+  position: relative;
+}
+
+.cart-item-link {
+  display: block;
+  border-radius: var(--radius-base);
+  overflow: hidden;
+}
+
+.cart-item-img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
+
+.cart-item-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.cart-item-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-2) 0;
+  line-height: var(--line-height-tight);
+}
+
+.cart-item-variants,
+.cart-item-properties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-2);
+}
+
+.cart-item-variant,
+.cart-item-property {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.variant-label,
+.property-label {
+  font-weight: var(--font-weight-medium);
+}
+
+.variant-value,
+.property-value {
+  color: var(--color-text-primary);
+}
+
+.cart-item-price {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.price-row {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.price-original {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  text-decoration: line-through;
+}
+
+.price-current {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-secondary);
+}
+
+.item-discount {
+  margin-top: var(--spacing-1);
+}
+
+.discount-badge {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-base);
+}
+
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.cart-item-quantity {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  overflow: hidden;
+}
+
+.quantity-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover:not(:disabled) {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.quantity-input {
+  width: 50px;
+  height: 28px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.cart-item-remove {
+  margin-top: var(--spacing-2);
+  @include scifi-button(var(--color-bg-secondary), var(--color-text-primary));
+  width: 100%;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-2);
+
+  &:hover {
+    background: var(--color-error);
+    color: var(--color-text-inverse);
+    border-color: var(--color-error);
+  }
+}
+
+/* 免费配送提醒 */
+.cart-shipping-reminder {
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-4);
+}
+
+.shipping-success {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+.shipping-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.shipping-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.shipping-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.shipping-progress-bar {
+  height: 100%;
+  background: var(--color-success);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* 购物车底部 */
+.cart-sidebar-footer {
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--spacing-6);
+  flex-shrink: 0;
+}
+
+.cart-subtotal {
+  margin-bottom: var(--spacing-6);
+}
+
+.subtotal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.subtotal-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.subtotal-value {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-secondary);
+}
+
+.discounts-list {
+  margin-bottom: var(--spacing-3);
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--spacing-3);
+}
+
+.discount-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+}
+
+.discount-title {
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+.discount-value {
+  color: var(--color-text-secondary);
+}
+
+.tax-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--spacing-3);
+}
+
+/* 优惠券码 */
+.discount-code-form {
+  margin-bottom: var(--spacing-6);
+}
+
+.discount-field {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.discount-input {
+  flex: 1;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px var(--glow-secondary);
+  }
+
+  &:read-only {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-light);
+  }
+}
+
+.discount-btn {
+  padding: var(--spacing-3) var(--spacing-4);
+  white-space: nowrap;
+}
+
+/* 操作按钮 */
+.cart-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
+
+.view-cart-btn {
+  @include scifi-button(var(--color-bg-secondary), var(--color-text-primary), 2px solid var(--color-border));
+  border-color: var(--color-border);
+}
+
+.checkout-btn {
+  @include scifi-button();
+}
+
+/* 安全徽章 */
+.security-badges {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}
+
+.security-text {
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.security-icons {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+.security-icon {
+  opacity: 0.6;
+  width: 20px;
+  height: 20px;
+}
+
+/* 背景遮罩 */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal-backdrop) - 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+}
+
+.cart-sidebar.active ~ .cart-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 购物车通知 */
+.cart-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-large);
+  z-index: var(--z-tooltip);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  max-width: 350px;
+  pointer-events: none;
+}
+
+.cart-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+.notification-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  @include glow(var(--glow-size-small, var(--color-success), 0.7);
+}
+
+.notification-message {
+  flex: 1;
+}
+
+.notification-title {
+  display: block;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.notification-product {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.notification-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: var(--radius-base);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .cart-sidebar {
+    max-width: 100%;
+  }
+
+  .cart-item {
+    grid-template-columns: 60px 1fr;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+  }
+
+  .cart-item-image {
+    grid-row: span 2;
+  }
+
+  .cart-item-img {
+    width: 100%;
+    height: 60px;
+  }
+
+  .cart-item-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .cart-item-price {
+    font-size: var(--font-size-sm);
+  }
+
+  .quantity-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .quantity-input {
+    width: 40px;
+    height: 24px;
+  }
+
+  .cart-notification {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    max-width: none;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .cart-sidebar,
+  .cart-overlay,
+  .cart-notification,
+  .cart-item,
+  .quantity-btn,
+  .cart-item-remove,
+  .view-cart-btn,
+  .checkout-btn {
+    transition: none;
+  }
+
+  .shipping-progress-bar {
+    transition: none;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 购物车侧边栏控制
+  const cartToggle = document.querySelector('[data-cart-toggle]');
+  const cartSidebar = document.querySelector('[data-cart-sidebar]');
+  const cartClose = cartSidebar?.querySelector('[data-cart-close]');
+  const cartOverlay = cartSidebar?.querySelector('[data-cart-overlay]');
+  const cartNotification = document.getElementById('cart-notification');
+
+  // 打开购物车
+  if (cartToggle) {
+    cartToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      openCart();
+    });
+  }
+
+  // 关闭购物车
+  if (cartClose) {
+    cartClose.addEventListener('click', closeCart);
+  }
+
+  // 点击背景关闭
+  if (cartOverlay) {
+    cartOverlay.addEventListener('click', closeCart);
+  }
+
+  // ESC键关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && cartSidebar.classList.contains('active')) {
+      closeCart();
+    }
+  });
+
+  function openCart() {
+    cartSidebar.setAttribute('aria-hidden', 'false');
+    cartSidebar.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCart() {
+    cartSidebar.setAttribute('aria-hidden', 'true');
+    cartSidebar.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 数量更新
+  const minusBtns = cartSidebar?.querySelectorAll('[data-minus-quantity]');
+  const plusBtns = cartSidebar?.querySelectorAll('[data-plus-quantity]');
+  const quantityInputs = cartSidebar?.querySelectorAll('[data-quantity-input]');
+
+  if (minusBtns) {
+    minusBtns.forEach(btn => {
+      btn.addEventListener('click', () => updateQuantity(btn.dataset.minusQuantity, -1));
+    });
+  }
+
+  if (plusBtns) {
+    plusBtns.forEach(btn => {
+      btn.addEventListener('click', () => updateQuantity(btn.dataset.plusQuantity, 1));
+    });
+  }
+
+  if (quantityInputs) {
+    quantityInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        const key = e.target.dataset.quantityInput;
+        const quantity = parseInt(e.target.value) || 0;
+        updateQuantity(key, 0, quantity);
+      });
+    });
+  }
+
+  async function updateQuantity(key, change, exactQuantity = null) {
+    const input = document.querySelector(`[data-quantity-input="${key}"]`);
+    if (!input) return;
+
+    let newQuantity = exactQuantity !== null ? exactQuantity : (parseInt(input.value) + change);
+
+    if (newQuantity < 0) newQuantity = 0;
+    if (newQuantity > 99) newQuantity = 99;
+
+    try {
+      const response = await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: key,
+          quantity: newQuantity
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 更新购物车显示
+        updateCartDisplay(data);
+
+        // 更新数量输入框
+        input.value = newQuantity;
+
+        // 如果数量为0，移除商品
+        if (newQuantity === 0) {
+          const cartItem = input.closest('.cart-item');
+          if (cartItem) {
+            cartItem.style.transform = 'translateX(100%)';
+            cartItem.style.opacity = '0';
+            setTimeout(() => cartItem.remove(), 300);
+          }
+        }
+
+        // 显示更新通知
+        if (window.ScifiTheme) {
+          window.ScifiTheme.showNotification('购物车已更新', 'info', 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Quantity update error:', error);
+    }
+  }
+
+  // 删除商品
+  const removeBtns = cartSidebar?.querySelectorAll('[data-remove-item]');
+  if (removeBtns) {
+    removeBtns.forEach(btn => {
+      btn.addEventListener('click', () => removeItem(btn.dataset.removeItem));
+    });
+  }
+
+  async function removeItem(key) {
+    const cartItem = btn.closest('.cart-item');
+
+    try {
+      const response = await fetch('/cart/change.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: key,
+          quantity: 0
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 更新购物车显示
+        updateCartDisplay(data);
+
+        // 移除商品项
+        if (cartItem) {
+          cartItem.style.transform = 'translateX(100%)';
+          cartItem.style.opacity = '0';
+          setTimeout(() => cartItem.remove(), 300);
+        }
+
+        // 显示移除通知
+        if (window.ScifiTheme) {
+          window.ScifiTheme.showNotification('商品已从购物车移除', 'info', 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Remove item error:', error);
+    }
+  }
+
+  // 更新购物车显示
+  function updateCartDisplay(cart) {
+    // 更新购物车数量
+    const cartCount = document.querySelector('[data-cart-count]');
+    if (cartCount) {
+      cartCount.textContent = cart.item_count;
+    }
+
+    // 更新小计
+    const cartSubtotal = document.querySelector('[data-cart-subtotal]');
+    if (cartSubtotal) {
+      cartSubtotal.textContent = new Intl.NumberFormat('{{ shop.currency }}', {
+        style: 'currency',
+        currency: '{{ shop.currency }}'
+      }).format(cart.total_price / 100);
+    }
+
+    // 如果购物车为空，显示空状态
+    if (cart.items.length === 0) {
+      const cartItems = document.querySelector('[data-cart-items]');
+      if (cartItems) {
+        cartItems.innerHTML = `
+          <div class="cart-empty">
+            <div class="cart-empty-content">
+              <div class="cart-empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 2L7 17h13l-2-15H9zm0 2h8l-1.5 11H10.5L9 4z"/>
+                  <path d="M9 13h6M9 16h6"/>
+                  <circle cx="10" cy="21" r="1"/>
+                  <circle cx="18" cy="21" r="1"/>
+                </svg>
+              </div>
+              <h3 class="cart-empty-title">{{ 'cart.general.empty' | t }}</h3>
+              <p class="cart-empty-description">{{ 'cart.general.empty_message' | t }}</p>
+              <a href="{{ routes.all_products_collection_url }}" class="btn btn-primary">
+                {{ 'cart.general.continue_shopping' | t }}
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      // 隐藏底部操作按钮
+      const cartFooter = cartSidebar.querySelector('.cart-sidebar-footer');
+      if (cartFooter) {
+        cartFooter.style.display = 'none';
+      }
+    }
+  }
+
+  // 全局添加到购物车功能
+  window.addToCart = async function(variantId, quantity = 1, productName = '') {
+    try {
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: quantity
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // 更新购物车显示
+        await fetch('/cart.js')
+          .then(res => res.json())
+          .then(cart => updateCartDisplay(cart));
+
+        // 显示成功通知
+        if (cartNotification) {
+          const notificationProduct = cartNotification.querySelector('[data-notification-product]');
+          if (notificationProduct && productName) {
+            notificationProduct.textContent = productName;
+          }
+
+          cartNotification.classList.add('show');
+
+          setTimeout(() => {
+            cartNotification.classList.remove('show');
+          }, 3000);
+        }
+
+        // 打开购物车
+        openCart();
+      }
+    } catch (error) {
+      console.error('Add to cart error:', error);
+    }
+  };
+});
+</script>

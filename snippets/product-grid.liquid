@@ -1,0 +1,696 @@
+{%- comment -%}
+  产品网格组件
+  响应式产品展示网格，支持多种布局和过滤
+{%- endcomment -%}
+
+{%- assign grid_class = 'product-grid' -%}
+{%- assign columns_class = '' -%}
+{%- assign mobile_columns = section.settings.mobile_columns | default: 1 -%}
+{%- assign tablet_columns = section.settings.tablet_columns | default: 2 -%}
+{%- assign desktop_columns = section.settings.desktop_columns | default: 3 -%}
+
+{%- capture grid_classes -%}
+  {{ grid_class }}
+  grid--mobile-{{ mobile_columns }}
+  grid--tablet-{{ tablet_columns }}
+  grid--desktop-{{ desktop_columns }}
+  {%- if section.settings.grid_style == 'compact' -%} grid--compact{% endif -%}
+  {%- if section.settings.grid_style == 'wide' -%} grid--wide{% endif -%}
+  {%- if section.settings.show_badges == false -%} grid--no-badges{% endif -%}
+  {%- if section.settings.show_rating == false -%} grid--no-rating{% endif -%}
+  {%- if section.settings.enable_quick_add == false -%} grid--no-quick-add{% endif -%}
+{%- endcapture -%}
+
+<div class="product-grid-wrapper" data-product-grid>
+  <!-- 网格头部 -->
+  {%- if section.settings.show_grid_header -%}
+    <div class="grid-header">
+      {%- if section.settings.title != blank -%}
+        <h2 class="grid-title">{{ section.settings.title }}</h2>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="grid-subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+      {%- endif -%}
+
+      <!-- 视图切换 -->
+      {%- if section.settings.enable_view_toggle -%}
+        <div class="view-toggle" data-view-toggle>
+          <button type="button"
+                  class="view-btn view-btn-grid active"
+                  data-view="grid"
+                  aria-label="{{ 'collections.view.grid' | t }}">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M1 4a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1V4zM1 10a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1v-2zM1 16a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1v-2zM7 4a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H8a1 1 0 01-1-1V4zM7 10a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2zM7 16a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2zM13 4a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V4zM13 10a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2zM13 16a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z"/>
+            </svg>
+          </button>
+
+          <button type="button"
+                  class="view-btn view-btn-list"
+                  data-view="list"
+                  aria-label="{{ 'collections.view.list' | t }}">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      {%- endif -%}
+
+      <!-- 每页显示数量 -->
+      {%- if section.settings.enable_pagination -%}
+        <div class="pagination-info">
+          <span class="pagination-count">
+            {{ 'collections.general.showing' | t }}: {{ collection.all_products_count }} {{ 'collections.general.products' | t }}
+          </span>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <!-- 筛选和排序 -->
+  {%- if section.settings.show_filtering -%}
+    <div class="grid-controls">
+      {%- render 'collection-filters', collection: collection -%}
+      {%- render 'collection-sorting', collection: collection -%}
+    </div>
+  {%- endif -%}
+
+  <!-- 产品网格容器 -->
+  <div class="{{ grid_classes | strip | strip_html | strip_newlines }}" data-products-container>
+    {%- liquid
+      assign count = 0
+      assign columns = desktop_columns
+
+      if mobile_columns == 2
+        assign columns = mobile_columns
+      elsif tablet_columns > desktop_columns
+        assign columns = tablet_columns
+      endif
+    -%}
+
+    {%- for product in collection.products limit: section.settings.products_per_page -%}
+      {%- assign count = count | plus: 1 -%}
+
+      <!-- 第一个产品可能需要特殊处理 -->
+      {%- if forloop.first and section.settings.featured_first_product -%}
+        <div class="product-card product-card--featured" data-product-featured>
+          {% render 'product-card', product: product %}
+        </div>
+      {%- else -%}
+        <div class="product-grid-item" data-product-id="{{ product.id }}">
+          {% render 'product-card', product: product %}
+          {% render 'quick-view-trigger', product: product %}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.enable_ad_positions -%}
+        {%- if forloop.index == section.settings.ad_position and section.settings.ad_content != blank -%}
+          <div class="grid-ad" data-grid-ad>
+            {{ section.settings.ad_content }}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <!-- 空状态 -->
+    {%- if collection.products.size == 0 -%}
+      <div class="grid-empty">
+        <div class="empty-content">
+          <div class="empty-icon">
+            {% render 'icon-package' %}
+          </div>
+          <h3 class="empty-title">{{ 'collections.general.no_products' | t }}</h3>
+          <p class="empty-description">{{ 'collections.general.no_products_description' | t }}</p>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn-primary">
+            {{ 'collections.general.continue_shopping' | t }}
+          </a>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <!-- 加载更多按钮 -->
+    {%- if section.settings.enable_load_more and collection.all_products_count > section.settings.products_per_page -%}
+      <div class="grid-load-more">
+        <button type="button"
+                class="load-more-btn btn btn-secondary"
+                data-load-more
+                data-page="2"
+                data-total="{{ collection.all_products_count }}"
+                data-per-page="{{ section.settings.products_per_page }}">
+          <span class="btn-text">{{ 'collections.general.load_more' | t }}</span>
+          <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M1 8a.5.5 0 01.5-.5h11.793l-3.147-3.146a.5.5 0 01.708-.708l4 4a.5.5 0 010 .708l-4 4a.5.5 0 01-.708-.708L13.293 8.5H1.5A.5.5 0 011 8z"/>
+          </svg>
+        </button>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <!-- 分页 -->
+  {%- if section.settings.show_pagination and paginate > 1 -%}
+    <div class="grid-pagination">
+      {% render 'pagination', paginate: paginate %}
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+/* 产品网格包装器 */
+.product-grid-wrapper {
+  width: 100%;
+}
+
+/* 网格头部 */
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-8);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.grid-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.grid-subtitle {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 视图切换 */
+.view-toggle {
+  display: flex;
+  gap: var(--spacing-1);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-1);
+  border-radius: var(--radius-base);
+}
+
+.view-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &.active {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    box-shadow: 0 0 10px var(--glow-primary);
+  }
+}
+
+/* 分页信息 */
+.pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* 网格控制 */
+.grid-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+/* 产品网格基础样式 */
+.product-grid {
+  display: grid;
+  gap: var(--spacing-6);
+  align-items: stretch;
+}
+
+/* 网格列数配置 */
+.grid--mobile-1 {
+  @include mobile-only {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.grid--mobile-2 {
+  @include mobile-only {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4);
+  }
+}
+
+.grid--tablet-2 {
+  @include respond-to('md') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.grid--tablet-3 {
+  @include respond-to('md') {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid--desktop-3 {
+  @include respond-to('lg') {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid--desktop-4 {
+  @include respond-to('lg') {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.grid--desktop-5 {
+  @include respond-to('lg') {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 网格样式变体 */
+.grid--compact {
+  gap: var(--spacing-4);
+
+  @include mobile-only {
+    gap: var(--spacing-3);
+  }
+}
+
+.grid--wide {
+  gap: var(--spacing-8);
+
+  @include respond-to('lg') {
+    gap: var(--spacing-10);
+  }
+}
+
+/* 网格项目 */
+.product-grid-item {
+  position: relative;
+}
+
+.product-card--featured {
+  grid-column: span 2;
+}
+
+/* 网格广告 */
+.grid-ad {
+  grid-column: span 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  min-height: 200px;
+}
+
+/* 空状态 */
+.grid-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-16) var(--spacing-8);
+}
+
+.empty-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-6);
+  color: var(--color-text-light);
+}
+
+.empty-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-3);
+  color: var(--color-text-primary);
+}
+
+.empty-description {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-6);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 加载更多 */
+.grid-load-more {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-8) 0;
+}
+
+.load-more-btn {
+  @include scifi-button(var(--color-bg-primary), var(--color-text-primary), 2px solid var(--color-border));
+  border-color: var(--color-border);
+
+  &:hover {
+    border-color: var(--color-secondary);
+  }
+}
+
+/* 分页 */
+.grid-pagination {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-8) 0;
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-8);
+}
+
+/* 列表视图样式 */
+.product-grid[data-view="list"] {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+}
+
+.product-grid[data-view="list"] .product-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--spacing-6);
+  align-items: center;
+  padding: var(--spacing-6);
+}
+
+.product-grid[data-view="list"] .product-link {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--spacing-6);
+  align-items: center;
+}
+
+.product-grid[data-view="list"] .product-image-container {
+  max-width: 200px;
+  height: 200px;
+}
+
+.product-grid[data-view="list"] .product-info {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-grid[data-view="list"] .product-title {
+  font-size: var(--font-size-lg);
+  white-space: normal;
+  margin-bottom: var(--spacing-3);
+}
+
+.product-grid[data-view="list"] .product-rating {
+  margin-bottom: var(--spacing-4);
+}
+
+.product-grid[data-view="list"] .product-price {
+  margin-bottom: var(--spacing-4);
+}
+
+.product-grid[data-view="list"] .product-swatches {
+  margin-bottom: var(--spacing-4);
+}
+
+.product-grid[data-view="list"] .quick-add-btn {
+  margin-top: auto;
+  width: auto;
+  display: inline-flex;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .product-card--featured {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-4);
+  }
+
+  .grid-title {
+    font-size: var(--font-size-xl);
+    text-align: center;
+  }
+
+  .grid-controls {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .grid-ad {
+    grid-column: span 1;
+    min-height: 150px;
+  }
+
+  .grid-empty {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+
+  .empty-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .empty-title {
+    font-size: var(--font-size-lg);
+  }
+
+  /* 列表视图移动端 */
+  .product-grid[data-view="list"] .product-card,
+  .product-grid[data-view="list"] .product-link {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+    text-align: center;
+  }
+
+  .product-grid[data-view="list"] .product-image-container {
+    max-width: 100%;
+    height: 250px;
+  }
+
+  .product-grid[data-view="list"] .product-info {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .view-toggle {
+    align-self: center;
+  }
+
+  .pagination-info {
+    text-align: center;
+    font-size: var(--font-size-xs);
+  }
+
+  .product-grid.grid--mobile-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-3);
+  }
+
+  .product-grid.grid--mobile-2 .product-card {
+    font-size: var(--font-size-xs);
+  }
+
+  .product-grid.grid--mobile-2 .product-title {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+  }
+}
+
+/* 加载状态 */
+.product-grid[data-loading="true"] .product-grid-item {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.product-grid[data-loading="true"] .load-more-btn {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 动画 */
+.product-grid-item {
+  animation: fadeInUp 0.6s ease-out backwards;
+
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 0.1}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .product-grid-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .view-btn {
+    transition: none;
+  }
+
+  .load-more-btn {
+    transition: none;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 视图切换功能
+  const viewToggle = document.querySelector('[data-view-toggle]');
+  const productGrid = document.querySelector('[data-products-container]');
+
+  if (viewToggle && productGrid) {
+    const viewBtns = viewToggle.querySelectorAll('.view-btn');
+
+    viewBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+
+        // 更新按钮状态
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // 更新网格视图
+        productGrid.dataset.view = view;
+
+        // 保存用户偏好
+        localStorage.setItem('productGridView', view);
+      });
+    });
+
+    // 恢复用户偏好
+    const savedView = localStorage.getItem('productGridView');
+    if (savedView) {
+      productGrid.dataset.view = savedView;
+      viewBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === savedView);
+      });
+    }
+  }
+
+  // 加载更多功能
+  const loadMoreBtn = document.querySelector('[data-load-more]');
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', async () => {
+      const currentPage = parseInt(loadMoreBtn.dataset.page);
+      const perPage = parseInt(loadMoreBtn.dataset.perPage);
+      const total = parseInt(loadMoreBtn.dataset.total);
+
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.innerHTML = `
+        <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 1 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        </svg>
+        <span class="btn-text">{{ 'general.loading' | t }}...</span>
+      `;
+
+      try {
+        // 这里需要根据实际的Shopify API来加载更多产品
+        // 示例实现：
+        const nextUrl = `{{ collection.url }}?page=${currentPage}&view=ajax`;
+
+        const response = await fetch(nextUrl, {
+          headers: {
+            'Accept': 'text/html'
+          }
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          const newProducts = doc.querySelectorAll('[data-product-id]');
+          const container = document.querySelector('[data-products-container]');
+
+          newProducts.forEach(product => {
+            container.appendChild(product.cloneNode(true));
+          });
+
+          // 更新加载更多按钮
+          loadMoreBtn.dataset.page = currentPage + 1;
+          const loadedCount = (currentPage + 1) * perPage;
+
+          if (loadedCount >= total) {
+            loadMoreBtn.style.display = 'none';
+          } else {
+            loadMoreBtn.innerHTML = `
+              <span class="btn-text">{{ 'collections.general.load_more' | t }}</span>
+              <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1 8a.5.5 0 01.5-.5h11.793l-3.147-3.146a.5.5 0 01.708-.708l4 4a.5.5 0 010 .708l-4 4a.5.5 0 01-.708-.708L13.293 8.5H1.5A.5.5 0 011 8z"/>
+              </svg>
+            `;
+          }
+
+          // 重新初始化产品卡片功能
+          initializeProductCards();
+        }
+      } catch (error) {
+        console.error('Error loading more products:', error);
+
+        if (window.ScifiTheme) {
+          window.ScifiTheme.showNotification('加载失败，请重试', 'error');
+        }
+      } finally {
+        loadMoreBtn.disabled = false;
+      }
+    });
+  }
+
+  // 初始化产品卡片
+  function initializeProductCards() {
+    const productCards = document.querySelectorAll('.product-card');
+
+    productCards.forEach(card => {
+      // 添加悬停效果
+      card.addEventListener('mouseenter', () => {
+        card.classList.add('hover');
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.classList.remove('hover');
+      });
+    });
+  }
+
+  initializeProductCards();
+});
+</script>

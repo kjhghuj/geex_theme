@@ -1,0 +1,865 @@
+{% comment %}
+  单个评论组件
+  用于显示用户评论和回复
+
+  Parameters:
+  - comment: 评论对象（必需）
+  - show_reply_button: 是否显示回复按钮（可选，默认true）
+  - level: 评论嵌套层级（可选，默认1）
+{% endcomment -%}
+
+{% assign show_reply_button = show_reply_button | default: true %}
+{% assign level = level | default: 1 %}
+
+<article class="comment{% if level > 1 %} comment--nested{% endif %}" data-comment-id="{{ comment.id }}" data-level="{{ level }}">
+  <div class="comment__avatar">
+    {% if comment.author contains 'customer' or comment.author contains 'shopify' %}
+      <div class="comment__avatar-placeholder">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+          <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    {% else %}
+      <div class="comment__avatar-initial">
+        {{ comment.author | truncate: 1 | upcase }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="comment__content">
+    <div class="comment__header">
+      <div class="comment__meta">
+        <span class="comment__author">{{ comment.author }}</span>
+        {% if comment.status == 'pending' %}
+          <span class="comment__status comment__status--pending">{{ 'blog.comments.pending' | t }}</span>
+        {% endif %}
+        <time datetime="{{ comment.created_at | date: '%Y-%m-%dT%H:%M:%S%z' }}" class="comment__date">
+          {{ comment.created_at | date: format: 'date_short' }} {{ comment.created_at | date: '%H:%M' }}
+        </time>
+      </div>
+
+      {% if blog.comments moderated? %}
+        <div class="comment__actions">
+          <button type="button"
+                  class="comment__action comment__action--report"
+                  data-comment-report="{{ comment.id }}"
+                  aria-label="{{ 'blog.comments.report' | t }}">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 2v6M8 10v2M2 6l6-4 6 4v8c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6z" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </button>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="comment__body">
+      <div class="comment__text">
+        {{ comment.content }}
+      </div>
+
+      <!-- 评分显示（如果有） -->
+      {% if comment.metafields.rating.value %}
+        <div class="comment__rating">
+          {% assign rating = comment.metafields.rating.value %}
+          {% for i in (1..5) %}
+            <span class="rating-star{% if i <= rating %} rating-star--filled{% else %} rating-star--empty{% endif %}">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 2l1.5 3.5L13 6l-2.5 2.5L11.5 13 8 11 4.5 13l1-4.5L3 6l3.5-.5L8 2z"/>
+              </svg>
+            </span>
+          {% endfor %}
+          <span class="rating-value">{{ rating }}/5</span>
+        </div>
+      {% endif %}
+
+      <!-- 附件显示 -->
+      {% if comment.metafields.attachments.value %}
+        <div class="comment__attachments">
+          {% for attachment in comment.metafields.attachments.value %}
+            <div class="comment-attachment">
+              <a href="{{ attachment.url }}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="comment-attachment__link">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4 2v12h8V2H4z" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M8 6v4" stroke="currentColor" stroke-width="2"/>
+                  <path d="M6 8h4" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span class="comment-attachment__name">{{ attachment.name }}</span>
+                <span class="comment-attachment__size">{{ attachment.size | filesize }}</span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 评论操作按钮 -->
+    <div class="comment__footer">
+      {% if show_reply_button and blog.comments_enabled? %}
+        <button type="button"
+                class="comment__reply-button"
+                data-reply-to="{{ comment.id }}"
+                data-author="{{ comment.author | escape }}"
+                aria-label="{{ 'blog.comments.reply_to' | t: author: comment.author }}">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <path d="M7 2v8M3 6l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>
+          {{ 'blog.comments.reply' | t }}
+        </button>
+      {% endif %}
+
+      {% if comment.user_agent contains 'mobile' %}
+        <span class="comment__device">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+            <rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1" fill="none"/>
+            <circle cx="6" cy="8" r="1" fill="currentColor"/>
+          </svg>
+          {{ 'blog.comments.mobile' | t }}
+        </span>
+      {% endif %}
+
+      <span class="comment__helpful">
+        {{ 'blog.comments.helpful_question' | t }}
+        <button type="button"
+                class="comment__helpful-button comment__helpful-button--yes"
+                data-comment-id="{{ comment.id }}"
+                data-helpful="yes">
+          {{ 'blog.comments.yes' | t }}
+        </button>
+        <span class="comment__helpful-separator">/</span>
+        <button type="button"
+                class="comment__helpful-button comment__helpful-button--no"
+                data-comment-id="{{ comment.id }}"
+                data-helpful="no">
+          {{ 'blog.comments.no' | t }}
+        </button>
+        <span class="comment__helpful-count{% if comment.metafields.helpful_count.value == 0 %} hidden{% endif %}">
+          ({{ comment.metafields.helpful_count.value | default: 0 }})
+        </span>
+      </span>
+    </div>
+
+    <!-- 子评论区域 -->
+    {% if comment.children.size > 0 %}
+      <div class="comment__replies">
+        {% for child_comment in comment.children %}
+          {% render 'comment',
+            comment: child_comment,
+            show_reply_button: false,
+            level: level | plus: 1 %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- 回复表单（初始隐藏） -->
+    {% if show_reply_button and blog.comments_enabled? %}
+      <div class="comment__reply-form" data-reply-form="{{ comment.id }}" hidden>
+        {% form 'new_comment', article %}
+          <input type="hidden" name="comment[parent_id]" value="{{ comment.id }}">
+
+          <div class="reply-form__header">
+            <h4 class="reply-form__title">
+              {{ 'blog.comments.replying_to' | t: author: comment.author }}
+            </h4>
+            <button type="button"
+                    class="reply-form__close"
+                    data-close-reply="{{ comment.id }}"
+                    aria-label="{{ 'general.accessibility.close' | t }}">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M4 4l8 8M12 4L4 12" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+
+          {% if form.errors %}
+            <div class="form-errors">
+              {{ form.errors | default_errors }}
+            </div>
+          {% endif %}
+
+          {% if form.posted_successfully? %}
+            <div class="form-success">
+              {{ 'blog.comments.reply_success' | t }}
+            </div>
+          {% endif %}
+
+          {% unless customer %}
+            <div class="form-row">
+              <div class="form-group">
+                <label for="reply-name-{{ comment.id }}" class="form-label">
+                  {{ 'blog.comments.name' | t }} *
+                </label>
+                <input type="text"
+                       id="reply-name-{{ comment.id }}"
+                       name="comment[author]"
+                       class="form-input"
+                       value="{{ form.author }}"
+                       required
+                       aria-required="true">
+              </div>
+
+              <div class="form-group">
+                <label for="reply-email-{{ comment.id }}" class="form-label">
+                  {{ 'blog.comments.email' | t }} *
+                </label>
+                <input type="email"
+                       id="reply-email-{{ comment.id }}"
+                       name="comment[email]"
+                       class="form-input"
+                       value="{{ form.email }}"
+                       required
+                       aria-required="true">
+              </div>
+            </div>
+          {% endunless %}
+
+          <div class="form-group">
+            <label for="reply-body-{{ comment.id }}" class="form-label">
+              {{ 'blog.comments.comment' | t }} *
+            </label>
+            <textarea id="reply-body-{{ comment.id }}"
+                      name="comment[body]"
+                      class="form-textarea"
+                      rows="4"
+                      required
+                      aria-required="true"
+                      placeholder="{{ 'blog.comments.reply_placeholder' | t: author: comment.author }}">{{ form.body }}</textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary btn--small">
+              {{ 'blog.comments.post_reply' | t }}
+            </button>
+            <button type="button"
+                    class="btn btn--secondary btn--small"
+                    data-close-reply="{{ comment.id }}">
+              {{ 'blog.comments.cancel' | t }}
+            </button>
+          </div>
+        {% endform %}
+      </div>
+    {% endif %}
+  </div>
+</article>
+
+<style>
+  .comment {
+    display: flex;
+    gap: var(--spacing-4);
+    padding: var(--spacing-6);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-4);
+    transition: all var(--duration-normal) var(--ease-out);
+    position: relative;
+
+    &:hover {
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.2);
+    }
+
+    &--nested {
+      margin-left: var(--spacing-8);
+      margin-top: var(--spacing-4);
+      background: var(--color-bg-secondary);
+      border-color: rgba(135, 206, 235, 0.2);
+
+      &:hover {
+        border-color: rgba(135, 206, 235, 0.4);
+      }
+    }
+
+    &.comment--highlighted {
+      border-color: var(--color-accent);
+      @include glow(var(--glow-size-small, var(--color-accent), 0.3);
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, var(--color-accent), transparent);
+        border-radius: var(--radius-lg);
+        opacity: 0.1;
+        z-index: -1;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+  }
+
+  .comment__avatar {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+  }
+
+  .comment__avatar-placeholder,
+  .comment__avatar-initial {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    background: var(--color-bg-secondary);
+    color: var(--color-secondary);
+    border: 2px solid var(--color-border);
+  }
+
+  .comment__avatar-initial {
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+    color: var(--color-text-inverse);
+    text-transform: uppercase;
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+  }
+
+  .comment__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .comment__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .comment__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  .comment__author {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+  }
+
+  .comment__status {
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+
+    &--pending {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--color-warning);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    &--approved {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--color-success);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+  }
+
+  .comment__date {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+  }
+
+  .comment__actions {
+    display: flex;
+    gap: var(--spacing-2);
+  }
+
+  .comment__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-secondary);
+      color: var(--color-error);
+      border-color: var(--color-error);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .comment__body {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .comment__text {
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+
+    p {
+      margin: var(--spacing-2) 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--duration-fast) var(--ease-out);
+
+      &:hover {
+        border-bottom-color: var(--color-secondary);
+      }
+    }
+
+    blockquote {
+      border-left: 3px solid var(--color-secondary);
+      margin: var(--spacing-3) 0;
+      padding: var(--spacing-2) var(--spacing-3);
+      background: rgba(135, 206, 235, 0.05);
+      border-radius: 0 var(--radius-base) var(--radius-base) 0;
+      font-style: italic;
+      color: var(--color-text-light);
+    }
+
+    code {
+      background: var(--color-bg-tertiary);
+      padding: 0.2em 0.4em;
+      border-radius: var(--radius-base);
+      font-family: var(--font-family-mono);
+      font-size: 0.9em;
+      border: 1px solid var(--color-border);
+    }
+  }
+
+  .comment__rating {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-base);
+  }
+
+  .rating-star {
+    color: var(--color-border);
+
+    &--filled {
+      color: #ffc107;
+      filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.4));
+    }
+  }
+
+  .rating-value {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .comment__attachments {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    margin-top: var(--spacing-3);
+  }
+
+  .comment-attachment__link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-secondary);
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+    }
+  }
+
+  .comment-attachment__name {
+    flex: 1;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .comment-attachment__size {
+    color: var(--color-text-light);
+    font-size: var(--font-size-xs);
+  }
+
+  .comment__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+  }
+
+  .comment__reply-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      border-color: var(--color-secondary);
+      transform: translateY(-1px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .comment__device {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    padding: var(--spacing-1) var(--spacing-2);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+  }
+
+  .comment__helpful {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-left: auto;
+  }
+
+  .comment__helpful-button {
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-secondary);
+      background: rgba(135, 206, 235, 0.1);
+    }
+
+    &.voted {
+      color: var(--color-secondary);
+      background: rgba(135, 206, 235, 0.1);
+      font-weight: var(--font-weight-medium);
+    }
+
+    &:focus {
+      outline: none;
+      background: rgba(135, 206, 235, 0.1);
+    }
+  }
+
+  .comment__helpful-separator {
+    color: var(--color-border);
+  }
+
+  .comment__helpful-count {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-secondary);
+  }
+
+  .comment__replies {
+    margin-top: var(--spacing-4);
+    padding-left: var(--spacing-4);
+    border-left: 2px solid rgba(135, 206, 235, 0.2);
+  }
+
+  .comment__reply-form {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-secondary);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+  }
+
+  .reply-form__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .reply-form__title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .reply-form__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-primary);
+      color: var(--color-error);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .form-errors {
+    padding: var(--spacing-3);
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: var(--radius-base);
+    color: var(--color-error);
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-success {
+    padding: var(--spacing-3);
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    border-radius: var(--radius-base);
+    color: var(--color-success);
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: var(--spacing-2);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-normal) var(--ease-out);
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &::placeholder {
+      color: var(--color-text-light);
+      opacity: 0.7;
+    }
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: var(--spacing-3);
+    justify-content: flex-end;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+    border: 2px solid transparent;
+
+    &:focus {
+      outline: none;
+    }
+
+    &--small {
+      padding: var(--spacing-1) var(--spacing-3);
+      font-size: var(--font-size-xs);
+    }
+
+    &--primary {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+
+      &:hover {
+        transform: translateY(-1px);
+        @include glow(var(--glow-size-medium, var(--color-secondary), 0.6);
+      }
+    }
+
+    &--secondary {
+      background: transparent;
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+
+      &:hover {
+        background: var(--color-bg-tertiary);
+        border-color: var(--color-secondary);
+        color: var(--color-secondary);
+      }
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .comment {
+      padding: var(--spacing-4);
+      gap: var(--spacing-3);
+    }
+
+    .comment__avatar {
+      width: 40px;
+      height: 40px;
+    }
+
+    .comment__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-2);
+    }
+
+    .comment--nested {
+      margin-left: var(--spacing-4);
+    }
+
+    .comment__footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-2);
+    }
+
+    .comment__helpful {
+      margin-left: 0;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-3);
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    .comment {
+      border-width: 2px;
+    }
+
+    .comment__avatar-placeholder,
+    .comment__avatar-initial {
+      border-width: 3px;
+    }
+
+    .btn {
+      border-width: 3px;
+      font-weight: var(--font-weight-bold);
+    }
+  }
+
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    .comment {
+      transition: none;
+
+      &:hover {
+        transform: none;
+      }
+    }
+
+    .btn,
+    .comment__reply-button,
+    .comment__helpful-button {
+      transition: none;
+    }
+  }
+</script>

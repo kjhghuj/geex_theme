@@ -1,0 +1,102 @@
+{%- comment -%}
+  科幻主题产品页面模板
+  现代化的产品展示页面，强调视觉效果和用户体验
+{%- endcomment -%}
+
+<div class="product-template">
+  <div class="container">
+    <!-- 产品导航面包屑 -->
+    {% render 'breadcrumb', product: product %}
+
+    <!-- 产品主区域 -->
+    <div class="product-main">
+      <div class="product-layout">
+        <!-- 产品图片区域 -->
+        <div class="product-gallery">
+          {% render 'product-gallery', product: product %}
+        </div>
+
+        <!-- 产品信息区域 -->
+        <div class="product-info">
+          {% render 'product-info', product: product %}
+        </div>
+      </div>
+    </div>
+
+    <!-- 产品详情区域 -->
+    <div class="product-details">
+      <!-- 产品描述 -->
+      <div class="product-description-section">
+        {% render 'product-description', product: product %}
+      </div>
+
+      <!-- 产品规格 -->
+      {% if product.has_only_default_variant == false %}
+        <div class="product-specs-section">
+          {% render 'product-specs', product: product %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 推荐产品 -->
+    <div class="product-recommendations">
+      {% render 'product-recommendations', product: product %}
+    </div>
+
+    <!-- 最近浏览 -->
+    <div class="recently-viewed">
+      {% render 'recently-viewed', product: product %}
+    </div>
+  </div>
+</div>
+
+<style>
+/* 产品页面基础样式 */
+.product-template {
+  padding: var(--spacing-8) 0;
+}
+
+.product-main {
+  margin-bottom: var(--spacing-16);
+}
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-12);
+  align-items: start;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-8);
+  }
+
+  .product-gallery {
+    order: 1;
+  }
+
+  .product-info {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-template {
+    padding: var(--spacing-4) 0;
+  }
+
+  .product-main {
+    margin-bottom: var(--spacing-12);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .product-layout {
+    gap: var(--spacing-6);
+  }
+}
+</style>

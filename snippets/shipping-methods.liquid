@@ -1,0 +1,703 @@
+{%- comment -%}
+  配送方式选择组件
+  支持多种配送方式的展示和选择
+{%- endcomment -%}
+
+<div class="shipping-methods" data-shipping-methods>
+  <div class="shipping-methods-header">
+    <h3 class="shipping-methods-title">选择配送方式</h3>
+    <div class="delivery-estimate">
+      预计送达时间：<span class="delivery-date" data-delivery-date>计算中...</span>
+    </div>
+  </div>
+
+  {% assign shipping_rates = checkout.shipping_rates %}
+
+  {% if shipping_rates.size > 0 %}
+    <div class="shipping-rates">
+      {% for rate in shipping_rates %}
+        <div class="shipping-method {% if forloop.first %}recommended{% endif %} {% if rate == checkout.shipping_rate %}selected{% endif %}"
+             data-shipping-rate="{{ rate.id }}"
+             data-rate-price="{{ rate.price }}"
+             data-delivery-days="{{ rate.delivery_days | default: 0 }}">
+
+          <input type="radio"
+                 name="shipping_rate"
+                 value="{{ rate.id }}"
+                 id="shipping_rate_{{ rate.id }}"
+                 {% if rate == checkout.shipping_rate %}checked{% endif %}
+                 class="shipping-rate-radio">
+
+          <label class="shipping-method-label" for="shipping_rate_{{ rate.id }}">
+            <div class="shipping-method-info">
+              <div class="shipping-method-name">
+                {{ rate.name }}
+                {% if forloop.first %}
+                  <span class="shipping-badge recommended">推荐</span>
+                {% endif %}
+              </div>
+              <div class="shipping-method-details">
+                {{ rate.description }}
+              </div>
+              <div class="shipping-method-time">
+                {% if rate.delivery_days > 0 %}
+                  {{ rate.delivery_days }}个工作日送达
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="shipping-method-price">
+              {% if rate.price == 0 %}
+                <span class="free-shipping">免费配送</span>
+              {% else %}
+                <span class="price">{{ rate.price | money }}</span>
+              {% endif %}
+            </div>
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-shipping-rates">
+      <div class="no-shipping-icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+          <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16z"/>
+          <path d="M24 14v10l6 6"/>
+        </svg>
+      </div>
+      <h4>无法计算配送费</h4>
+      <p>请确认您的收货地址信息是否正确</p>
+    </div>
+  {% endif %}
+
+  <!-- 快递自提选项 -->
+  {% if settings.enable_self_pickup %}
+    <div class="self-pickup-section">
+      <h4 class="self-pickup-title">快递自提</h4>
+      <div class="self-pickup-options">
+        <div class="shipping-method self-pickup" data-self-pickup="store">
+          <input type="radio"
+                 name="shipping_method"
+                 value="self_pickup_store"
+                 id="self_pickup_store"
+                 class="shipping-rate-radio">
+          <label class="shipping-method-label" for="self_pickup_store">
+            <div class="shipping-method-info">
+              <div class="shipping-method-name">
+                门店自提
+                <span class="shipping-badge free">免费</span>
+              </div>
+              <div class="shipping-method-details">
+                {{ settings.store_address }}
+                <br>
+                营业时间：{{ settings.store_hours }}
+              </div>
+              <div class="pickup-instructions">
+                下单后可立即到店取货
+              </div>
+            </div>
+            <div class="shipping-method-price">
+              <span class="free-shipping">免费</span>
+            </div>
+          </label>
+        </div>
+
+        {% if settings.enable_locker_pickup %}
+          <div class="shipping-method self-pickup" data-self-pickup="locker">
+            <input type="radio"
+                   name="shipping_method"
+                   value="self_pickup_locker"
+                   id="self_pickup_locker"
+                   class="shipping-rate-radio">
+            <label class="shipping-method-label" for="self_pickup_locker">
+              <div class="shipping-method-info">
+                <div class="shipping-method-name">
+                  快递柜自提
+                  <span class="shipping-badge convenient">便捷</span>
+                </div>
+                <div class="shipping-method-details">
+                  选择附近的快递柜自提
+                  <br>
+                  24小时随时取件
+                </div>
+              </div>
+              <div class="shipping-method-price">
+                <span class="price">{{ settings.locker_pickup_fee | default: 0 | money }}</span>
+              </div>
+            </label>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- 配送偏好设置 -->
+  <div class="shipping-preferences">
+    <h4 class="preferences-title">配送偏好</h4>
+
+    <div class="preference-item">
+      <label class="checkbox-label">
+        <input type="checkbox" name="signature_required" id="signature_required">
+        <span class="checkbox-text">要求签收</span>
+        <span class="preference-note">（可能产生额外费用）</span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <label class="checkbox-label">
+        <input type="checkbox" name="sms_notifications" id="sms_notifications" checked>
+        <span class="checkbox-text">短信通知</span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <label class="checkbox-label">
+        <input type="checkbox" name="email_notifications" id="email_notifications" checked>
+        <span class="checkbox-text">邮件通知</span>
+      </label>
+    </div>
+
+    <div class="preference-item">
+      <label class="form-label" for="delivery_instructions">配送说明</label>
+      <textarea id="delivery_instructions"
+                name="delivery_instructions"
+                class="form-textarea"
+                placeholder="如有特殊配送要求，请在此说明..."
+                rows="3"></textarea>
+    </div>
+
+    <div class="preference-item">
+      <label class="form-label" for="preferred_delivery_time">期望配送时间</label>
+      <select id="preferred_delivery_time" name="preferred_delivery_time" class="form-select">
+        <option value="">不限时间</option>
+        <option value="morning">上午 (9:00-12:00)</option>
+        <option value="afternoon">下午 (13:00-17:00)</option>
+        <option value="evening">晚上 (18:00-21:00)</option>
+        <option value="weekend">周末配送</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 配送时间轴 -->
+  <div class="shipping-timeline" id="shipping_timeline" style="display: none;">
+    <h4 class="timeline-title">配送时间轴</h4>
+    <div class="timeline-items">
+      <div class="timeline-item completed">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">订单确认</div>
+          <div class="timeline-time" data-order-time></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">商品准备</div>
+          <div class="timeline-time" data-prep-time></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">物流发货</div>
+          <div class="timeline-time" data-ship-time></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">送达预计</div>
+          <div class="timeline-time" data-delivery-time></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .shipping-methods {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .shipping-methods-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .shipping-methods-title {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-text-primary);
+    margin: 0;
+  }
+
+  .delivery-estimate {
+    font-size: var(--font-size-sm);
+    color: var(--checkout-text-secondary);
+  }
+
+  .delivery-date {
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-primary);
+  }
+
+  .shipping-rates {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .shipping-method {
+    background: var(--checkout-bg-primary);
+    border: 2px solid var(--checkout-border);
+    border-radius: var(--checkout-radius);
+    transition: all var(--duration-normal) var(--ease-sci-fi);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shipping-method.recommended {
+    border-color: var(--checkout-primary);
+    background: rgba(135, 206, 235, 0.02);
+  }
+
+  .shipping-method.selected {
+    border-color: var(--checkout-primary);
+    background: rgba(135, 206, 235, 0.05);
+  }
+
+  .shipping-method:hover {
+    border-color: var(--checkout-primary);
+    box-shadow: 0 4px 12px rgba(135, 206, 235, 0.1);
+  }
+
+  .shipping-rate-radio {
+    display: none;
+  }
+
+  .shipping-method-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-4);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-sci-fi);
+  }
+
+  .shipping-method-info {
+    flex: 1;
+    margin-right: var(--spacing-3);
+  }
+
+  .shipping-method-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-text-primary);
+    margin-bottom: var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  .shipping-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .shipping-badge.recommended {
+    background: var(--checkout-success);
+    color: white;
+    animation: pulse 2s infinite;
+  }
+
+  .shipping-badge.free {
+    background: var(--checkout-warning);
+    color: white;
+  }
+
+  .shipping-badge.convenient {
+    background: var(--checkout-info);
+    color: white;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  .shipping-method-details {
+    font-size: var(--font-size-sm);
+    color: var(--checkout-text-secondary);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .shipping-method-time {
+    font-size: var(--font-size-xs);
+    color: var(--checkout-text-secondary);
+  }
+
+  .shipping-method-price {
+    font-weight: var(--font-weight-bold);
+    color: var(--checkout-text-primary);
+    text-align: right;
+  }
+
+  .free-shipping {
+    color: var(--checkout-success);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .no-shipping-rates {
+    text-align: center;
+    padding: var(--spacing-6);
+    background: var(--checkout-bg-tertiary);
+    border: 1px solid var(--checkout-border);
+    border-radius: var(--checkout-radius);
+  }
+
+  .no-shipping-icon {
+    color: var(--checkout-text-secondary);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .self-pickup-section {
+    background: var(--checkout-bg-secondary);
+    border: 1px solid var(--checkout-border);
+    border-radius: var(--checkout-radius);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .self-pickup-title {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-text-primary);
+    margin: 0 0 var(--spacing-3) 0;
+  }
+
+  .self-pickup-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .pickup-instructions {
+    font-size: var(--font-size-xs);
+    color: var(--checkout-success);
+    font-weight: var(--font-weight-medium);
+    margin-top: var(--spacing-1);
+  }
+
+  .shipping-preferences {
+    background: var(--checkout-bg-secondary);
+    border: 1px solid var(--checkout-border);
+    border-radius: var(--checkout-radius);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .preferences-title {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-text-primary);
+    margin: 0 0 var(--spacing-3) 0;
+  }
+
+  .preference-item {
+    margin-bottom: var(--spacing-3);
+  }
+
+  .preference-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    cursor: pointer;
+  }
+
+  .checkbox-text {
+    font-size: var(--font-size-base);
+    color: var(--checkout-text-primary);
+  }
+
+  .preference-note {
+    font-size: var(--font-size-xs);
+    color: var(--checkout-text-secondary);
+  }
+
+  .shipping-timeline {
+    background: var(--checkout-bg-secondary);
+    border: 1px solid var(--checkout-border);
+    border-radius: var(--checkout-radius);
+    padding: var(--spacing-4);
+    margin-top: var(--spacing-4);
+  }
+
+  .timeline-title {
+    font-family: var(--font-heading-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--checkout-text-primary);
+    margin: 0 0 var(--spacing-3) 0;
+  }
+
+  .timeline-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    position: relative;
+  }
+
+  .timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 24px;
+    width: 2px;
+    height: calc(100% + var(--spacing-2));
+    background: var(--checkout-border-light);
+  }
+
+  .timeline-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--checkout-border);
+    border: 2px solid var(--checkout-bg-secondary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .timeline-item.completed .timeline-marker {
+    background: var(--checkout-success);
+    border-color: var(--checkout-success);
+  }
+
+  .timeline-content {
+    flex: 1;
+    padding-top: 2px;
+  }
+
+  .timeline-title {
+    font-weight: var(--font-weight-medium);
+    color: var(--checkout-text-primary);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .timeline-time {
+    font-size: var(--font-size-sm);
+    color: var(--checkout-text-secondary);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .shipping-methods-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-2);
+    }
+
+    .shipping-method-label {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-2);
+    }
+
+    .shipping-method-info {
+      margin-right: 0;
+    }
+
+    .shipping-method-price {
+      align-self: flex-end;
+    }
+
+    .timeline-items {
+      gap: var(--spacing-2);
+    }
+  }
+
+  /* 加载状态 */
+  .shipping-method.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .shipping-method.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--checkout-primary), var(--checkout-success));
+    animation: loading-bar 1.5s ease-in-out infinite;
+  }
+
+  @keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const shippingMethods = document.querySelectorAll('.shipping-method');
+    const deliveryDateElement = document.querySelector('[data-delivery-date]');
+    const shippingTimeline = document.getElementById('shipping_timeline');
+
+    shippingMethods.forEach(method => {
+      const radio = method.querySelector('.shipping-rate-radio');
+
+      method.addEventListener('click', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+          return;
+        }
+
+        selectShippingMethod(method);
+      });
+
+      radio.addEventListener('change', function() {
+        if (radio.checked) {
+          selectShippingMethod(method);
+        }
+      });
+    });
+
+    function selectShippingMethod(method) {
+      // 移除其他选中状态
+      shippingMethods.forEach(m => m.classList.remove('selected'));
+
+      // 添加选中状态
+      method.classList.add('selected');
+
+      // 更新radio按钮
+      const radio = method.querySelector('.shipping-rate-radio');
+      if (radio) {
+        radio.checked = true;
+      }
+
+      // 更新配送时间预估
+      updateDeliveryEstimate(method);
+
+      // 显示配送时间轴
+      showShippingTimeline();
+
+      // 触发自定义事件
+      const event = new CustomEvent('shippingMethodSelected', {
+        detail: {
+          methodId: method.dataset.shippingRate || method.dataset.selfPickup,
+          price: method.dataset.ratePrice || '0',
+          deliveryDays: method.dataset.deliveryDays || '0'
+        }
+      });
+      document.dispatchEvent(event);
+    }
+
+    function updateDeliveryEstimate(method) {
+      if (!deliveryDateElement) return;
+
+      const deliveryDays = parseInt(method.dataset.deliveryDays) || 0;
+      const now = new Date();
+
+      // 计算工作日
+      let deliveryDate = new Date(now);
+      let businessDays = 0;
+
+      while (businessDays < deliveryDays) {
+        deliveryDate.setDate(deliveryDate.getDate() + 1);
+        const dayOfWeek = deliveryDate.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) { // 排除周末
+          businessDays++;
+        }
+      }
+
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+      };
+
+      deliveryDateElement.textContent = deliveryDate.toLocaleDateString('zh-CN', options);
+    }
+
+    function showShippingTimeline() {
+      if (!shippingTimeline) return;
+
+      shippingTimeline.style.display = 'block';
+
+      const now = new Date();
+      const orderTime = document.querySelector('[data-order-time]');
+      const prepTime = document.querySelector('[data-prep-time]');
+      const shipTime = document.querySelector('[data-ship-time]');
+      const deliveryTime = document.querySelector('[data-delivery-time]');
+
+      if (orderTime) {
+        orderTime.textContent = now.toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      if (prepTime) {
+        const prepDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2小时后
+        prepTime.textContent = prepDate.toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      if (shipTime) {
+        const shipDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1天后
+        shipTime.textContent = shipDate.toLocaleDateString('zh-CN', {
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+
+      if (deliveryTime) {
+        const deliveryDays = parseInt(document.querySelector('.shipping-method.selected')?.dataset.deliveryDays) || 3;
+        const deliveryDate = new Date(now.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
+        deliveryTime.textContent = deliveryDate.toLocaleDateString('zh-CN', {
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+    }
+
+    // 默认选择推荐的配送方式
+    const recommendedMethod = document.querySelector('.shipping-method.recommended');
+    if (recommendedMethod && !document.querySelector('.shipping-method.selected')) {
+      selectShippingMethod(recommendedMethod);
+    }
+
+    // 监听配送方式选择事件
+    document.addEventListener('shippingMethodSelected', function(e) {
+      // 添加分析跟踪
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'shipping_method_selected', {
+          shipping_method: e.detail.methodId,
+          shipping_price: e.detail.price
+        });
+      }
+    });
+  });
+</script>

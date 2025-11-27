@@ -1,0 +1,384 @@
+// ============================================
+// Main SCSS - 科幻主题主样式文件
+// ============================================
+
+// 禁用 Shopify 主题检查警告
+/* csslint ignore:start */
+
+// 导入抽象层
+@import 'abstracts/functions';
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
+
+// 导入基础样式
+@import 'base/reset';
+@import 'base/typography';
+
+// 导入布局
+@import 'layout/grid';
+
+// 导入组件
+@import 'components/buttons';
+
+// 导入工具类
+@import 'utilities/utilities';
+
+// 主题特定样式
+.scifi-theme {
+  // 主题背景效果
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  // 页面容器
+  .page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  // 主要内容区域
+  .main-content {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  // 滚动条样式
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-secondary);
+    border-radius: var(--radius-full);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+
+    &:hover {
+      background: var(--color-accent);
+    }
+  }
+
+  // 选择文本样式
+  ::selection {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    text-shadow: none;
+  }
+
+  ::-moz-selection {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    text-shadow: none;
+  }
+
+  // 焦点指示器
+  :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+// 动画类
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all var(--duration-normal) var(--ease-out);
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all var(--duration-slow) var(--ease-sci-fi);
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scale-in {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 加载动画
+.loading-spinner {
+  @include loading-spinner(40px, var(--color-secondary));
+  margin: var(--spacing-8) auto;
+}
+
+// 加载骨架屏
+.skeleton {
+  background: linear-gradient(90deg, var(--color-bg-secondary) 0%, rgba(135, 206, 235, 0.1) 50%, var(--color-bg-secondary) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-base);
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
+
+// 通知提示
+.notification {
+  position: fixed;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-large);
+  z-index: var(--z-modal);
+  max-width: 400px;
+  @include scifi-card();
+
+  &--success {
+    border-color: var(--color-success);
+    @include glow(var(--glow-size-small, var(--color-success), 0.3);
+  }
+
+  &--error {
+    border-color: var(--color-error);
+    @include glow(var(--glow-size-small, var(--color-error), 0.3);
+  }
+
+  &--warning {
+    border-color: var(--color-warning);
+    @include glow(var(--glow-size-small, var(--color-warning), 0.3);
+  }
+}
+
+// 工具提示
+.tooltip {
+  position: relative;
+
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-bg-dark);
+    color: var(--color-text-inverse);
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+    z-index: var(--z-tooltip);
+    margin-bottom: var(--spacing-2);
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+// 模态框背景
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal-backdrop);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// 模态框内容
+.modal-content {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.8);
+  transition: transform var(--duration-normal) var(--ease-sci-fi);
+  @include scifi-card();
+
+  .modal-overlay.active & {
+    transform: scale(1);
+  }
+}
+
+// 购物车徽章
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  text-align: center;
+  @include glow(var(--glow-size-small, var(--color-secondary), 0.7);
+}
+
+// 价格样式
+.price {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+
+  &--current {
+    font-size: var(--font-size-lg);
+    color: var(--color-secondary);
+  }
+
+  &--original {
+    font-size: var(--font-size-base);
+    color: var(--color-text-light);
+    text-decoration: line-through;
+    margin-left: var(--spacing-2);
+  }
+
+  &--sale {
+    color: var(--color-error);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+// 评分星星
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+
+  &__star {
+    color: var(--color-secondary);
+    font-size: var(--font-size-lg);
+
+    &--empty {
+      color: var(--color-border);
+    }
+  }
+
+  &__count {
+    margin-left: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+  }
+}
+
+// 徽章
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  border-radius: var(--radius-full);
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+
+  &--primary {
+    background: var(--color-secondary);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.5);
+  }
+
+  &--success {
+    background: var(--color-success);
+    @include glow(var(--glow-size-small, var(--color-success), 0.5);
+  }
+
+  &--error {
+    background: var(--color-error);
+    @include glow(var(--glow-size-small, var(--color-error), 0.5);
+  }
+
+  &--warning {
+    background: var(--color-warning);
+    @include glow(var(--glow-size-small, var(--color-warning), 0.5);
+  }
+}
+
+// 响应式工具类
+@include mobile-only {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@include respond-to('md') {
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
+@include respond-to('lg') {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+// 打印样式
+@media print {
+  .scifi-theme {
+    background: white !important;
+    color: black !important;
+
+    .btn,
+    .tooltip,
+    .modal-overlay,
+    .notification {
+      display: none !important;
+    }
+  }
+}
+
+// 启用 Shopify 主题检查警告
+/* csslint ignore:end */

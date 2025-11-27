@@ -1,0 +1,591 @@
+{%- comment -%}
+  产品快速查看模态框组件
+  提供快速查看产品详情的模态框界面
+{%- endcomment -%}
+
+<template id="quick-view-template">
+  <div class="quick-view" data-quick-view aria-hidden="true">
+    <!-- 遮罩层 -->
+    <div class="quick-view__overlay" data-quick-view-overlay></div>
+
+    <!-- 模态框容器 -->
+    <div class="quick-view__container" data-quick-view-container>
+      <!-- 关闭按钮 -->
+      <button type="button"
+              class="quick-view__close"
+              data-quick-view-close
+              aria-label="{{ 'general.close' | t }}">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- 快速查看内容 -->
+      <div class="quick-view__content" data-quick-view-content>
+        <!-- 加载指示器 -->
+        <div class="quick-view__loading" data-quick-view-loading>
+          <div class="loading-spinner">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+              <path d="M16 2a14 14 0 0114 14" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="1s" repeatCount="indefinite"/>
+              </path>
+            </svg>
+          </div>
+          <p class="loading-text">{{ 'general.loading' | t }}...</p>
+        </div>
+
+        <!-- 错误状态 -->
+        <div class="quick-view__error" data-quick-view-error style="display: none;">
+          <div class="error-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M15 9l-6 6M9 9l6 6"/>
+            </svg>
+          </div>
+          <h3 class="error-title">{{ 'general.error' | t }}</h3>
+          <p class="error-message">{{ 'general.error_message' | t }}</p>
+          <button type="button" class="btn btn-secondary" data-quick-view-retry>
+            {{ 'general.retry' | t }}
+          </button>
+        </div>
+
+        <!-- 产品内容容器 -->
+        <div class="quick-view__product" data-quick-view-product style="display: none;">
+          <!-- 产品内容将通过JavaScript动态加载 -->
+        </div>
+      </div>
+
+      <!-- 快速查看导航 -->
+      <div class="quick-view__navigation" data-quick-view-navigation>
+        <!-- 上一个产品 -->
+        <button type="button"
+                class="quick-view__nav quick-view__nav--prev"
+                data-quick-view-prev
+                aria-label="{{ 'general.previous' | t }}">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <!-- 产品指示器 -->
+        <div class="quick-view__indicators" data-quick-view-indicators>
+          <span class="indicator" data-indicator></span>
+        </div>
+
+        <!-- 下一个产品 -->
+        <button type="button"
+                class="quick-view__nav quick-view__nav--next"
+                data-quick-view-next
+                aria-label="{{ 'general.next' | t }}">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M7.5 15l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- 快速查看触发按钮模板 -->
+<template id="quick-view-trigger-template">
+  <button type="button"
+          class="quick-view-trigger"
+          data-quick-view-trigger
+          data-product-handle="{{ product.handle }}"
+          aria-label="{{ 'products.product.quick_view' | t: title: product.title }}">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 4.5C5.5 4.5 3.3 6 2 8c1.3 2 3.5 3.5 6 3.5s4.7-1.5 6-3.5c-1.3-2-3.5-3.5-6-3.5zm0 6C6.6 10.5 5.5 9.4 5.5 8S6.6 5.5 8 5.5 10.5 6.6 10.5 8 9.4 10.5 8 10.5zm0-4c-.8 0-1.5.7-1.5 1.5S7.2 9.5 8 9.5 9.5 8.8 9.5 8 8.8 6.5 8 6.5z"/>
+    </svg>
+    <span class="quick-view-trigger__text">{{ 'products.product.quick_view' | t }}</span>
+  </button>
+</template>
+
+<style>
+/* 快速查看模态框 */
+.quick-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-slow) var(--ease-sci-fi);
+}
+
+.quick-view[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 遮罩层 */
+.quick-view__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background var(--duration-normal) var(--ease-sci-fi);
+}
+
+.quick-view[aria-hidden="false"] .quick-view__overlay {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* 模态框容器 */
+.quick-view__container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%) scale(0.9);
+  width: 90vw;
+  max-width: 900px;
+  max-height: 90vh;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 40px var(--glow-primary);
+  overflow: hidden;
+  opacity: 0;
+  transition: all var(--duration-slow) var(--ease-sci-fi);
+}
+
+.quick-view[aria-hidden="false"] .quick-view__container {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* 关闭按钮 */
+.quick-view__close {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  z-index: 10;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--color-text-primary);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 15px rgba(135, 206, 235, 0.3);
+  }
+}
+
+/* 快速查看内容 */
+.quick-view__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.quick-view__loading,
+.quick-view__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+.loading-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  margin: 0;
+}
+
+/* 错误状态 */
+.error-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-error);
+  margin-bottom: var(--spacing-4);
+}
+
+.error-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.error-message {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-6);
+}
+
+/* 产品内容 */
+.quick-view__product {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.quick-view__product::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quick-view__product::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+.quick-view__product::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.quick-view__product::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* 产品图片容器 */
+.quick-view__gallery {
+  position: relative;
+  background: var(--color-bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.quick-view__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-sci-fi);
+}
+
+.quick-view__image:hover {
+  transform: scale(1.05);
+}
+
+/* 产品信息 */
+.quick-view__info {
+  padding: var(--spacing-8);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.quick-view__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+  line-height: var(--line-height-tight);
+}
+
+.quick-view__price {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-4);
+
+  .price-item--sale {
+    color: var(--color-error);
+  }
+
+  .price-item--regular {
+    text-decoration: line-through;
+    opacity: 0.7;
+    margin-left: var(--spacing-2);
+  }
+}
+
+.quick-view__description {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-6);
+
+  p {
+    margin: 0 0 var(--spacing-3) 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.quick-view__variants {
+  margin-bottom: var(--spacing-6);
+}
+
+.quick-view__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: auto;
+  padding-top: var(--spacing-6);
+}
+
+.quick-view__quantity {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.quick-view__buttons {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+/* 快速查看导航 */
+.quick-view__navigation {
+  position: absolute;
+  bottom: var(--spacing-6);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+}
+
+.quick-view__nav {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover:not(:disabled) {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 10px var(--glow-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.quick-view__indicators {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &.active {
+    background: var(--color-secondary);
+    box-shadow: 0 0 8px var(--glow-primary);
+  }
+}
+
+/* 快速查看触发按钮 */
+.quick-view-trigger {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  z-index: 5;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 15px var(--glow-primary);
+  }
+}
+
+.product-card:hover .quick-view-trigger {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.quick-view-trigger__text {
+  font-weight: var(--font-weight-medium);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .quick-view__container {
+    width: 95vw;
+    max-height: 95vh;
+  }
+
+  .quick-view__product {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-view__gallery {
+    min-height: 300px;
+  }
+
+  .quick-view__info {
+    padding: var(--spacing-6);
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-view__container {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: none;
+  }
+
+  .quick-view[aria-hidden="false"] .quick-view__container {
+    transform: none;
+  }
+
+  .quick-view__close {
+    top: var(--spacing-3);
+    right: var(--spacing-3);
+  }
+
+  .quick-view__navigation {
+    bottom: var(--spacing-4);
+  }
+
+  .quick-view__info {
+    padding: var(--spacing-4);
+  }
+
+  .quick-view__title {
+    font-size: var(--font-size-xl);
+  }
+
+  .quick-view__buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-view__gallery {
+    min-height: 250px;
+  }
+
+  .quick-view-trigger {
+    position: static;
+    opacity: 1;
+    transform: none;
+    margin-top: var(--spacing-2);
+    justify-content: center;
+  }
+}
+
+/* 动画 */
+@keyframes quickViewSlideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.quick-view__product {
+  animation: quickViewSlideIn 0.4s ease-out;
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .quick-view,
+  .quick-view__overlay,
+  .quick-view__container,
+  .quick-view__close,
+  .quick-view__nav,
+  .quick-view-trigger {
+    transition: none;
+  }
+
+  .quick-view__product {
+    animation: none;
+  }
+
+  .loading-spinner svg {
+    animation: none;
+  }
+}
+
+/* 无障碍支持 */
+.quick-view:focus-within {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.quick-view__close:focus,
+.quick-view__nav:focus,
+.quick-view-trigger:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .quick-view__container {
+    border-width: 2px;
+  }
+
+  .quick-view__close,
+  .quick-view__nav {
+    border-width: 2px;
+  }
+}
+</style>

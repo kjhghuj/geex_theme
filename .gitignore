@@ -1,0 +1,47 @@
+# Shopify主题 .gitignore 文件
+
+# Shopify CLI 生成文件
+.shopify/
+.cache/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# 编辑器和IDE文件
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js (如果使用)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 构建工具输出
+dist/
+build/
+.tmp/
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+
+# Shopify CLI 会忽略这些文件，但为了避免意外提交，在这里也列出
+# Shopify主题上传的文件
+*.shopify
+
+# 本地开发环境文件
+.env
+.env.local
+
+# 备份文件
+*.bak
+*.backup

@@ -1,0 +1,410 @@
+{%- comment -%}
+  科幻主题公告栏组件
+  可自定义文字、颜色和显示逻辑
+{%- endcomment -%}
+
+{%- if section.settings.announcement_bar_enabled -%}
+  {%- unless request.page_type == 'password' -%}
+    <div class="announcement-bar" role="banner" aria-label="{{ 'general.announcement_bar.announcement' | t }}">
+      <div class="container">
+        <div class="announcement-bar-content">
+          {%- if section.settings.announcement_bar_link != blank -%}
+            <a href="{{ section.settings.announcement_bar_link }}" class="announcement-bar-link">
+          {%- endif -%}
+
+          <div class="announcement-bar-text">
+            {%- if section.settings.announcement_bar_icon != blank -%}
+              <span class="announcement-bar-icon">
+                {% render 'icon-announcement' %}
+              </span>
+            {%- endif -%}
+
+            <span class="announcement-bar-message">
+              {{ section.settings.announcement_bar_text | escape }}
+            </span>
+
+            {%- if section.settings.show_countdown and section.settings.countdown_date != blank -%}
+              <div class="announcement-countdown" data-countdown="{{ section.settings.countdown_date | date: '%Y-%m-%dT%H:%M:%S' }}">
+                <div class="countdown-item">
+                  <span class="countdown-number" data-countdown-days>00</span>
+                  <span class="countdown-label">{{ 'general.countdown.days' | t }}</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-number" data-countdown-hours>00</span>
+                  <span class="countdown-label">{{ 'general.countdown.hours' | t }}</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-number" data-countdown-minutes>00</span>
+                  <span class="countdown-label">{{ 'general.countdown.minutes' | t }}</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-number" data-countdown-seconds>00</span>
+                  <span class="countdown-label">{{ 'general.countdown.seconds' | t }}</span>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.announcement_bar_link != blank -%}
+            </a>
+          {%- endif -%}
+
+          {%- if section.settings.show_close_button -%}
+            <button class="announcement-bar-close btn btn-icon btn-ghost"
+                    type="button"
+                    aria-label="{{ 'general.announcement_bar.close' | t }}"
+                    data-announcement-close>
+              <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M2.343 2.343a1 1 0 0 1 1.414 0L8 6.586l4.243-4.243a1 1 0 1 1 1.414 1.414L9.414 8l4.243 4.243a1 1 0 0 1-1.414 1.414L8 9.414l-4.243 4.243a1 1 0 0 1-1.414-1.414L6.586 8 2.343 3.757a1 1 0 0 1 0-1.414z"/>
+              </svg>
+            </button>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- 多条公告轮播 -->
+      {%- if section.slider_enabled and section.announcements.size > 1 -%}
+        <div class="announcement-slider" data-announcement-slider>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'announcement' -%}
+              <div class="announcement-slide" {{ block.shopify_attributes }}>
+                <div class="container">
+                  <div class="announcement-bar-content">
+                    {%- if block.settings.link != blank -%}
+                      <a href="{{ block.settings.link }}" class="announcement-bar-link">
+                    {%- endif -%}
+
+                    <div class="announcement-bar-text">
+                      {%- if block.settings.show_icon -%}
+                        <span class="announcement-bar-icon">
+                          {% render 'icon-sparkle' %}
+                        </span>
+                      {%- endif -%}
+
+                      <span class="announcement-bar-message">
+                        {{ block.settings.text | escape }}
+                      </span>
+                    </div>
+
+                    {%- if block.settings.link != blank -%}
+                      </a>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- 公告栏背景效果 -->
+    <div class="announcement-bar-bg-effect"></div>
+  {%- endunless -%}
+{%- endif -%}
+
+<style>
+.announcement-bar {
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-2) 0;
+  position: relative;
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  z-index: 10;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.announcement-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: announcement-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes announcement-shimmer {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.announcement-bar-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  min-height: 32px;
+}
+
+.announcement-bar-link {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    color: inherit;
+    text-shadow: 0 0 8px rgba(255,255,255,0.3);
+  }
+}
+
+.announcement-bar-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.announcement-bar-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  animation: announcement-pulse 2s ease-in-out infinite;
+}
+
+@keyframes announcement-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.announcement-bar-message {
+  text-shadow: 0 0 4px rgba(255,255,255,0.3);
+}
+
+.announcement-countdown {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-left: var(--spacing-3);
+  padding-left: var(--spacing-3);
+  border-left: 1px solid rgba(255,255,255,0.3);
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.countdown-number {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  margin-bottom: 2px;
+  text-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+
+.countdown-label {
+  font-size: 10px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.announcement-bar-close {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity var(--duration-normal) var(--ease-out);
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    color: inherit;
+  }
+}
+
+.announcement-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.announcement-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-normal) var(--ease-out);
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.announcement-bar-bg-effect {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.6) 50%,
+    transparent 100%);
+  animation: announcement-progress 10s linear infinite;
+}
+
+@keyframes announcement-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .announcement-bar {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) 0;
+  }
+
+  .announcement-bar-content {
+    min-height: 28px;
+    padding: 0 var(--spacing-12);
+  }
+
+  .announcement-bar-close {
+    right: var(--spacing-2);
+  }
+
+  .announcement-countdown {
+    gap: var(--spacing-2);
+    margin-left: var(--spacing-2);
+    padding-left: var(--spacing-2);
+  }
+
+  .countdown-item {
+    min-width: 32px;
+  }
+
+  .countdown-number {
+    font-size: var(--font-size-sm);
+  }
+
+  .countdown-label {
+    font-size: 8px;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .announcement-bar::before,
+  .announcement-bar-icon,
+  .announcement-bar-bg-effect {
+    animation: none;
+  }
+
+  .announcement-slide {
+    transition: none;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 公告栏关闭功能
+  const closeBtn = document.querySelector('[data-announcement-close]');
+  const announcementBar = document.querySelector('.announcement-bar');
+
+  if (closeBtn && announcementBar) {
+    closeBtn.addEventListener('click', function() {
+      announcementBar.style.transform = 'translateY(-100%)';
+      announcementBar.style.opacity = '0';
+
+      setTimeout(() => {
+        announcementBar.style.display = 'none';
+        document.documentElement.style.setProperty('--announcement-bar-height', '0px');
+      }, 300);
+
+      // 保存用户偏好
+      localStorage.setItem('announcementClosed', 'true');
+    });
+  }
+
+  // 检查是否已关闭
+  if (localStorage.getItem('announcementClosed') === 'true' && announcementBar) {
+    announcementBar.style.display = 'none';
+  }
+
+  // 更新CSS变量
+  if (announcementBar && announcementBar.style.display !== 'none') {
+    const height = announcementBar.offsetHeight;
+    document.documentElement.style.setProperty('--announcement-bar-height', `${height}px`);
+  }
+
+  // 倒计时功能
+  const countdowns = document.querySelectorAll('[data-countdown]');
+  countdowns.forEach(countdown => {
+    const targetDate = new Date(countdown.dataset.countdown).getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        countdown.style.display = 'none';
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      const daysEl = countdown.querySelector('[data-countdown-days]');
+      const hoursEl = countdown.querySelector('[data-countdown-hours]');
+      const minutesEl = countdown.querySelector('[data-countdown-minutes]');
+      const secondsEl = countdown.querySelector('[data-countdown-seconds]');
+
+      if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  });
+
+  // 多公告轮播功能
+  const slider = document.querySelector('[data-announcement-slider]');
+  if (slider) {
+    const slides = slider.querySelectorAll('.announcement-slide');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    if (slides.length > 1) {
+      showSlide(0);
+      setInterval(nextSlide, 5000); // 每5秒切换
+    }
+  }
+});
+</script>

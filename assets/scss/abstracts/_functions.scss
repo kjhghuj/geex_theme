@@ -1,0 +1,164 @@
+// ============================================
+// SCSS Functions - 科幻主题工具函数
+// ============================================
+
+// 获取发光颜色的函数
+@function get-glow-color($base-color: var(--color-secondary), $alpha: 0.6) {
+  @return rgba($base-color, $alpha);
+}
+
+// 计算间距比例（1:1.5:2.4）
+@function spacing-scale($base-unit: 1rem, $ratio: 1.5) {
+  $scale: (
+    '1': $base-unit,
+    '2': $base-unit * $ratio,
+    '3': $base-unit * $ratio * $ratio,
+    '4': $base-unit * $ratio * $ratio * $ratio
+  );
+  @return $scale;
+}
+
+// 字体大小计算
+@function font-size($scale: 1) {
+  $base-size: 16px;
+  @return $base-size * $scale;
+}
+
+// 转换像素到rem
+@function px-to-rem($px-value) {
+  @return ($px-value / 16px) * 1rem;
+}
+
+// 渐变颜色生成器
+@function generate-gradient($start-color, $end-color, $angle: 135deg) {
+  @return linear-gradient($angle, $start-color 0%, $end-color 100%);
+}
+
+// 计算颜色对比度
+@function color-contrast($background) {
+  @if (lightness($background) > 60%) {
+    @return #333333;
+  } @else {
+    @return #ffffff;
+  }
+}
+
+// 发光强度计算器
+@function glow-intensity($base-size: 8px, $multiplier: 1) {
+  @return $base-size * $multiplier;
+}
+
+// 响应式字体大小计算
+@function responsive-font($min-size: 16px, $max-size: 24px, $min-vw: 320px, $max-vw: 1200px) {
+  @return clamp(px-to-rem($min-size), px-to-rem($min-size) + px-to-rem($max-size - $min-size) * ((100vw - px-to-rem($min-vw)) / px-to-rem($max-vw - $min-vw)), px-to-rem($max-size));
+}
+
+// 随机科幻色彩
+@function scifi-color($variant: 'primary') {
+  $colors: (
+    'primary': #87ceeb,
+    'secondary': #4a90e2,
+    'accent': #00ff88,
+    'warning': #ff6b6b,
+    'neutral': #e0e0e0
+  );
+  @return map-get($colors, $variant);
+}
+
+// 动画持续时间计算
+@function animation-duration($base: 300ms, $multiplier: 1) {
+  @return $base * $multiplier;
+}
+
+// Z-index层级计算
+@function z-index($layer: 'base') {
+  $layers: (
+    'base': 0,
+    'dropdown': 1000,
+    'sticky': 1020,
+    'fixed': 1030,
+    'modal-backdrop': 1040,
+    'modal': 1050,
+    'popover': 1060,
+    'tooltip': 1070,
+    'notification': 1080
+  );
+  @return map-get($layers, $layer);
+}
+
+// 断点检查
+@function is-breakpoint($breakpoint) {
+  @return map-has-key($breakpoints, $breakpoint);
+}
+
+// 获取断点值
+@function get-breakpoint($breakpoint) {
+  @if is-breakpoint($breakpoint) {
+    @return map-get($breakpoints, $breakpoint);
+  }
+  @warn "未知的断点: #{$breakpoint}";
+  @return null;
+}
+
+// 颜色深度计算
+@function color-shade($color, $percentage) {
+  @return mix(black, $color, $percentage);
+}
+
+// 颜色色调计算
+@function color-tint($color, $percentage) {
+  @return mix(white, $color, $percentage);
+}
+
+// 半透明颜色生成
+@function alpha($color, $opacity) {
+  @return rgba($color, $opacity);
+}
+
+// 单位转换函数
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+  @return $number;
+}
+
+// 网格列宽计算
+@function grid-column-width($columns: 12, $gap: 20px, $container-width: 1200px) {
+  $total-gap: ($columns - 1) * $gap;
+  @return ($container-width - $total-gap) / $columns;
+}
+
+// 黄金比例计算
+@function golden-ratio($value) {
+  @return $value * 1.618;
+}
+
+// 字体粗细映射
+@function font-weight($weight: 'normal') {
+  $weights: (
+    'light': 300,
+    'normal': 400,
+    'medium': 500,
+    'semibold': 600,
+    'bold': 700,
+    'extrabold': 800
+  );
+  @return map-get($weights, $weight);
+}
+
+// 阴影生成器
+@function create-shadow($x: 0, $y: 0, $blur: 4px, $color: rgba(0,0,0,0.1)) {
+  @return $x $y $blur $color;
+}
+
+// 多重阴影生成器
+@function multi-shadows($base-color: var(--color-secondary), $count: 3) {
+  $shadows: ();
+  @for $i from 1 through $count {
+    $blur: $i * 4px;
+    $alpha: 0.6 / $i;
+    $shadows: append($shadows, 0 0 $blur rgba($base-color, $alpha), comma);
+  }
+  @return $shadows;
+}

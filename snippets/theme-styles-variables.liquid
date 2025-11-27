@@ -1,0 +1,47 @@
+{%- comment -%}
+  Theme CSS Variables
+  Generates CSS custom properties for theme settings
+{%- endcomment -%}
+
+<style>
+  :root {
+    {%- if settings.color_schemes.scheme-1.settings.background != blank -%}
+      --color-background: {{ settings.color_schemes.scheme-1.settings.background.rgb }};
+    {%- else -%}
+      --color-background: #ffffff;
+    {%- endif -%}
+
+    {%- if settings.color_schemes.scheme-1.settings.text != blank -%}
+      --color-foreground: {{ settings.color_schemes.scheme-1.settings.text.rgb }};
+    {%- else -%}
+      --color-foreground: #000000;
+    {%- endif -%}
+
+    {%- if settings.color_schemes.scheme-1.settings.primary != blank -%}
+      --color-primary: {{ settings.color_schemes.scheme-1.settings.primary.rgb }};
+    {%- else -%}
+      --color-primary: #87ceeb;
+    {%- endif -%}
+
+    {%- if settings.color_schemes.scheme-1.settings.secondary != blank -%}
+      --color-secondary: {{ settings.color_schemes.scheme-1.settings.secondary.rgb }};
+    {%- else -%}
+      --color-secondary: #4169E1;
+    {%- endif -%}
+
+    /* Font settings */
+    --font-primary: {{ settings.type_primary_font.family }}, {{ settings.type_primary_font.fallback_families }};
+    --font-secondary: {{ settings.type_secondary_font.family }}, {{ settings.type_secondary_font.fallback_families }};
+    --font-weight-primary: {{ settings.type_primary_font.weight }};
+    --font-weight-secondary: {{ settings.type_secondary_font.weight }};
+
+    /* Layout */
+    --page-width: {{ settings.page_width }}px;
+    --page-width-margin: {% if settings.page_width == '1600' %}2{% else %}0{% endif %}rem;
+
+    /* Border radius */
+    --radius-base: {{ settings.settings_image_size }}px;
+    --radius-small: calc({{ settings.settings_image_size }}px * 0.5);
+    --radius-large: calc({{ settings.settings_image_size }}px * 2);
+  }
+</style>

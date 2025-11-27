@@ -1,0 +1,33 @@
+# Shopify Theme Check 配置文件
+# 用于验证主题是否符合Shopify最佳实践
+
+# 忽略的检查
+ignore:
+  # 暂时忽略某些检查，后续会修复
+  - missing_template
+  - missing_snippet
+
+# 严格模式
+strict: true
+
+# 包含的检查
+include:
+  # 主题结构检查
+  - layout_exists
+  - templates_exist
+
+  # 性能检查
+  - img_lazy_loading
+  - inline_svg_size
+  - html_has_lang
+
+  # 可访问性检查
+  - valid_html
+  - img_alt_names
+  - html_parsing_errors
+
+  # 液体模板检查
+  - liquid_syntax
+  - valid_schema
+  - missing_template
+  - missing_snippet

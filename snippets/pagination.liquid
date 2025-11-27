@@ -1,0 +1,508 @@
+{%- comment -%}
+  分页组件
+  提供页面导航和分页信息
+{%- endcomment -%}
+
+{%- assign current_page = paginate.current_page -%}
+{%- assign total_pages = paginate.pages -%}
+{%- assign total_items = paginate.items -%}
+{%- assign items_per_page = paginate.page_size -%}
+
+<nav class="pagination" data-pagination aria-label="分页导航">
+  <!-- 分页信息 -->
+  <div class="pagination__info">
+    <span class="pagination__text">
+      显示第 {{ paginate.current_offset | plus: 1 }}-{{ paginate.current_offset | plus: paginate.page_size }} 项，
+      共 {{ total_items }} 项产品
+    </span>
+  </div>
+
+  <!-- 分页控件 -->
+  {%- if total_pages > 1 -%}
+    <div class="pagination__controls">
+      <!-- 上一页 -->
+      {%- if paginate.previous -%}
+        <a href="{{ paginate.previous.url }}" class="pagination__btn pagination__btn--prev" data-pagination-prev>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>上一页</span>
+        </a>
+      {%- else -%}
+        <button class="pagination__btn pagination__btn--prev" disabled>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.5 15l-5-5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>上一页</span>
+        </button>
+      {%- endif -%}
+
+      <!-- 页码 -->
+      <div class="pagination__pages" data-pagination-pages>
+        {%- if total_pages <= 7 -%}
+          <!-- 显示所有页码 -->
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              <a href="{{ part.url }}" class="pagination__page" data-pagination-page="{{ part.title }}">
+                {{ part.title }}
+              </a>
+            {%- else -%}
+              <span class="pagination__page pagination__page--current" data-pagination-current="{{ part.title }}">
+                {{ part.title }}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          <!-- 智能分页显示 -->
+          {%- if current_page > 3 -%}
+            <a href="{{ paginate.parts[0].url }}" class="pagination__page" data-pagination-page="1">1</a>
+
+            {%- if current_page > 4 -%}
+              <span class="pagination__ellipsis">...</span>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- for part in paginate.parts -%}
+            {%- if part.is_link -%}
+              {%- assign part_num = part.title | times: 1 -%}
+              {%- if part_num > current_page | minus: 2 and part_num < current_page | plus: 2 -%}
+                <a href="{{ part.url }}" class="pagination__page" data-pagination-page="{{ part.title }}">
+                  {{ part.title }}
+                </a>
+              {%- elsif part_num == current_page -%}
+                <span class="pagination__page pagination__page--current" data-pagination-current="{{ part.title }}">
+                  {{ part.title }}
+                </span>
+              {%- endif -%}
+            {%- else -%}
+              <span class="pagination__page pagination__page--current" data-pagination-current="{{ part.title }}">
+                {{ part.title }}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if current_page < total_pages | minus: 2 -%}
+            {%- if current_page < total_pages | minus: 3 -%}
+              <span class="pagination__ellipsis">...</span>
+            {%- endif -%}
+            <a href="{{ paginate.parts[paginate.parts.size | minus: 1].url }}" class="pagination__page" data-pagination-page="{{ total_pages }}">
+              {{ total_pages }}
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+
+      <!-- 下一页 -->
+      {%- if paginate.next -%}
+        <a href="{{ paginate.next.url }}" class="pagination__btn pagination__btn--next" data-pagination-next>
+          <span>下一页</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.5 1l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </a>
+      {%- else -%}
+        <button class="pagination__btn pagination__btn--next" disabled>
+          <span>下一页</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.5 1l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+
+    <!-- 快速跳转 -->
+    <div class="pagination__jump">
+      <label class="pagination__label" for="pagination-jump">跳转到:</label>
+      <form class="pagination__jump-form" data-pagination-jump>
+        <input type="number"
+               id="pagination-jump"
+               name="page"
+               min="1"
+               max="{{ total_pages }}"
+               value="{{ current_page }}"
+               class="pagination__jump-input"
+               aria-label="跳转到页面">
+        <button type="submit" class="btn btn-secondary btn--small">Go</button>
+      </form>
+      <span class="pagination__total">共 {{ total_pages }} 页</span>
+    </div>
+  {%- endif -%}
+</nav>
+
+<style>
+/* 分页组件 */
+.pagination {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6) 0;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.pagination__info {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.pagination__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: var(--color-text-inverse);
+    box-shadow: 0 2px 8px rgba(135, 206, 235, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.pagination__btn--prev {
+  margin-right: var(--spacing-2);
+}
+
+.pagination__btn--next {
+  margin-left: var(--spacing-2);
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.pagination__page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-secondary);
+    color: var(--color-primary);
+    box-shadow: 0 2px 6px rgba(135, 206, 235, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.pagination__page--current {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+  box-shadow: 0 0 8px var(--glow-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.pagination__ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.pagination__jump {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pagination__label {
+  font-weight: var(--font-weight-medium);
+}
+
+.pagination__jump-form {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.pagination__jump-input {
+  width: 60px;
+  padding: var(--spacing-2);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+  }
+}
+
+.pagination__total {
+  font-weight: var(--font-weight-medium);
+}
+
+/* 紧凑样式 */
+.pagination--compact {
+  gap: var(--spacing-3);
+
+  .pagination__btn {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .pagination__page {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-xs);
+  }
+
+  .pagination__ellipsis {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* 简单样式 */
+.pagination--simple {
+  .pagination__pages {
+    display: none;
+  }
+
+  .pagination__jump {
+    display: none;
+  }
+}
+
+/* 加载更多样式 */
+.pagination--load-more {
+  .pagination__info,
+  .pagination__pages,
+  .pagination__jump {
+    display: none;
+  }
+
+  .pagination__controls {
+    justify-content: center;
+  }
+
+  .pagination__btn {
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+    @include scifi-button(var(--color-bg-primary), var(--color-text-primary), 2px solid var(--color-border));
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-secondary);
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .pagination {
+    gap: var(--spacing-3);
+  }
+
+  .pagination__controls {
+    gap: var(--spacing-1);
+  }
+
+  .pagination__btn span {
+    display: none; /* 只显示图标 */
+  }
+
+  .pagination__btn--prev svg,
+  .pagination__btn--next svg {
+    margin: 0;
+  }
+
+  .pagination__page {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-xs);
+  }
+
+  .pagination__ellipsis {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-xs);
+  }
+
+  .pagination__jump {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .pagination__jump-form {
+    order: 2;
+  }
+
+  .pagination__total {
+    order: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination__pages {
+    display: none; /* 在小屏幕上隐藏页码 */
+  }
+
+  .pagination__jump {
+    display: none; /* 在小屏幕上隐藏跳转 */
+  }
+
+  .pagination__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination__btn {
+    flex: 1;
+    justify-content: center;
+    padding: var(--spacing-3);
+  }
+}
+
+/* 动画 */
+.pagination__page {
+  animation: fadeInScale 0.3s ease-out backwards;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 焦点管理 */
+.pagination__page:focus,
+.pagination__btn:focus {
+  position: relative;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .pagination__page,
+  .pagination__btn {
+    border-width: 2px;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .pagination__page,
+  .pagination__btn {
+    transition: none;
+  }
+
+  .pagination__page {
+    animation: none;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .pagination {
+    display: none;
+  }
+}
+
+/* 加载状态 */
+.pagination__btn[aria-busy="true"] {
+  position: relative;
+  color: transparent;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.pagination.has-error {
+  .pagination__btn,
+  .pagination__page {
+    border-color: var(--color-error);
+  }
+
+  .pagination__jump-input {
+    border-color: var(--color-error);
+  }
+}
+
+/* 成功状态 */
+.pagination.has-success {
+  .pagination__jump-input {
+    border-color: var(--color-success);
+  }
+}
+</style>

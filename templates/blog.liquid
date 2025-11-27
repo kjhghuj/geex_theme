@@ -1,0 +1,364 @@
+{% comment %}
+  博客主页面模板
+  展示所有博客文章列表，支持分页和筛选
+{% endcomment %}
+
+<div class="blog-container">
+  <!-- 页面头部 -->
+  <header class="blog-header">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a></li>
+          <li aria-current="page">{{ blog.title }}</li>
+        </ol>
+      </nav>
+
+      <div class="blog-header__content">
+        <h1 class="blog-header__title">{{ blog.title }}</h1>
+        {% if blog.description != blank %}
+          <p class="blog-header__description">{{ blog.description }}</p>
+        {% endif %}
+      </div>
+
+      <!-- 博客筛选和搜索 -->
+      <div class="blog-controls">
+        <div class="blog-search">
+          <form action="{{ routes.search_url }}" method="get" class="search-form">
+            <input type="hidden" name="type" value="article">
+            <input type="search"
+                   name="q"
+                   placeholder="{{ 'general.search.search_blog' | t }}"
+                   class="search-input"
+                   value="{{ search.terms | escape }}"
+                   aria-label="{{ 'general.search.search' | t }}">
+            <button type="submit" class="search-button" aria-label="{{ 'general.search.submit' | t }}">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="9" r="7"></circle>
+                <path d="M14 14L19 19"></path>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- 标签筛选 -->
+        {% if blog.tags.size > 0 %}
+          <div class="blog-tags">
+            <button class="blog-tags__toggle" data-tags-toggle>
+              {{ 'blog.filter.filter_by_tag' | t }}
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M4 6h8M4 10h8M6 2l-2 4v6a2 2 0 002 2h4a2 2 0 002-2V6l-2-4H6z"/>
+              </svg>
+            </button>
+            <div class="blog-tags__dropdown" hidden>
+              <a href="{{ blog.url }}" class="blog-tag {% unless current_tags %}active{% endunless %}">
+                {{ 'blog.filter.all_tags' | t }}
+              </a>
+              {% for tag in blog.tags %}
+                <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="blog-tag {% if current_tags contains tag %}active{% endif %}">
+                  {{ tag }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- 文章网格 -->
+  <div class="container">
+    <div class="blog-grid">
+      {% if blog.articles.size > 0 %}
+        {% for article in blog.articles %}
+          {% render 'article-card', article: article, show_tags: true, show_excerpt: true %}
+        {% endfor %}
+      {% else %}
+        <div class="blog-empty">
+          <div class="blog-empty__icon">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M40 20L24 36M24 20l16 16M8 32h48"></path>
+              <circle cx="32" cy="32" r="24"></circle>
+            </svg>
+          </div>
+          <h2 class="blog-empty__title">{{ 'blog.empty.no_articles' | t }}</h2>
+          <p class="blog-empty__description">{{ 'blog.empty.description' | t }}</p>
+          <a href="{{ routes.root_url }}" class="btn btn--primary">
+            {{ 'blog.empty.continue_shopping' | t }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 分页 -->
+    {% if paginate.pages > 1 %}
+      {% render 'pagination', paginate: paginate %}
+    {% endif %}
+  </div>
+
+  <!-- 博客侧边栏 -->
+  {% section 'blog-sidebar' %}
+</div>
+
+<style>
+  .blog-container {
+    padding: var(--spacing-8) 0;
+    background: var(--color-bg-primary);
+    position: relative;
+  }
+
+  .blog-header {
+    margin-bottom: var(--spacing-12);
+    text-align: center;
+  }
+
+  .blog-header__content {
+    max-width: 800px;
+    margin: 0 auto var(--spacing-8);
+  }
+
+  .blog-header__title {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .blog-header__description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-light);
+    line-height: 1.8;
+  }
+
+  .blog-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+    flex-wrap: wrap;
+  }
+
+  .blog-search {
+    position: relative;
+    max-width: 400px;
+    flex: 1;
+  }
+
+  .search-form {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4) var(--spacing-3) var(--spacing-12);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--duration-normal) var(--ease-out);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .search-button {
+    position: absolute;
+    left: var(--spacing-3);
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    padding: var(--spacing-2);
+    transition: color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-secondary);
+    }
+  }
+
+  .blog-tags {
+    position: relative;
+  }
+
+  .blog-tags__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+    white-space: nowrap;
+
+    &:hover {
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+  }
+
+  .blog-tags__dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-large);
+    z-index: var(--z-dropdown);
+    margin-top: var(--spacing-2);
+    padding: var(--spacing-2);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .blog-tag {
+    display: block;
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-bg-secondary);
+      color: var(--color-secondary);
+    }
+
+    &.active {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.5);
+    }
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-8);
+    margin-bottom: var(--spacing-8);
+  }
+
+  .blog-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: var(--spacing-16) var(--spacing-4);
+    color: var(--color-text-light);
+  }
+
+  .blog-empty__icon {
+    margin-bottom: var(--spacing-4);
+    opacity: 0.5;
+  }
+
+  .blog-empty__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-3);
+    color: var(--color-text-primary);
+  }
+
+  .blog-empty__description {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-6);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .blog-container {
+      padding: var(--spacing-6) 0;
+    }
+
+    .blog-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--spacing-4);
+    }
+
+    .blog-search {
+      max-width: none;
+    }
+
+    .blog-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-6);
+    }
+
+    .blog-header__title {
+      font-size: var(--font-size-3xl);
+    }
+  }
+
+  @include respond-to('md') {
+    .blog-tags__dropdown.show {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 标签下拉菜单
+    const tagsToggle = document.querySelector('[data-tags-toggle]');
+    const tagsDropdown = document.querySelector('.blog-tags__dropdown');
+
+    if (tagsToggle && tagsDropdown) {
+      tagsToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const isOpen = tagsDropdown.hasAttribute('hidden');
+
+        if (isOpen) {
+          tagsDropdown.removeAttribute('hidden');
+          tagsToggle.setAttribute('aria-expanded', 'true');
+        } else {
+          tagsDropdown.setAttribute('hidden', '');
+          tagsToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // 点击外部关闭
+      document.addEventListener('click', function(e) {
+        if (!tagsToggle.contains(e.target) && !tagsDropdown.contains(e.target)) {
+          tagsDropdown.setAttribute('hidden', '');
+          tagsToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    // 搜索框动画
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-form--focused');
+      });
+
+      searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-form--focused');
+      });
+    }
+  });
+</script>

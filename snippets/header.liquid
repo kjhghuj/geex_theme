@@ -1,0 +1,386 @@
+{%- comment -%}
+  科幻主题头部导航组件
+  包含桌面和移动端导航
+{%- endcomment -%}
+
+<header class="site-header" role="banner">
+  {%- if section.settings.announcement_bar_enabled -%}
+    {% render 'announcement-bar' %}
+  {%- endif -%}
+
+  <div class="header-main">
+    <div class="container">
+      <div class="header-flex">
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-btn btn btn-icon btn-ghost hide-desktop"
+                type="button"
+                aria-label="{{ 'general.navigation.open_menu' | t }}"
+                aria-expanded="false"
+                aria-controls="mobile-nav">
+          <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Logo -->
+        <div class="header-logo">
+          {%- if request.page_type == 'index' -%}
+            <h1 class="logo-text">
+              <a href="{{ routes.root_url }}" class="logo-link">
+                {%- if settings.logo != blank -%}
+                  <img src="{{ settings.logo | image_url: width: 200, height: 60 }}"
+                       alt="{{ shop.name | escape }}"
+                       class="logo-image"
+                       loading="lazy">
+                {%- else -%}
+                  <span class="logo-text-scifi scifi-gradient-text">{{ shop.name }}</span>
+                {%- endif -%}
+              </a>
+            </h1>
+          {%- else -%}
+            <div class="logo-text">
+              <a href="{{ routes.root_url }}" class="logo-link">
+                {%- if settings.logo != blank -%}
+                  <img src="{{ settings.logo | image_url: width: 200, height: 60 }}"
+                       alt="{{ shop.name | escape }}"
+                       class="logo-image"
+                       loading="lazy">
+                {%- else -%}
+                  <span class="logo-text-scifi scifi-gradient-text">{{ shop.name }}</span>
+                {%- endif -%}
+              </a>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <!-- 桌面端导航 -->
+        <nav class="main-nav hide-mobile" role="navigation" aria-label="{{ 'general.navigation.main_menu' | t }}">
+          <ul class="nav-list">
+            {%- for link in linklists[section.settings.main_menu].links -%}
+              <li class="nav-item">
+                {%- if link.links != blank -%}
+                  <div class="nav-dropdown">
+                    <button class="nav-link dropdown-toggle"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="dropdown-{{ link.handle }}">
+                      {{ link.title }}
+                      <svg class="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <path d="M6 9L1 4h10z"/>
+                      </svg>
+                    </button>
+
+                    <div class="dropdown-menu" id="dropdown-{{ link.handle }}">
+                      <div class="dropdown-grid">
+                        {%- for childlink in link.links -%}
+                          {%- if childlink.links != blank -%}
+                            <div class="dropdown-column">
+                              <h3 class="dropdown-heading">
+                                <a href="{{ childlink.url }}">{{ childlink.title }}</a>
+                              </h3>
+                              <ul class="dropdown-submenu">
+                                {%- for grandchildlink in childlink.links -%}
+                                  <li>
+                                    <a href="{{ grandchildlink.url }}" class="dropdown-link">
+                                      {{ grandchildlink.title }}
+                                    </a>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            </div>
+                          {%- else -%}
+                            <div class="dropdown-column">
+                              <a href="{{ childlink.url }}" class="dropdown-link dropdown-link-main">
+                                {{ childlink.title }}
+                              </a>
+                            </div>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </div>
+                    </div>
+                  </div>
+                {%- else -%}
+                  <a href="{{ link.url }}" class="nav-link">
+                    {{ link.title }}
+                  </a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+
+        <!-- 头部操作区域 -->
+        <div class="header-actions">
+          <!-- 搜索按钮 -->
+          <button class="header-action-btn btn btn-icon btn-ghost"
+                  type="button"
+                  aria-label="{{ 'general.search.search' | t }}"
+                  data-search-toggle>
+            <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="9" r="7"></circle>
+              <path d="m21 21-6-6"></path>
+            </svg>
+          </button>
+
+          <!-- 账户按钮 -->
+          {%- if shop.customer_accounts_enabled -%}
+            <a href="{{ routes.account_url }}"
+               class="header-action-btn btn btn-icon btn-ghost"
+               aria-label="{{ 'layout.customer.account' | t }}">
+              {%- if customer -%}
+                <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              {%- else -%}
+                <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+
+          <!-- 购物车按钮 -->
+          <button class="header-action-btn btn btn-icon btn-ghost cart-toggle"
+                  type="button"
+                  aria-label="{{ 'layout.cart.title' | t }}"
+                  data-cart-toggle>
+            <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+
+            {%- if cart.item_count > 0 -%}
+              <span class="cart-badge" aria-label="{{ 'layout.cart.items_count' | t: count: cart.item_count }}">
+                {{ cart.item_count }}
+              </span>
+            {%- endif -%}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端导航菜单 -->
+  <div class="mobile-nav" id="mobile-nav" role="navigation" aria-label="{{ 'general.navigation.main_menu' | t }}">
+    <div class="mobile-nav-header">
+      <div class="mobile-nav-logo">
+        {%- if settings.logo != blank -%}
+          <img src="{{ settings.logo | image_url: width: 160, height: 50 }}"
+               alt="{{ shop.name | escape }}"
+               loading="lazy">
+        {%- else -%}
+          <span class="mobile-nav-text scifi-gradient-text">{{ shop.name }}</span>
+        {%- endif -%}
+      </div>
+
+      <button class="mobile-nav-close btn btn-icon btn-ghost"
+              type="button"
+              aria-label="{{ 'general.navigation.close_menu' | t }}"
+              aria-expanded="false"
+              aria-controls="mobile-nav">
+        <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-nav-content">
+      <nav class="mobile-menu">
+        <ul class="mobile-nav-list">
+          {%- for link in linklists[section.settings.main_menu].links -%}
+            <li class="mobile-nav-item">
+              {%- if link.links != blank -%}
+                <div class="mobile-nav-dropdown">
+                  <button class="mobile-nav-link mobile-dropdown-toggle"
+                          type="button"
+                          aria-expanded="false">
+                    {{ link.title }}
+                    <svg class="mobile-dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                      <path d="M6 9L1 4h10z"/>
+                    </svg>
+                  </button>
+
+                  <ul class="mobile-dropdown-menu">
+                    {%- for childlink in link.links -%}
+                      <li class="mobile-dropdown-item">
+                        {%- if childlink.links != blank -%}
+                          <div class="mobile-nav-sub-dropdown">
+                            <button class="mobile-subdropdown-toggle" type="button">
+                              {{ childlink.title }}
+                              <svg class="mobile-dropdown-icon" width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                                <path d="M5 7L1 3h8z"/>
+                              </svg>
+                            </button>
+
+                            <ul class="mobile-subdropdown-menu">
+                              {%- for grandchildlink in childlink.links -%}
+                                <li>
+                                  <a href="{{ grandchildlink.url }}" class="mobile-nav-link">
+                                    {{ grandchildlink.title }}
+                                  </a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          </div>
+                        {%- else -%}
+                          <a href="{{ childlink.url }}" class="mobile-nav-link">
+                            {{ childlink.title }}
+                          </a>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- else -%}
+                <a href="{{ link.url }}" class="mobile-nav-link">
+                  {{ link.title }}
+                </a>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+
+      <!-- 移动端搜索 -->
+      <div class="mobile-nav-search">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
+          <div class="search-field">
+            <input type="search"
+                   name="q"
+                   value="{{ search.terms | escape }}"
+                   placeholder="{{ 'general.search.placeholder' | t }}"
+                   class="search-input"
+                   aria-label="{{ 'general.search.placeholder' | t }}">
+            <button type="submit" class="search-btn btn btn-primary btn-icon" aria-label="{{ 'general.search.search' | t }}">
+              <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 移动端账户链接 -->
+      {%- if shop.customer_accounts_enabled -%}
+        <div class="mobile-nav-account">
+          {%- if customer -%}
+            <a href="{{ routes.account_url }}" class="btn btn-ghost">
+              {{ 'customer.account.title' | t }}
+            </a>
+            <a href="{{ routes.account_logout_url }}" class="btn btn-secondary">
+              {{ 'layout.customer.log_out' | t }}
+            </a>
+          {%- else -%}
+            <a href="{{ routes.account_login_url }}" class="btn btn-ghost">
+              {{ 'layout.customer.log_in' | t }}
+            </a>
+            <a href="{{ routes.account_register_url }}" class="btn btn-primary">
+              {{ 'layout.customer.create_account' | t }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+<!-- 搜索覆盖层 -->
+<div class="search-overlay" id="search-overlay" aria-hidden="true">
+  <div class="search-overlay-content">
+    <div class="container">
+      <button class="search-close btn btn-icon btn-ghost"
+              type="button"
+              aria-label="{{ 'general.search.close' | t }}"
+              data-search-close>
+        <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="search-form-container">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search-form-main">
+          <div class="search-field-main">
+            <input type="search"
+                   name="q"
+                   value="{{ search.terms | escape }}"
+                   placeholder="{{ 'general.search.placeholder' | t }}"
+                   class="search-input-main"
+                   id="search-input-main"
+                   autocomplete="off"
+                   aria-label="{{ 'general.search.placeholder' | t }}"
+                   autofocus>
+            <button type="submit" class="search-submit btn btn-primary btn-lg">
+              {{ 'general.search.search' | t }}
+            </button>
+          </div>
+        </form>
+
+        <div class="search-results" id="search-results"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 购物车侧边栏 -->
+<div class="cart-sidebar" id="cart-sidebar" aria-hidden="true">
+  <div class="cart-sidebar-content">
+    <div class="cart-sidebar-header">
+      <h2 class="cart-sidebar-title">{{ 'layout.cart.title' | t }}</h2>
+      <button class="cart-close btn btn-icon btn-ghost"
+              type="button"
+              aria-label="{{ 'layout.cart.close' | t }}"
+              data-cart-close>
+        <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="cart-sidebar-body">
+      <div class="cart-items" id="cart-items">
+        <!-- 购物车商品将通过JavaScript动态加载 -->
+      </div>
+
+      <div class="cart-empty" id="cart-empty" style="display: none;">
+        <div class="cart-empty-content">
+          <div class="cart-empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+          <h3>{{ 'cart.general.empty' | t }}</h3>
+          <p>{{ 'cart.general.empty_message' | t }}</p>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn-primary">
+            {{ 'cart.general.continue_shopping' | t }}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-sidebar-footer" id="cart-footer" style="display: none;">
+      <div class="cart-subtotal">
+        <span>{{ 'cart.general.subtotal' | t }}</span>
+        <span id="cart-subtotal">{{ cart.total_price | money }}</span>
+      </div>
+
+      <div class="cart-actions">
+        <a href="{{ routes.cart_url }}" class="btn btn-ghost btn-full">
+          {{ 'cart.general.view_cart' | t }}
+        </a>
+        <a href="{{ routes.checkout_url }}" class="btn btn-primary btn-full">
+          {{ 'cart.general.checkout' | t }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

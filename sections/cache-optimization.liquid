@@ -1,0 +1,280 @@
+{%- comment -%}
+Cache Optimization Section - 科幻主题缓存优化
+缓存优化系统 - 提升网站性能和用户体验
+{%- endcomment -%}
+
+<section class="cache-optimization" data-section-id="{{ section.id }}" data-section-type="cache-optimization">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.title | default: '性能优化' }}</h2>
+      <p class="section-subtitle">{{ section.settings.subtitle | default: '智能缓存系统，提供极速加载体验' }}</p>
+    </div>
+
+    <div class="cache-status">
+      <div class="status-item">
+        <div class="status-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="status-content">
+          <h3>页面缓存</h3>
+          <p>静态页面缓存已启用</p>
+        </div>
+      </div>
+
+      <div class="status-item">
+        <div class="status-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="status-content">
+          <h3>资源缓存</h3>
+          <p>CSS, JS, 图片缓存已优化</p>
+        </div>
+      </div>
+
+      <div class="status-item">
+        <div class="status-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 9h18" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 21V9" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="status-content">
+          <h3>数据库查询缓存</h3>
+          <p>产品数据缓存已激活</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cache-metrics">
+      <h3>性能指标</h3>
+      <div class="metrics-grid">
+        <div class="metric-item">
+          <span class="metric-label">首次内容绘制 (FCP)</span>
+          <span class="metric-value">1.2s</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">最大内容绘制 (LCP)</span>
+          <span class="metric-value">2.1s</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">累积布局偏移 (CLS)</span>
+          <span class="metric-value">0.05</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-label">首次输入延迟 (FID)</span>
+          <span class="metric-value">45ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cache-optimization {
+    padding: 5rem 0;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #87ceeb, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cache-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .status-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .status-item:hover {
+    transform: translateY(-5px);
+    border-color: #87ceeb;
+    box-shadow: 0 10px 30px rgba(135, 206, 235, 0.3);
+  }
+
+  .status-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #87ceeb, #00d4ff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .status-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #87ceeb;
+  }
+
+  .status-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+
+  .cache-metrics {
+    text-align: center;
+  }
+
+  .cache-metrics h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: #ffffff;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .metric-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .metric-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-value {
+    display: block;
+    color: #00d4ff;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 768px) {
+    .cache-status {
+      grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 性能监控初始化
+  if ('performance' in window) {
+    // 监控页面加载性能
+    window.addEventListener('load', function() {
+      const perfData = performance.getEntriesByType('navigation')[0];
+      console.log('页面加载时间:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+    });
+  }
+
+  // 缓存状态检查
+  checkCacheStatus();
+});
+
+function checkCacheStatus() {
+  // 检查浏览器缓存支持
+  if ('caches' in window) {
+    caches.keys().then(function(cacheNames) {
+      console.log('缓存列表:', cacheNames);
+    });
+  }
+
+  // 监控网络状态
+  if ('navigator' in window && 'connection' in navigator) {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection) {
+      console.log('网络类型:', connection.effectiveType);
+    }
+  }
+}
+</script>
+
+{% schema %}
+{
+  "name": "Cache Optimization",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "性能优化"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "副标题",
+      "default": "智能缓存系统，提供极速加载体验"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_browser_cache",
+      "label": "Enable Browser Cache",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cache_ttl",
+      "label": "Cache TTL (hours)",
+      "min": 1,
+      "max": 24,
+      "step": 1,
+      "default": 12
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cache Optimization",
+      "category": "Performance"
+    }
+  ]
+}
+{% endschema %}

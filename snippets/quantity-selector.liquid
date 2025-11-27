@@ -1,0 +1,440 @@
+{%- comment -%}
+  数量选择器组件
+  支持增减按钮和直接输入
+{%- endcomment -%}
+
+{%- assign min = min | default: 1 -%}
+{%- assign max = max | default: 999 -%}
+{%- assign value = value | default: 1 -%}
+
+<div class="quantity-selector" data-quantity-selector>
+  <label class="quantity-selector__label" for="Quantity-{{ section.id | default: 'product' }}">
+    {{ 'products.product.quantity' | t }}:
+  </label>
+
+  <div class="quantity-selector__wrapper">
+    <button type="button"
+            class="quantity-btn quantity-btn--minus"
+            data-quantity-minus
+            aria-label="{{ 'general.accessibility.decrease_quantity' | t }}"
+            {% if value <= min %}disabled{% endif %}>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <input type="number"
+           class="quantity-input"
+           id="Quantity-{{ section.id | default: 'product' }}"
+           name="quantity"
+           value="{{ value }}"
+           min="{{ min }}"
+           max="{{ max }}"
+           data-quantity-input
+           pattern="[0-9]*"
+           inputmode="numeric">
+
+    <button type="button"
+            class="quantity-btn quantity-btn--plus"
+            data-quantity-plus
+            aria-label="{{ 'general.accessibility.increase_quantity' | t }}"
+            {% if value >= max %}disabled{% endif %}>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  {%- if show_rules and max != blank -%}
+    <div class="quantity-rules">
+      {%- if min > 1 -%}
+        <div class="quantity-rule">
+          {{ 'products.product.quantity.minimum' | t: quantity: min }}
+        </div>
+      {%- endif -%}
+
+      {%- if max != 999 -%}
+        <div class="quantity-rule">
+          {{ 'products.product.quantity.maximum' | t: quantity: max }}
+        </div>
+      {%- endif -%}
+
+      {%- if increment != blank and increment > 1 -%}
+        <div class="quantity-rule">
+          {{ 'products.product.quantity.increment' | t: increment: increment }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if show_inventory and current_variant.inventory_management == 'shopify' -%}
+    <div class="quantity-inventory">
+      {%- assign inventory_quantity = current_variant.inventory_quantity | default: 0 -%}
+      {%- if inventory_quantity > 0 -%}
+        {%- if inventory_quantity <= 10 -%}
+          <div class="inventory-info inventory--low">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 4a1 1 0 00-2 0v4a1 1 0 001 1h3a1 1 0 100-2H9V5z"/>
+            </svg>
+            <span>{{ 'products.product.inventory.low_stock' | t: count: inventory_quantity }}</span>
+          </div>
+        {%- else -%}
+          <div class="inventory-info inventory--available">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3.5 7.5l-4 4a.5.5 0 01-.71 0l-2-2a.5.5 0 11.71-.71L7.5 11.09l3.65-3.65a.5.5 0 01.7.71z"/>
+            </svg>
+            <span>{{ 'products.product.inventory.in_stock' | t }}</span>
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        {%- if current_variant.inventory_policy == 'continue' -%}
+          <div class="inventory-info inventory--backorder">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zM8 4a1 1 0 011 1v2h2a1 1 0 110 2H9v2a1 1 0 11-2 0V9H5a1 1 0 110-2h2V5a1 1 0 011-1z"/>
+            </svg>
+            <span>{{ 'products.product.inventory.backorder' | t }}</span>
+          </div>
+        {%- else -%}
+          <div class="inventory-info inventory--sold-out">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm3 8H5a1 1 0 110-2h6a1 1 0 110 2z"/>
+            </svg>
+            <span>{{ 'products.product.inventory.sold_out' | t }}</span>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+/* 数量选择器 */
+.quantity-selector {
+  margin-bottom: var(--spacing-4);
+}
+
+.quantity-selector__label {
+  display: block;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.quantity-selector__wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus-within {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+  }
+}
+
+.quantity-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: var(--color-text-light);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+}
+
+.quantity-input {
+  width: 60px;
+  height: 44px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus {
+    outline: none;
+  }
+
+  /* 隐藏数字输入器的上下箭头 */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  &::placeholder {
+    color: var(--color-text-light);
+    opacity: 0.5;
+  }
+}
+
+/* 数量规则 */
+.quantity-rules {
+  margin-top: var(--spacing-3);
+}
+
+.quantity-rule {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 库存信息 */
+.quantity-inventory {
+  margin-top: var(--spacing-3);
+}
+
+.inventory-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.inventory--available {
+  color: var(--color-success);
+}
+
+.inventory--low {
+  color: var(--color-warning);
+}
+
+.inventory--sold-out {
+  color: var(--color-error);
+}
+
+.inventory--backorder {
+  color: var(--color-info);
+}
+
+/* 大尺寸变体 */
+.quantity-selector--large {
+  .quantity-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .quantity-input {
+    width: 80px;
+    height: 52px;
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* 小尺寸变体 */
+.quantity-selector--small {
+  .quantity-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .quantity-input {
+    width: 50px;
+    height: 36px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* 紧凑变体 */
+.quantity-selector--compact {
+  .quantity-selector__wrapper {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-light);
+  }
+
+  .quantity-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .quantity-input {
+    width: 56px;
+    height: 40px;
+    background: var(--color-bg-primary);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .quantity-input {
+    width: 50px;
+  }
+
+  .quantity-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quantity-input {
+    width: 45px;
+  }
+
+  .quantity-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .quantity-selector__label {
+    font-size: var(--font-size-xs);
+  }
+
+  .quantity-rule,
+  .inventory-info {
+    font-size: 10px;
+  }
+}
+
+/* 动画 */
+.quantity-btn {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(135, 206, 235, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  &:active::after {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.quantity-input {
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+/* 无障碍支持 */
+.quantity-btn:focus-visible,
+.quantity-input:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .quantity-selector__wrapper {
+    border-width: 2px;
+  }
+
+  .quantity-input {
+    border-left-width: 2px;
+    border-right-width: 2px;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .quantity-btn,
+  .quantity-input,
+  .quantity-selector__wrapper {
+    transition: none;
+  }
+
+  .quantity-btn::after {
+    transition: none;
+  }
+}
+
+/* 错误状态 */
+.quantity-selector.has-error {
+  .quantity-selector__wrapper {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+
+  .quantity-input {
+    color: var(--color-error);
+  }
+}
+
+/* 成功状态 */
+.quantity-selector.has-success {
+  .quantity-selector__wrapper {
+    border-color: var(--color-success);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  }
+}
+
+/* 加载状态 */
+.quantity-selector.is-loading {
+  .quantity-btn,
+  .quantity-input {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .quantity-selector__wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(135, 206, 235, 0.3), transparent);
+    animation: loading-shimmer 1.5s infinite;
+  }
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+</style>

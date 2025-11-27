@@ -1,0 +1,866 @@
+{% comment %}
+  文章详情页模板
+  展示完整的文章内容，包括作者、日期、标签等元信息
+{% endcomment %}
+
+<article class="article-container">
+  <!-- 文章头部 -->
+  <header class="article-header">
+    <div class="container">
+      <!-- 面包屑导航 -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a></li>
+          <li><a href="{{ blog.url }}">{{ blog.title }}</a></li>
+          <li aria-current="page">{{ article.title }}</li>
+        </ol>
+      </nav>
+
+      <div class="article-header__content">
+        <!-- 文章标题 -->
+        <h1 class="article-header__title">{{ article.title }}</h1>
+
+        <!-- 文章元信息 -->
+        <div class="article-meta">
+          <div class="article-meta__primary">
+            {% if article.image %}
+              <div class="article-meta__image">
+                <img src="{{ article.image | image_url: width: 80, height: 80 }}"
+                     alt="{{ article.image.alt | escape }}"
+                     loading="lazy"
+                     width="80"
+                     height="80">
+              </div>
+            {% endif %}
+
+            <div class="article-meta__info">
+              <div class="article-meta__author">
+                {% if article.author %}
+                  <span class="article-meta__label">{{ 'blog.article.author' | t }}:</span>
+                  <span class="article-meta__value">{{ article.author }}</span>
+                {% endif %}
+              </div>
+
+              <div class="article-meta__date">
+                <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
+                      class="article-meta__value">
+                  {{ article.published_at | date: format: 'date_long' }}
+                </time>
+              </div>
+
+              {% if article.comments_count > 0 %}
+                <div class="article-meta__comments">
+                  <a href="#comments" class="article-meta__link">
+                    {{ article.comments_count }} {{ 'blog.article.comments' | t }}
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- 文章标签 -->
+          {% if article.tags.size > 0 %}
+            <div class="article-tags">
+              {% for tag in article.tags limit: 5 %}
+                <a href="{{ blog.url }}/tagged/{{ tag | handle }}"
+                   class="article-tag"
+                   rel="tag">
+                  {{ tag }}
+                </a>
+              {% endfor %}
+              {% if article.tags.size > 5 %}
+                <span class="article-tag article-tag--more">
+                  +{{ article.tags.size | minus: 5 }}
+                </span>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- 阅读时间估算 -->
+        <div class="article-reading-time">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M8 4v4l2 2" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>
+          <span>{{ 'blog.article.reading_time' | t: minutes: article.content | strip_html | strip | split: ' ' | size | divided_by: 200 | ceil }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 文章主体内容 -->
+  <div class="article-content">
+    <div class="container">
+      <div class="article-layout">
+        <!-- 主要内容区域 -->
+        <main class="article-main">
+          <!-- 特色图片 -->
+          {% if article.image %}
+            <div class="article-feature-image">
+              <img src="{{ article.image | image_url: width: 1200, height: 600 }}"
+                   alt="{{ article.image.alt | escape }}"
+                   loading="eager"
+                   width="1200"
+                   height="600"
+                   class="article-feature-image__img">
+            </div>
+          {% endif %}
+
+          <!-- 文章内容 -->
+          <div class="article-body">
+            <div class="article-body__content">
+              {{ article.content }}
+            </div>
+
+            <!-- 文章分享 -->
+            {% render 'social-sharing',
+              share_title: article.title,
+              share_permalink: article.url,
+              share_image: article.image %}
+          </div>
+
+          <!-- 文章导航 -->
+          {% if blog.previous_article or blog.next_article %}
+            <nav class="article-navigation" aria-label="{{ 'blog.article.navigation' | t }}">
+              <div class="article-navigation__content">
+                {% if blog.previous_article %}
+                  <a href="{{ blog.previous_article.url }}"
+                     class="article-navigation__link article-navigation__prev"
+                     rel="prev">
+                    <div class="article-navigation__direction">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" stroke-width="2" fill="none"/>
+                      </svg>
+                      {{ 'blog.article.previous_post' | t }}
+                    </div>
+                    <div class="article-navigation__title">{{ blog.previous_article.title }}</div>
+                  </a>
+                {% endif %}
+
+                {% if blog.next_article %}
+                  <a href="{{ blog.next_article.url }}"
+                     class="article-navigation__link article-navigation__next"
+                     rel="next">
+                    <div class="article-navigation__direction">
+                      {{ 'blog.article.next_post' | t }}
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" fill="none"/>
+                      </svg>
+                    </div>
+                    <div class="article-navigation__title">{{ blog.next_article.title }}</div>
+                  </a>
+                {% endif %}
+              </div>
+            </nav>
+          {% endif %}
+
+          <!-- 相关文章 -->
+          {% if blog.articles_count > 1 %}
+            <section class="related-articles">
+              <h2 class="related-articles__title">{{ 'blog.article.related_posts' | t }}</h2>
+              <div class="related-articles__grid">
+                {% assign related_articles = blog.articles | where: 'id', article.id %}
+                {% for related_article in blog.articles limit: 3 %}
+                  {% unless related_articles contains related_article %}
+                    {% render 'article-card',
+                      article: related_article,
+                      show_excerpt: true,
+                      show_tags: false,
+                      compact: true %}
+                  {% endunless %}
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          <!-- 评论区域 -->
+          {% if blog.comments_enabled? %}
+            <section id="comments" class="article-comments">
+              <h2 class="article-comments__title">
+                {{ 'blog.comments.title' | t }} ({{ article.comments_count }})
+              </h2>
+
+              {% if article.comments_count > 0 %}
+                <div class="article-comments__list">
+                  {% for comment in article.comments %}
+                    {% render 'comment', comment: comment %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <!-- 评论表单 -->
+              <div class="article-comments__form">
+                {% form 'new_comment', article %}
+                  {{ form.errors | default_errors }}
+
+                  <div class="comment-form__fields">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="comment-author" class="form-label">
+                          {{ 'blog.comments.name' | t }} *
+                        </label>
+                        <input type="text"
+                               id="comment-author"
+                               name="comment[author]"
+                               class="form-input"
+                               value="{{ form.author }}"
+                               required
+                               aria-required="true">
+                      </div>
+
+                      <div class="form-group">
+                        <label for="comment-email" class="form-label">
+                          {{ 'blog.comments.email' | t }} *
+                        </label>
+                        <input type="email"
+                               id="comment-email"
+                               name="comment[email]"
+                               class="form-input"
+                               value="{{ form.email }}"
+                               required
+                               aria-required="true">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="comment-body" class="form-label">
+                        {{ 'blog.comments.comment' | t }} *
+                      </label>
+                      <textarea id="comment-body"
+                                name="comment[body]"
+                                class="form-textarea"
+                                rows="5"
+                                required
+                                aria-required="true">{{ form.body }}</textarea>
+                    </div>
+                  </div>
+
+                  <div class="comment-form__actions">
+                    <button type="submit" class="btn btn--primary">
+                      {{ 'blog.comments.post_comment' | t }}
+                    </button>
+                  </div>
+                {% endform %}
+              </div>
+            </section>
+          {% endif %}
+        </main>
+
+        <!-- 文章侧边栏 -->
+        <aside class="article-sidebar">
+          {% section 'article-sidebar' %}
+        </aside>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .article-container {
+    background: var(--color-bg-primary);
+    min-height: 100vh;
+  }
+
+  .article-header {
+    background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+    padding: var(--spacing-8) 0 var(--spacing-12);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(135, 206, 235, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+  }
+
+  .article-header__content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .article-header__title {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-6);
+    line-height: 1.2;
+    background: linear-gradient(45deg, var(--color-text-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .article-meta__primary {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .article-meta__image {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 3px solid var(--color-secondary);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+  }
+
+  .article-meta__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .article-meta__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    text-align: left;
+  }
+
+  .article-meta__label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .article-meta__value {
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .article-meta__link {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      color: var(--color-accent);
+      text-decoration: underline;
+    }
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    justify-content: center;
+  }
+
+  .article-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-1) var(--spacing-3);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--duration-fast) var(--ease-out);
+    border: 1px solid var(--color-border);
+
+    &:hover {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      transform: translateY(-1px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+
+    &--more {
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-light);
+      cursor: default;
+      border: 1px dashed var(--color-border);
+
+      &:hover {
+        transform: none;
+        @include glow(none);
+      }
+    }
+  }
+
+  .article-reading-time {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+  }
+
+  .article-content {
+    padding: var(--spacing-12) 0;
+  }
+
+  .article-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--spacing-12);
+    align-items: start;
+  }
+
+  .article-main {
+    max-width: none;
+  }
+
+  .article-feature-image {
+    margin-bottom: var(--spacing-8);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-large);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 40%, rgba(135, 206, 235, 0.1) 50%, transparent 60%);
+      pointer-events: none;
+    }
+  }
+
+  .article-feature-image__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform var(--duration-slow) var(--ease-sci-fi);
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+
+  .article-body {
+    margin-bottom: var(--spacing-12);
+  }
+
+  .article-body__content {
+    font-size: var(--font-size-lg);
+    line-height: 1.8;
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    padding: var(--spacing-8);
+    border-radius: var(--radius-lg);
+    @include scifi-card();
+
+    h1, h2, h3, h4, h5, h6 {
+      margin: var(--spacing-6) 0 var(--spacing-4);
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    h2 {
+      font-size: var(--font-size-2xl);
+      border-bottom: 2px solid var(--color-secondary);
+      padding-bottom: var(--spacing-2);
+    }
+
+    h3 {
+      font-size: var(--font-size-xl);
+    }
+
+    p {
+      margin: var(--spacing-4) 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    a {
+      color: var(--color-secondary);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+      border-bottom: 1px solid transparent;
+      transition: all var(--duration-fast) var(--ease-out);
+
+      &:hover {
+        color: var(--color-accent);
+        border-bottom-color: var(--color-accent);
+        @include glow(var(--glow-size-small, var(--color-accent), 0.3);
+      }
+    }
+
+    ul, ol {
+      margin: var(--spacing-4) 0;
+      padding-left: var(--spacing-6);
+    }
+
+    li {
+      margin: var(--spacing-2) 0;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--color-secondary);
+      margin: var(--spacing-6) 0;
+      padding: var(--spacing-4) var(--spacing-6);
+      background: rgba(135, 206, 235, 0.1);
+      border-radius: 0 var(--radius-base) var(--radius-base) 0;
+      font-style: italic;
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.2);
+    }
+
+    code {
+      background: var(--color-bg-tertiary);
+      padding: 0.2em 0.4em;
+      border-radius: var(--radius-base);
+      font-family: var(--font-family-mono);
+      font-size: 0.9em;
+      border: 1px solid var(--color-border);
+    }
+
+    pre {
+      background: var(--color-bg-tertiary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+      overflow-x: auto;
+      margin: var(--spacing-6) 0;
+
+      code {
+        background: none;
+        padding: 0;
+        border: none;
+        font-size: 1em;
+      }
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+      margin: var(--spacing-4) 0;
+      box-shadow: var(--shadow-medium);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--spacing-6) 0;
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-medium);
+    }
+
+    th, td {
+      padding: var(--spacing-3) var(--spacing-4);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    th {
+      background: var(--color-bg-tertiary);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+  }
+
+  .article-navigation {
+    margin: var(--spacing-12) 0;
+    padding: var(--spacing-8) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .article-navigation__content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-8);
+  }
+
+  .article-navigation__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding: var(--spacing-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: all var(--duration-normal) var(--ease-out);
+    border: 1px solid var(--color-border);
+
+    &:hover {
+      background: var(--color-bg-tertiary);
+      border-color: var(--color-secondary);
+      transform: translateY(-2px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &.article-navigation__prev {
+      text-align: left;
+    }
+
+    &.article-navigation__next {
+      text-align: right;
+    }
+  }
+
+  .article-navigation__direction {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-secondary);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .article-navigation__next .article-navigation__direction {
+    justify-content: flex-end;
+  }
+
+  .article-navigation__title {
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+  }
+
+  .related-articles {
+    margin: var(--spacing-12) 0;
+  }
+
+  .related-articles__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-6);
+    color: var(--color-text-primary);
+    text-align: center;
+  }
+
+  .related-articles__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-6);
+  }
+
+  .article-comments {
+    margin-top: var(--spacing-12);
+    padding-top: var(--spacing-8);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article-comments__title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-8);
+    color: var(--color-text-primary);
+  }
+
+  .article-comments__list {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .article-comments__form {
+    background: var(--color-bg-secondary);
+    padding: var(--spacing-6);
+    border-radius: var(--radius-lg);
+    @include scifi-card();
+  }
+
+  .comment-form__fields {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: var(--spacing-2);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: var(--spacing-3);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-base);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--duration-normal) var(--ease-out);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+    }
+
+    &::placeholder {
+      color: var(--color-text-light);
+      opacity: 0.7;
+    }
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+  }
+
+  .comment-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-4);
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .article-header {
+      padding: var(--spacing-6) 0 var(--spacing-8);
+    }
+
+    .article-header__title {
+      font-size: var(--font-size-3xl);
+    }
+
+    .article-meta__primary {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .article-meta__info {
+      text-align: center;
+    }
+
+    .article-layout {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-8);
+    }
+
+    .article-navigation__content {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .related-articles__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @include respond-to('lg') {
+    .article-body__content {
+      padding: var(--spacing-12);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 文章内容图片懒加载
+    const articleImages = document.querySelectorAll('.article-body__content img');
+
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+              img.classList.add('loaded');
+              imageObserver.unobserve(img);
+            }
+          }
+        });
+      }, {
+        rootMargin: '50px 0px'
+      });
+
+      articleImages.forEach(img => {
+        if (img.dataset.src) {
+          imageObserver.observe(img);
+        }
+      });
+    }
+
+    // 文章目录生成（如果需要）
+    const articleContent = document.querySelector('.article-body__content');
+    const headings = articleContent.querySelectorAll('h2, h3');
+
+    if (headings.length > 3) {
+      const toc = document.createElement('div');
+      toc.className = 'article-toc';
+      toc.innerHTML = `
+        <h3 class="article-toc__title">目录</h3>
+        <ul class="article-toc__list">
+          ${Array.from(headings).map((heading, index) =>
+            `<li class="article-toc__item">
+              <a href="#heading-${index}" class="article-toc__link">${heading.textContent}</a>
+            </li>`
+          ).join('')}
+        </ul>
+      `;
+
+      // 为标题添加ID
+      headings.forEach((heading, index) => {
+        heading.id = `heading-${index}`;
+      });
+
+      // 插入目录
+      const firstParagraph = articleContent.querySelector('p');
+      if (firstParagraph) {
+        firstParagraph.parentNode.insertBefore(toc, firstParagraph.nextSibling);
+      }
+    }
+
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  });
+</script>

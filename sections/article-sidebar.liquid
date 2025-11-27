@@ -1,0 +1,808 @@
+{% comment %}
+  文章侧边栏区块
+  包含作者信息、目录、相关标签等
+{% endcomment %}
+
+{%- assign article_author = article.user -%}
+
+<div class="article-sidebar" data-article-sidebar>
+  <!-- 作者信息卡片 -->
+  {% if article_author %}
+    <div class="article-sidebar__section author-card">
+      <div class="author-card__header">
+        {% if article_author.avatar_url %}
+          <img src="{{ article_author.avatar_url }}"
+               alt="{{ article_author.first_name | default: 'Author' }}"
+               loading="lazy"
+               width="80"
+               height="80"
+               class="author-card__avatar">
+        {% else %}
+          <div class="author-card__avatar-placeholder">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor">
+              <circle cx="20" cy="15" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M8 32c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+        {% endif %}
+        <div class="author-card__info">
+          <h3 class="author-card__name">{{ article_author.first_name | default: article.author }}</h3>
+          {% if article_author.bio %}
+            <p class="author-card__bio">{{ article_author.bio | truncate: 100 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if article_author.bio %}
+        <div class="author-card__description">
+          {{ article_author.bio | truncatewords: 20 }}
+        </div>
+      {% endif %}
+
+      <div class="author-card__stats">
+        <div class="author-stats__item">
+          <span class="author-stats__value">{{ blog.articles | where: 'author', article.author | size }}</span>
+          <span class="author-stats__label">{{ 'blog.sidebar.articles' | t }}</span>
+        </div>
+        <div class="author-stats__item">
+          <span class="author-stats__value">{{ article.published_at | date: '%Y' }}</span>
+          <span class="author-stats__label">{{ 'blog.sidebar.since' | t }}</span>
+        </div>
+      </div>
+
+      {% if article_author.website or article_author.twitter %}
+        <div class="author-card__social">
+          {% if article_author.website %}
+            <a href="{{ article_author.website }}"
+               class="author-social__item"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="{{ 'blog.sidebar.author_website' | t }}">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                <path d="M2 9c0-3.9 3.1-7 7-7s7 3.1 7 7-3.1 7-7 7-7-3.1-7-7zm7-5c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z"/>
+              </svg>
+            </a>
+          {% endif %}
+          {% if article_author.twitter %}
+            <a href="https://twitter.com/{{ article_author.twitter }}"
+               class="author-social__item"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="{{ 'blog.sidebar.author_twitter' | t }}">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor">
+                <path d="M16 4.5c-.6.3-1.3.5-2 .6.7-.4 1.3-1.1 1.6-2-.7.4-1.4.7-2.3.9-.6-.7-1.6-1.1-2.7-1.1-2 0-3.7 1.7-3.7 3.7 0 .3 0 .6.1.8C5.8 7.1 3.1 5.7 1.3 3.5c-.3.6-.5 1.3-.5 2 0 1.3.6 2.4 1.6 3-.6 0-1.2-.2-1.7-.5v.1c0 1.8 1.3 3.3 2.9 3.6-.3.1-.6.1-1 .1-.2 0-.5 0-.7-.1.5 1.5 1.8 2.6 3.4 2.6-1.3 1-2.9 1.6-4.6 1.6-.3 0-.6 0-.9-.1 1.7 1 3.6 1.6 5.7 1.6 6.8 0 10.6-5.7 10.6-10.6v-.5c.7-.5 1.3-1.2 1.9-1.9z"/>
+              </svg>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- 文章目录 -->
+  <div class="article-sidebar__section table-of-contents" data-table-of-contents>
+    <h3 class="article-sidebar__title">{{ 'blog.sidebar.contents' | t }}</h3>
+    <nav class="toc-nav" data-toc-nav>
+      <div class="toc-placeholder">
+        {{ 'blog.sidebar.loading_toc' | t }}
+      </div>
+    </nav>
+  </div>
+
+  <!-- 文章信息 -->
+  <div class="article-sidebar__section article-info">
+    <h3 class="article-sidebar__title">{{ 'blog.sidebar.article_info' | t }}</h3>
+    <div class="article-info__list">
+      <div class="article-info__item">
+        <span class="article-info__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="2" y="4" width="10" height="8" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M4 2v2M10 2v2M2 6h10" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </span>
+        <div class="article-info__content">
+          <span class="article-info__label">{{ 'blog.article.published_date' | t }}</span>
+          <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}" class="article-info__value">
+            {{ article.published_at | date: format: 'date_long' }}
+          </time>
+        </div>
+      </div>
+
+      {% if article.updated_at != article.published_at %}
+        <div class="article-info__item">
+          <span class="article-info__icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 2v6l4 2M8 2c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6 2.7-6 6-6z" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
+          </span>
+          <div class="article-info__content">
+            <span class="article-info__label">{{ 'blog.article.updated_date' | t }}</span>
+            <time datetime="{{ article.updated_at | date: '%Y-%m-%d' }}" class="article-info__value">
+              {{ article.updated_at | date: format: 'date_long' }}
+            </time>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="article-info__item">
+        <span class="article-info__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 2v6l4 2" stroke="currentColor" stroke-width="2" fill="none"/>
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>
+        </span>
+        <div class="article-info__content">
+          <span class="article-info__label">{{ 'blog.article.reading_time' | t }}</span>
+          <span class="article-info__value">{{ 'blog.article.reading_time_minutes' | t: minutes: article.content | strip_html | strip | split: ' ' | size | divided_by: 200 | ceil }}</span>
+        </div>
+      </div>
+
+      <div class="article-info__item">
+        <span class="article-info__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2 6h12M2 10h12M4 2l-2 4v6a2 2 0 002 2h8a2 2 0 002-2V6l-2-4H4z"/>
+          </svg>
+        </span>
+        <div class="article-info__content">
+          <span class="article-info__label">{{ 'blog.article.category' | t }}</span>
+          <span class="article-info__value">{{ blog.title }}</span>
+        </div>
+      </div>
+
+      {% if blog.comments_enabled? %}
+        <div class="article-info__item">
+          <span class="article-info__icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1C3.5 1 0.5 4 0.5 7.5c0 2 1 3.8 2.5 4.8V13l2.3-1.2c0.5 0.1 1.1 0.2 1.7 0.2 3.5 0 6.5-3 6.5-6.5S11.5 1 8 1z" stroke="currentColor" stroke-width="1" fill="none"/>
+              <path d="M15.8 12.4c0-2-1-3.8-2.5-4.8" stroke="currentColor" stroke-width="1" fill="none"/>
+            </svg>
+          </span>
+          <div class="article-info__content">
+            <span class="article-info__label">{{ 'blog.article.comments' | t }}</span>
+            <a href="#comments" class="article-info__value">
+              {{ article.comments_count }} {{ 'blog.article.comments_count' | t }}
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 标签 -->
+  {% if article.tags.size > 0 %}
+    <div class="article-sidebar__section article-tags">
+      <h3 class="article-sidebar__title">{{ 'blog.sidebar.tags' | t }}</h3>
+      <div class="article-tags__list">
+        {% for tag in article.tags %}
+          <a href="{{ blog.url }}/tagged/{{ tag | handle }}"
+             class="article-tag">
+            {{ tag }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- 阅读进度 -->
+  <div class="article-sidebar__section reading-progress" data-reading-progress>
+    <h3 class="article-sidebar__title">{{ 'blog.sidebar.reading_progress' | t }}</h3>
+    <div class="progress-container">
+      <div class="progress-bar" data-progress-bar>
+        <div class="progress-fill" data-progress-fill></div>
+      </div>
+      <span class="progress-text" data-progress-text>0%</span>
+    </div>
+  </div>
+
+  <!-- 分享按钮 -->
+  <div class="article-sidebar__section share-widget">
+    <h3 class="article-sidebar__title">{{ 'blog.sidebar.share' | t }}</h3>
+    {% render 'social-sharing',
+      share_title: article.title,
+      share_permalink: article.url,
+      share_image: article.image,
+      share_description: article.excerpt %}
+  </div>
+
+  <!-- 返回顶部按钮 -->
+  <button type="button"
+          class="back-to-top"
+          data-back-to-top
+          aria-label="{{ 'general.accessibility.back_to_top' | t }}">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10 5l5 5M10 5l-5 5M10 5v10" stroke="currentColor" stroke-width="2" fill="none"/>
+    </svg>
+    <span>{{ 'blog.sidebar.back_to_top' | t }}</span>
+  </button>
+</div>
+
+<style>
+  .article-sidebar {
+    position: sticky;
+    top: var(--spacing-6);
+  }
+
+  .article-sidebar__section {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    border: 1px solid var(--color-border);
+    @include scifi-card();
+  }
+
+  .article-sidebar__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-4);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  /* 作者信息卡片 */
+  .author-card {
+    text-align: center;
+  }
+
+  .author-card__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+  }
+
+  .author-card__avatar,
+  .author-card__avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    margin-bottom: var(--spacing-3);
+    border: 3px solid var(--color-secondary);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+  }
+
+  .author-card__avatar {
+    object-fit: cover;
+  }
+
+  .author-card__avatar-placeholder {
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+  }
+
+  .author-card__name {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .author-card__bio {
+    font-size: var(--font-size-sm);
+    color: var(--color-secondary);
+    margin: var(--spacing-1) 0 0;
+  }
+
+  .author-card__description {
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .author-card__stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: var(--spacing-4);
+    padding: var(--spacing-3) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .author-stats__item {
+    text-align: center;
+  }
+
+  .author-stats__value {
+    display: block;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-secondary);
+  }
+
+  .author-stats__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .author-card__social {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-3);
+  }
+
+  .author-social__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    color: var(--color-text-light);
+    text-decoration: none;
+    transition: all var(--duration-normal) var(--ease-out);
+    border: 2px solid var(--color-border);
+
+    &:hover {
+      color: var(--color-secondary);
+      border-color: var(--color-secondary);
+      transform: translateY(-2px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+  }
+
+  /* 文章目录 */
+  .toc-nav {
+    font-size: var(--font-size-sm);
+  }
+
+  .toc-placeholder {
+    color: var(--color-text-light);
+    font-style: italic;
+    text-align: center;
+    padding: var(--spacing-4) 0;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-item {
+    margin-bottom: var(--spacing-2);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .toc-link {
+    display: block;
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-base);
+    transition: all var(--duration-fast) var(--ease-out);
+    line-height: 1.4;
+
+    &:hover {
+      background: var(--color-bg-secondary);
+      color: var(--color-secondary);
+      transform: translateX(2px);
+    }
+
+    &.active {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+
+    &.toc-h3 {
+      padding-left: var(--spacing-6);
+      font-size: 0.9em;
+      color: var(--color-text-light);
+    }
+  }
+
+  /* 文章信息 */
+  .article-info__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .article-info__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+
+  .article-info__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-base);
+    color: var(--color-secondary);
+    flex-shrink: 0;
+    font-size: var(--font-size-sm);
+  }
+
+  .article-info__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .article-info__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--spacing-1);
+  }
+
+  .article-info__value {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+
+    &.article-info__value--link {
+      color: var(--color-secondary);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  /* 文章标签 */
+  .article-tags__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  .article-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid var(--color-border);
+    transition: all var(--duration-fast) var(--ease-out);
+
+    &:hover {
+      background: var(--color-secondary);
+      color: var(--color-text-inverse);
+      transform: translateY(-1px);
+      @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+    }
+  }
+
+  /* 阅读进度 */
+  .progress-container {
+    text-align: center;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-2);
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-secondary), var(--color-accent));
+    width: 0%;
+    transition: width 0.3s ease;
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.3);
+  }
+
+  .progress-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* 返回顶部按钮 */
+  .back-to-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    @include glow(var(--glow-size-small, var(--color-secondary), 0.4);
+
+    &:hover {
+      transform: translateY(-2px);
+      @include glow(var(--glow-size-medium, var(--color-secondary), 0.6);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  /* 响应式设计 */
+  @include mobile-only {
+    .article-sidebar {
+      position: static;
+      margin-top: var(--spacing-8);
+    }
+
+    .article-sidebar__section {
+      padding: var(--spacing-4);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .author-card__stats {
+      flex-direction: row;
+      justify-content: space-around;
+    }
+
+    .author-stats__item {
+      flex: 1;
+    }
+  }
+
+  @include respond-to('md') {
+    .article-sidebar {
+      max-width: 280px;
+      margin-left: auto;
+    }
+  }
+
+  // 高对比度模式支持
+  @media (prefers-contrast: high) {
+    .article-sidebar__section {
+      border-width: 2px;
+    }
+
+    .author-card__avatar,
+    .author-card__avatar-placeholder {
+      border-width: 4px;
+    }
+  }
+
+  // 减少动画偏好支持
+  @media (prefers-reduced-motion: reduce) {
+    .article-tag:hover,
+    .author-social__item:hover {
+      transform: none;
+    }
+
+    .progress-fill {
+      transition: none;
+    }
+
+    .back-to-top {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 生成文章目录
+    const tocNav = document.querySelector('[data-toc-nav]');
+    const articleContent = document.querySelector('.article-body__content');
+
+    if (tocNav && articleContent) {
+      const headings = articleContent.querySelectorAll('h2, h3');
+
+      if (headings.length > 0) {
+        const tocList = document.createElement('ul');
+        tocList.className = 'toc-list';
+
+        headings.forEach((heading, index) => {
+          // 为标题添加ID
+          const id = `heading-${index}`;
+          heading.id = id;
+
+          // 创建目录项
+          const tocItem = document.createElement('li');
+          tocItem.className = 'toc-item';
+
+          const tocLink = document.createElement('a');
+          tocLink.href = `#${id}`;
+          tocLink.className = `toc-link ${heading.tagName.toLowerCase()}`;
+          tocLink.textContent = heading.textContent;
+
+          tocItem.appendChild(tocLink);
+          tocList.appendChild(tocItem);
+        });
+
+        tocNav.innerHTML = '';
+        tocNav.appendChild(tocList);
+
+        // 平滑滚动
+        tocNav.addEventListener('click', function(e) {
+          if (e.target.classList.contains('toc-link')) {
+            e.preventDefault();
+            const targetId = e.target.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+
+            if (targetElement) {
+              targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }
+          }
+        });
+
+        // 激活当前目录项
+        const observeHeadings = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const activeLink = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+              if (activeLink) {
+                document.querySelectorAll('.toc-link').forEach(link => {
+                  link.classList.remove('active');
+                });
+                activeLink.classList.add('active');
+              }
+            }
+          });
+        }, {
+          rootMargin: '-20% 0px -70% 0px'
+        });
+
+        headings.forEach(heading => {
+          observeHeadings.observe(heading);
+        });
+      } else {
+        tocNav.innerHTML = '<div class="toc-placeholder">{{ 'blog.sidebar.no_headings' | t }}</div>';
+      }
+    }
+
+    // 阅读进度
+    const progressBar = document.querySelector('[data-progress-fill]');
+    const progressText = document.querySelector('[data-progress-text]');
+
+    if (progressBar && progressText && articleContent) {
+      function updateReadingProgress() {
+        const articleRect = articleContent.getBoundingClientRect();
+        const articleHeight = articleContent.offsetHeight;
+        const windowHeight = window.innerHeight;
+
+        const readPixels = Math.max(0, windowHeight - articleRect.top);
+        const progress = Math.min(100, Math.max(0, (readPixels / articleHeight) * 100));
+
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `${Math.round(progress)}%`;
+      }
+
+      window.addEventListener('scroll', updateReadingProgress);
+      updateReadingProgress();
+    }
+
+    // 返回顶部按钮
+    const backToTop = document.querySelector('[data-back-to-top]');
+
+    if (backToTop) {
+      function toggleBackToTop() {
+        const isVisible = window.pageYOffset > 300;
+        backToTop.classList.toggle('visible', isVisible);
+      }
+
+      window.addEventListener('scroll', toggleBackToTop);
+      toggleBackToTop();
+
+      backToTop.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    // 社交分享增强
+    const socialLinks = document.querySelectorAll('.social-sharing__link');
+    socialLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        const platform = this.dataset.platform;
+
+        // 触发自定义事件
+        const shareEvent = new CustomEvent('articleSidebarShare', {
+          detail: {
+            platform: platform,
+            url: this.href,
+            title: '{{ article.title | json }}'
+          }
+        });
+        document.dispatchEvent(shareEvent);
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "文章侧边栏",
+  "class": "article-sidebar-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "作者信息"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "显示作者信息",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "文章目录"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toc",
+      "label": "显示文章目录",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "文章信息"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_info",
+      "label": "显示文章信息",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reading_progress",
+      "label": "显示阅读进度",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "分享设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_share",
+      "label": "显示分享按钮",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "文章侧边栏",
+      "category": "博客"
+    }
+  ]
+}
+{% endschema %}

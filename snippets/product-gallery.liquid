@@ -1,0 +1,730 @@
+{%- comment -%}
+  产品图片画廊组件
+  包含主图、缩略图、放大镜效果
+{%- endcomment -%}
+
+<div class="product-gallery-container" data-product-gallery>
+  <!-- 主图区域 -->
+  <div class="gallery-main">
+    <div class="main-image-container" data-main-image>
+      {%- assign current_variant = product.selected_or_first_available_variant -%}
+      {%- assign featured_image = current_variant.featured_image | default: product.featured_image -%}
+
+      {%- if featured_image -%}
+        <div class="main-image-wrapper" id="MainImageWrapper">
+          <img id="MainImage"
+               src="{{ featured_image | image_url: width: 800 }}"
+               srcset="
+                 {{ featured_image | image_url: width: 400 }} 400w,
+                 {{ featured_image | image_url: width: 600 }} 600w,
+                 {{ featured_image | image_url: width: 800 }} 800w,
+                 {{ featured_image | image_url: width: 1000 }} 1000w,
+                 {{ featured_image | image_url: width: 1200 }} 1200w
+               "
+               sizes="(max-width: 768px) 100vw, 50vw"
+               alt="{{ featured_image.alt | default: product.title | escape }}"
+               loading="eager"
+               class="main-image"
+               data-image-id="{{ featured_image.id }}"
+               data-zoom-url="{{ featured_image | image_url: width: 2400 }}">
+
+          <!-- 放大镜遮罩 -->
+          <div class="zoom-overlay" data-zoom-overlay>
+            <div class="zoom-lens" data-zoom-lens></div>
+          </div>
+
+          <!-- 加载指示器 -->
+          <div class="image-loading" data-image-loading>
+            {% render 'icon-spinner' %}
+          </div>
+        </div>
+
+        {%- else -%}
+        <div class="no-image-placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'no-image-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <!-- 图片控制按钮 -->
+    <div class="gallery-controls">
+      <button class="gallery-btn gallery-btn-prev btn btn-icon btn-ghost" data-gallery-prev>
+        <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <button class="gallery-btn gallery-btn-next btn btn-icon btn-ghost" data-gallery-next>
+        <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <!-- 全屏按钮 -->
+      <button class="gallery-btn gallery-btn-fullscreen btn btn-icon btn-ghost" data-gallery-fullscreen>
+        <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8V4m0 0h4M3 4l4 4m10 0V4m0 0h-4m4 0l-4 4m-6 8v4m0 0h4m-4 0l4-4m6 4l-4-4m0 4h4"/>
+        </svg>
+      </button>
+
+      <!-- 360度视图按钮 -->
+      {%- if product.media contains media.media_type == 'model' -%}
+        <button class="gallery-btn gallery-btn-3d btn btn-icon btn-ghost" data-gallery-3d>
+          <svg class="btn__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- 缩略图列表 -->
+  {%- if product.images.size > 1 -%}
+    <div class="gallery-thumbnails">
+      <div class="thumbnails-container" data-thumbnails>
+        {%- for image in product.images -%}
+          {%- liquid
+            assign image_alt = image.alt | default: product.title
+            assign image_id = image.id
+          -%}
+
+          <div class="thumbnail-item {% if forloop.first %}active{% endif %}"
+               data-thumbnail-id="{{ image_id }}"
+               data-image-url="{{ image | image_url: width: 800 }}"
+               data-zoom-url="{{ image | image_url: width: 2400 }}">
+            <img src="{{ image | image_url: width: 100, height: 100 }}"
+                 srcset="{{ image | image_url: width: 100 }} 1x, {{ image | image_url: width: 200 }} 2x"
+                 alt="{{ image_alt | escape }}"
+                 class="thumbnail-image"
+                 loading="lazy"
+                 width="100"
+                 height="100">
+
+            <!-- 视频指示器 -->
+            {%- if image.media_type == 'video' -%}
+              <div class="media-indicator video-indicator">
+                {% render 'icon-play' %}
+              </div>
+            {%- elsif image.media_type == 'external_video' -%}
+              <div class="media-indicator video-indicator">
+                {% render 'icon-play' %}
+              </div>
+            {%- elsif image.media_type == 'model' -%}
+              <div class="media-indicator model-indicator">
+                {% render 'icon-3d' %}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 产品媒体画廊 (3D模型, 视频等) -->
+  <div class="product-media-gallery" data-product-media-gallery>
+    {%- for media in product.media -%}
+      {%- case media.media_type -%}
+        {%- when 'external_video' -%}
+          <div class="media-external-video" data-media-id="{{ media.id }}">
+            {{ media | external_video_tag }}
+          </div>
+
+        {%- when 'video' -%}
+          <div class="media-video" data-media-id="{{ media.id }}">
+            {{ media | video_tag: controls: true, autoplay: false, loop: false, muted: false, image_size: '800x600' }}
+          </div>
+
+        {%- when 'model' -%}
+          <div class="media-model" data-media-id="{{ media.id }}">
+            {{ media | model_viewer_tag: toggleable: true, auto-rotate: true }}
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<!-- 全屏图片查看器 -->
+<div class="image-viewer" data-image-viewer>
+  <div class="image-viewer-content">
+    <button class="image-viewer-close btn btn-icon btn-ghost" data-viewer-close>
+      <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div class="image-viewer-main">
+      <img id="ViewerImage" src="" alt="" class="viewer-image">
+    </div>
+
+    <div class="image-viewer-thumbnails">
+      <!-- 缩略图将动态加载 -->
+    </div>
+  </div>
+</div>
+
+<style>
+/* 产品图片画廊 */
+.product-gallery-container {
+  position: relative;
+}
+
+.gallery-main {
+  position: relative;
+  margin-bottom: var(--spacing-4);
+}
+
+.main-image-container {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border-light);
+}
+
+.main-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--duration-normal) var(--ease-out);
+  cursor: zoom-in;
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.no-image-svg {
+  width: 200px;
+  height: 200px;
+  opacity: 0.3;
+}
+
+/* 放大镜效果 */
+.zoom-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.main-image-wrapper:hover .zoom-overlay {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.zoom-lens {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border: 2px solid var(--color-secondary);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  box-shadow: 0 0 20px var(--glow-primary);
+}
+
+/* 图片控制按钮 */
+.gallery-controls {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 var(--spacing-4);
+  pointer-events: none;
+  z-index: 15;
+}
+
+.gallery-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-medium);
+  pointer-events: all;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--glow-primary);
+  }
+}
+
+.gallery-btn-fullscreen,
+.gallery-btn-3d {
+  position: absolute;
+  bottom: var(--spacing-4);
+  right: var(--spacing-4);
+}
+
+.gallery-btn-3d {
+  bottom: var(--spacing-4);
+  right: calc(var(--spacing-4) + 48px + var(--spacing-2));
+}
+
+/* 缩略图 */
+.gallery-thumbnails {
+  margin-top: var(--spacing-4);
+}
+
+.thumbnails-container {
+  display: flex;
+  gap: var(--spacing-2);
+  overflow-x: auto;
+  padding: var(--spacing-1) 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.thumbnail-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-secondary);
+    transform: translateY(-2px);
+  }
+
+  &.active {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 10px var(--glow-primary);
+  }
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-normal) var(--ease-sci-fi);
+}
+
+.thumbnail-item:hover .thumbnail-image {
+  transform: scale(1.1);
+}
+
+/* 媒体指示器 */
+.media-indicator {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-inverse);
+  font-size: 12px;
+}
+
+.video-indicator {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+.model-indicator {
+  background: rgba(40, 167, 69, 0.9);
+}
+
+/* 加载指示器 */
+.image-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.image-loading.active {
+  opacity: 1;
+}
+
+/* 产品媒体画廊 */
+.product-media-gallery {
+  display: none;
+}
+
+.media-external-video,
+.media-video {
+  margin-bottom: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.media-video video,
+.media-external-video iframe {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+}
+
+.media-model {
+  width: 100%;
+  height: 600px;
+  margin-bottom: var(--spacing-4);
+}
+
+/* 全屏图片查看器 */
+.image-viewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: var(--z-modal-backdrop);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+}
+
+.image-viewer.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.image-viewer-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-viewer-close {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 10;
+  color: var(--color-text-inverse);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.image-viewer-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+}
+
+.viewer-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+}
+
+.image-viewer-thumbnails {
+  padding: var(--spacing-4);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .gallery-controls {
+    padding: 0 var(--spacing-2);
+  }
+
+  .gallery-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-btn-fullscreen,
+  .gallery-btn-3d {
+    bottom: var(--spacing-2);
+    right: var(--spacing-2);
+  }
+
+  .gallery-btn-3d {
+    right: calc(var(--spacing-2) + 40px + var(--spacing-1));
+  }
+
+  .thumbnail-item {
+    width: 60px;
+    height: 60px;
+  }
+
+  .media-model {
+    height: 400px;
+  }
+
+  .image-viewer-main {
+    padding: var(--spacing-4);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .main-image,
+  .thumbnail-item,
+  .gallery-btn,
+  .image-viewer {
+    transition: none;
+  }
+
+  .thumbnail-item:hover .thumbnail-image {
+    transform: none;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const galleryContainer = document.querySelector('[data-product-gallery]');
+  if (!galleryContainer) return;
+
+  const mainImage = document.getElementById('MainImage');
+  const thumbnails = document.querySelectorAll('[data-thumbnail-id]');
+  const prevBtn = galleryContainer.querySelector('[data-gallery-prev]');
+  const nextBtn = galleryContainer.querySelector('[data-gallery-next]');
+  const fullscreenBtn = galleryContainer.querySelector('[data-gallery-fullscreen]');
+  const imageViewer = document.querySelector('[data-image-viewer]');
+  const viewerClose = imageViewer?.querySelector('[data-viewer-close]');
+
+  let currentImageIndex = 0;
+  let images = [];
+
+  // 初始化图片数组
+  thumbnails.forEach((thumbnail, index) => {
+    images.push({
+      id: thumbnail.dataset.thumbnailId,
+      url: thumbnail.dataset.imageUrl,
+      zoomUrl: thumbnail.dataset.zoomUrl
+    });
+
+    thumbnail.addEventListener('click', function() {
+      selectImage(index);
+    });
+  });
+
+  // 选择图片
+  function selectImage(index) {
+    if (index < 0 || index >= images.length) return;
+
+    currentImageIndex = index;
+    const image = images[index];
+
+    // 更新缩略图状态
+    thumbnails.forEach((thumb, i) => {
+      thumb.classList.toggle('active', i === index);
+    });
+
+    // 更新主图
+    if (mainImage) {
+      mainImage.style.opacity = '0';
+
+      setTimeout(() => {
+        mainImage.src = image.url;
+        mainImage.dataset.imageId = image.id;
+        mainImage.dataset.zoomUrl = image.zoomUrl;
+        mainImage.style.opacity = '1';
+      }, 150);
+    }
+
+    // 更新媒体画廊
+    updateMediaGallery(image.id);
+  }
+
+  // 更新媒体画廊
+  function updateMediaGallery(imageId) {
+    const mediaGallery = document.querySelector('[data-product-media-gallery]');
+    if (!mediaGallery) return;
+
+    const mediaItems = mediaGallery.querySelectorAll('[data-media-id]');
+    mediaItems.forEach(item => {
+      const isActive = item.dataset.mediaId === imageId;
+      item.style.display = isActive ? 'block' : 'none';
+    });
+  }
+
+  // 上一张图片
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      const newIndex = currentImageIndex - 1;
+      selectImage(newIndex < 0 ? images.length - 1 : newIndex);
+    });
+  }
+
+  // 下一张图片
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const newIndex = currentImageIndex + 1;
+      selectImage(newIndex >= images.length ? 0 : newIndex);
+    });
+  }
+
+  // 全屏查看
+  if (fullscreenBtn && imageViewer) {
+    fullscreenBtn.addEventListener('click', () => {
+      openImageViewer();
+    });
+
+    viewerClose.addEventListener('click', () => {
+      closeImageViewer();
+    });
+
+    // ESC键关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && imageViewer.classList.contains('active')) {
+        closeImageViewer();
+      }
+    });
+
+    // 点击背景关闭
+    imageViewer.addEventListener('click', (e) => {
+      if (e.target === imageViewer) {
+        closeImageViewer();
+      }
+    });
+  }
+
+  function openImageViewer() {
+    const viewerImage = document.getElementById('ViewerImage');
+    if (viewerImage && images[currentImageIndex]) {
+      viewerImage.src = images[currentImageIndex].url;
+      viewerImage.alt = mainImage?.alt || '';
+      imageViewer.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeImageViewer() {
+    imageViewer.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 键盘导航
+  document.addEventListener('keydown', (e) => {
+    if (document.activeElement === mainImage || document.activeElement.closest('.product-gallery-container')) {
+      if (e.key === 'ArrowLeft') {
+        prevBtn?.click();
+      } else if (e.key === 'ArrowRight') {
+        nextBtn?.click();
+      }
+    }
+  });
+
+  // 放大镜效果
+  if (mainImage && window.innerWidth > 768) {
+    initZoomEffect();
+  }
+
+  function initZoomEffect() {
+    const mainWrapper = document.querySelector('[data-main-image]');
+    const zoomOverlay = document.querySelector('[data-zoom-overlay]');
+    const zoomLens = document.querySelector('[data-zoom-lens]');
+
+    if (!mainWrapper || !zoomOverlay || !zoomLens) return;
+
+    let isZooming = false;
+
+    mainWrapper.addEventListener('mouseenter', () => {
+      isZooming = true;
+      mainImage.style.cursor = 'zoom-in';
+    });
+
+    mainWrapper.addEventListener('mouseleave', () => {
+      isZooming = false;
+      zoomLens.style.opacity = '0';
+    });
+
+    mainWrapper.addEventListener('mousemove', (e) => {
+      if (!isZooming) return;
+
+      const rect = mainWrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // 更新放大镜位置
+      zoomLens.style.left = `${x - 75}px`;
+      zoomLens.style.top = `${y - 75}px`;
+      zoomLens.style.opacity = '1';
+
+      // 这里可以添加实际的放大效果
+      // 需要创建一个放大后的图片容器
+    });
+
+    mainWrapper.addEventListener('click', () => {
+      openImageViewer();
+    });
+  }
+
+  // 触摸滑动支持
+  if ('ontouchstart' in window) {
+    initTouchSwipe();
+  }
+
+  function initTouchSwipe() {
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    mainImage.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    mainImage.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          // 向左滑动 - 下一张
+          nextBtn?.click();
+        } else {
+          // 向右滑动 - 上一张
+          prevBtn?.click();
+        }
+      }
+    }
+  }
+});
+</script>

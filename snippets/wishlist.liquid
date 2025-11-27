@@ -1,0 +1,704 @@
+{%- comment -%}
+  愿望清单组件
+  提供产品收藏和管理功能
+{%- endcomment -%}
+
+<template id="wishlist-template">
+  <div class="wishlist" data-wishlist aria-hidden="true">
+    <!-- 遮罩层 -->
+    <div class="wishlist__overlay" data-wishlist-overlay></div>
+
+    <!-- 愿望清单侧边栏 -->
+    <div class="wishlist__sidebar" data-wishlist-sidebar>
+      <!-- 头部 -->
+      <div class="wishlist__header">
+        <h2 class="wishlist__title">我的愿望清单</h2>
+        <div class="wishlist__actions">
+          <button type="button"
+                  class="wishlist__share"
+                  data-wishlist-share
+                  aria-label="分享愿望清单">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M15 8a3 3 0 00-3-3H5a3 3 0 00-3 3v6a3 3 0 003 3h7a3 3 0 003-3V8zM5 7h7a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1z"/>
+              <path d="M11 6l3-3M14 3l-3 3M14 3v3M14 3h-3"/>
+            </svg>
+          </button>
+          <button type="button"
+                  class="wishlist__close"
+                  data-wishlist-close
+                  aria-label="关闭愿望清单">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 内容区域 -->
+      <div class="wishlist__content">
+        <!-- 加载状态 -->
+        <div class="wishlist__loading" data-wishlist-loading style="display: none;">
+          <div class="loading-spinner">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" opacity="0.2"/>
+              <path d="M16 2a14 14 0 0114 14" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="1s" repeatCount="indefinite"/>
+              </path>
+            </svg>
+          </div>
+          <p class="loading-text">加载中...</p>
+        </div>
+
+        <!-- 空状态 -->
+        <div class="wishlist__empty" data-wishlist-empty style="display: none;">
+          <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M32 8L8 20v24a4 4 0 004 4h40a4 4 0 004-4V20L32 8z"/>
+              <path d="M32 8v20"/>
+              <path d="M20 28h24"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">愿望清单为空</h3>
+          <p class="empty-description">收藏您喜欢的产品，方便以后查看</p>
+          <a href="/collections/all" class="btn btn-primary">浏览产品</a>
+        </div>
+
+        <!-- 产品列表 -->
+        <div class="wishlist__products" data-wishlist-products style="display: none;">
+          <!-- 产品将通过JavaScript动态加载 -->
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="wishlist__stats" data-wishlist-stats style="display: none;">
+          <div class="stats-row">
+            <span class="stats-label">收藏产品数:</span>
+            <span class="stats-value" data-wishlist-count>0</span>
+          </div>
+          <div class="stats-row">
+            <span class="stats-label">总价值:</span>
+            <span class="stats-value" data-wishlist-total>¥0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部操作 -->
+      <div class="wishlist__footer" data-wishlist-footer style="display: none;">
+        <div class="wishlist-actions">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-wishlist-clear-all
+                  aria-label="清空愿望清单">
+            清空全部
+          </button>
+          <button type="button"
+                  class="btn btn-primary"
+                  data-wishlist-add-all-to-cart
+                  aria-label="全部加入购物车">
+            全部加入购物车
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- 愿望清单触发按钮模板 -->
+<template id="wishlist-trigger-template">
+  <button type="button"
+          class="wishlist-trigger"
+          data-wishlist-trigger
+          aria-label="查看愿望清单">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M8 6.5C5.5 6.5 3.3 8 2 10c1.3 2 3.5 3.5 6 3.5s4.7-1.5 6-3.5c-1.3-2-3.5-3.5-6-3.5zm0 6C6.6 12.5 5.5 11.4 5.5 10S6.6 7.5 8 7.5 10.5 8.6 10.5 10 9.4 12.5 8 12.5zm0-4c-.8 0-1.5.7-1.5 1.5S7.2 11.5 8 11.5 9.5 10.8 9.5 10 8.8 8.5 8 8.5z"/>
+    </svg>
+    <span class="wishlist-trigger__text">愿望清单</span>
+    <span class="wishlist-trigger__count" data-wishlist-trigger-count>0</span>
+  </button>
+</template>
+
+<!-- 产品收藏按钮模板 -->
+<template id="wishlist-product-button-template">
+  <button type="button"
+          class="wishlist-product-btn"
+          data-wishlist-product-btn
+          data-product-handle="{{ product.handle }}"
+          data-product-id="{{ product.id }}"
+          aria-label="添加到愿望清单">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" class="wishlist-icon">
+      <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+    </svg>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" class="wishlist-icon-filled" style="display: none;">
+      <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+    </svg>
+    <span class="wishlist-text">收藏</span>
+  </button>
+</template>
+
+<style>
+/* 愿望清单 */
+.wishlist {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-slow) var(--ease-sci-fi);
+}
+
+.wishlist[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 遮罩层 */
+.wishlist__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background var(--duration-normal) var(--ease-sci-fi);
+}
+
+.wishlist[aria-hidden="false"] .wishlist__overlay {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* 侧边栏 */
+.wishlist__sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 480px;
+  max-width: 100vw;
+  height: 100%;
+  background: var(--color-bg-primary);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+  transform: translateX(100%);
+  transition: transform var(--duration-slow) var(--ease-sci-fi);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wishlist[aria-hidden="false"] .wishlist__sidebar {
+  transform: translateX(0);
+}
+
+/* 头部 */
+.wishlist__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.wishlist__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.wishlist__actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.wishlist__share,
+.wishlist__close {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-secondary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+/* 内容区域 */
+.wishlist__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* 加载状态 */
+.wishlist__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+.loading-text {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+
+/* 空状态 */
+.wishlist__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  text-align: center;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-4);
+  color: var(--color-text-light);
+}
+
+.empty-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.empty-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-6);
+}
+
+/* 产品列表 */
+.wishlist__products {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.wishlist-product {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-secondary);
+    box-shadow: 0 4px 12px rgba(135, 206, 235, 0.2);
+  }
+}
+
+.wishlist-product__image {
+  position: relative;
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  aspect-ratio: 1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.wishlist-product__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.wishlist-product__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  line-height: var(--line-height-tight);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.wishlist-product__variant {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.wishlist-product__price {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: auto;
+
+  .price-current {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+  }
+
+  .price-original {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    text-decoration: line-through;
+  }
+}
+
+.wishlist-product__actions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-3);
+}
+
+.wishlist-product__remove {
+  padding: var(--spacing-2) var(--spacing-3);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+  }
+}
+
+.wishlist-product__add-to-cart {
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-secondary);
+  border: none;
+  border-radius: var(--radius-base);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-primary);
+    box-shadow: 0 2px 8px var(--glow-primary);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* 统计信息 */
+.wishlist__stats {
+  padding: var(--spacing-4);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.stats-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stats-value {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* 底部操作 */
+.wishlist__footer {
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.wishlist-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+}
+
+/* 触发按钮 */
+.wishlist-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  border-radius: var(--radius-base);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.wishlist-trigger__count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-error);
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* 产品收藏按钮 */
+.wishlist-product-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-error);
+    background: var(--color-error);
+    color: white;
+  }
+
+  &.is-added {
+    background: var(--color-error);
+    border-color: var(--color-error);
+    color: white;
+
+    .wishlist-icon {
+      display: none;
+    }
+
+    .wishlist-icon-filled {
+      display: block;
+    }
+
+    .wishlist-text {
+      display: none;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.wishlist-icon-filled {
+  color: currentColor;
+  fill: currentColor;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .wishlist__sidebar {
+    width: 100%;
+  }
+
+  .wishlist__header {
+    padding: var(--spacing-4);
+  }
+
+  .wishlist__title {
+    font-size: var(--font-size-lg);
+  }
+
+  .wishlist__content {
+    padding: var(--spacing-4);
+  }
+
+  .wishlist-product {
+    grid-template-columns: 80px 1fr;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+  }
+
+  .wishlist-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .wishlist__footer {
+    padding: var(--spacing-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .wishlist-product {
+    grid-template-columns: 60px 1fr;
+  }
+
+  .wishlist-product__title {
+    font-size: var(--font-size-sm);
+  }
+
+  .wishlist-product__price .price-current {
+    font-size: var(--font-size-base);
+  }
+
+  .wishlist-product__actions {
+    flex-direction: column;
+  }
+
+  .wishlist-trigger__text {
+    display: none;
+  }
+}
+
+/* 动画 */
+.wishlist-product {
+  animation: slideInRight 0.3s ease-out backwards;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 移除动画 */
+.wishlist-product.removing {
+  animation: slideOutRight 0.3s ease-out forwards;
+}
+
+@keyframes slideOutRight {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .wishlist,
+  .wishlist__overlay,
+  .wishlist__sidebar,
+  .wishlist-product,
+  .wishlist-product-btn,
+  .wishlist-trigger {
+    transition: none;
+  }
+
+  .wishlist-product {
+    animation: none;
+  }
+
+  .wishlist-product.removing {
+    animation: none;
+  }
+}
+
+/* 无障碍支持 */
+.wishlist:focus-within {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .wishlist__sidebar {
+    box-shadow: none;
+    border-left: 2px solid var(--color-border);
+  }
+
+  .wishlist-product,
+  .wishlist-product-btn,
+  .wishlist-trigger {
+    border-width: 2px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .wishlist {
+    display: none;
+  }
+}
+</style>

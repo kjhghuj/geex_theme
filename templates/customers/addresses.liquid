@@ -1,0 +1,1259 @@
+{%- comment -%}
+  客户地址管理页面模板
+  包含地址列表、添加编辑地址功能
+{%- endcomment -%}
+
+{{ 'addresses.css' | asset_url | stylesheet_tag }}
+
+<div class="addresses-page" data-addresses-page>
+  <!-- 页面头部 -->
+  <div class="addresses-header">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="面包屑导航">
+        <ol class="breadcrumb__list">
+          <li class="breadcrumb__item">
+            <a href="{{ routes.account_url }}" class="breadcrumb__link">账户</a>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" class="breadcrumb__separator">
+              <path d="M4 2l4 4-4 4"/>
+            </svg>
+          </li>
+          <li class="breadcrumb__item breadcrumb__item--current">
+            地址管理
+          </li>
+        </ol>
+      </nav>
+
+      <div class="addresses-header__content">
+        <h1 class="page-title">地址管理</h1>
+        <p class="page-description">管理您的收货地址和账单地址</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页面内容 -->
+  <div class="addresses-content">
+    <div class="container">
+      <!-- 操作栏 -->
+      <div class="addresses-toolbar">
+        <div class="toolbar-left">
+          <p class="address-count">
+            您有 <strong>{{ customer.addresses.size }}</strong> 个地址
+            {%- if customer.addresses.size > 0 -%}
+              （最多可以添加 {{ shop.addresses_max | default: 20 }} 个地址）
+            {%- endif -%}
+          </p>
+        </div>
+        <div class="toolbar-right">
+          <button type="button"
+                  class="btn btn-primary"
+                  data-address-add
+                  {% if customer.addresses.size >= shop.addresses_max | default: 20 %}disabled{% endif %}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a1 1 0 011 1v5h5a1 1 0 110 2H9v5a1 1 0 11-2 0V9H2a1 1 0 110-2h5V2a1 1 0 011-1z"/>
+            </svg>
+            添加新地址
+          </button>
+        </div>
+      </div>
+
+      <!-- 地址列表 -->
+      <div class="addresses-grid" data-addresses-grid>
+        {%- for address in customer.addresses -%}
+          <div class="address-card" data-address-id="{{ address.id }}">
+            <div class="address-header">
+              <h3 class="address-title">
+                {%- if address == customer.default_address -%}
+                  <span class="default-badge">默认</span>
+                {%- endif -%}
+                {{ address.name }}
+              </h3>
+              <div class="address-actions">
+                <button type="button"
+                        class="action-btn action-btn--edit"
+                        data-address-edit="{{ address.id }}"
+                        aria-label="编辑地址">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M11.778 2.222l2 2a1 1 0 010 1.414L13 6l-4-4 1.778-1.778a1 1 0 011.414 0zM2 12l8-8 4 4-8 8H2z"/>
+                  </svg>
+                </button>
+                <button type="button"
+                        class="action-btn action-btn--delete"
+                        data-address-delete="{{ address.id }}"
+                        aria-label="删除地址">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5 3a2 2 0 00-2 2v1h12V5a2 2 0 00-2-2H5zM3 13h10a2 2 0 002-2V7H3v4a2 2 0 002 2zM6 10a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="address-content">
+              <div class="address-info">
+                {%- if address.company -%}
+                  <div class="address-company">{{ address.company }}</div>
+                {%- endif -%}
+                <div class="address-street">{{ address.address1 }}</div>
+                {%- if address.address2 -%}
+                  <div class="address-street">{{ address.address2 }}</div>
+                {%- endif -%}
+                <div class="address-city">
+                  {{ address.city }}{% if address.province %}, {{ address.province }}{% endif %} {{ address.zip }}
+                </div>
+                <div class="address-country">{{ address.country }}</div>
+                {%- if address.phone -%}
+                  <div class="address-phone">{{ address.phone }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div class="address-footer">
+              {%- unless address == customer.default_address -%}
+                <button type="button"
+                        class="btn btn-secondary btn--small"
+                        data-address-default="{{ address.id }}">
+                  设为默认
+                </button>
+              {%- endunless -%}
+            </div>
+          </div>
+        {%- endfor -%}
+
+        <!-- 添加地址卡片 -->
+        <div class="address-card address-card--add" data-address-add-card>
+          <div class="add-address-content">
+            <div class="add-address-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 1a1 1 0 011 1v13h13a1 1 0 110 2H17v13a1 1 0 11-2 0V17H2a1 1 0 110-2h13V2a1 1 0 011-1z"/>
+              </svg>
+            </div>
+            <h3 class="add-address-title">添加新地址</h3>
+            <p class="add-address-description">添加新的收货或账单地址</p>
+            <button type="button"
+                    class="btn btn-primary btn--small"
+                    data-address-add>
+              添加地址
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 空状态 -->
+      {%- if customer.addresses.size == 0 -%}
+        <div class="addresses-empty">
+          <div class="empty-content">
+            <div class="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-7h2v4h-2V7zm0 6h2v2h-2v-2z"/>
+              </svg>
+            </div>
+            <h3 class="empty-title">还没有保存的地址</h3>
+            <p class="empty-description">添加您的收货地址，让下次购物更快捷</p>
+            <button type="button"
+                    class="btn btn-primary"
+                    data-address-add>
+              添加第一个地址
+            </button>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+<!-- 地址模态框 -->
+<div id="AddressModal" class="address-modal" data-address-modal aria-hidden="true">
+  <div class="modal__overlay" data-modal-overlay></div>
+  <div class="modal__container">
+    <div class="modal__header">
+      <h2 class="modal__title" data-modal-title>添加新地址</h2>
+      <button type="button"
+              class="modal__close"
+              data-modal-close
+              aria-label="关闭">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal__content">
+      <div class="address-form-wrapper">
+        {% form 'customer_address', customer.new_address %}
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="AddressFirstName">
+                名字 <span class="required">*</span>
+              </label>
+              <input type="text"
+                     id="AddressFirstName"
+                     name="address[first_name]"
+                     value="{{ form.first_name }}"
+                     class="form-input"
+                     required
+                     autocomplete="given-name">
+              {%- if form.errors contains 'first_name' -%}
+                <div class="form-error">{{ form.errors.first_name }}</div>
+              {%- endif -%}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="AddressLastName">
+                姓氏 <span class="required">*</span>
+              </label>
+              <input type="text"
+                     id="AddressLastName"
+                     name="address[last_name]"
+                     value="{{ form.last_name }}"
+                     class="form-input"
+                     required
+                     autocomplete="family-name">
+              {%- if form.errors contains 'last_name' -%}
+                <div class="form-error">{{ form.errors.last_name }}</div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="AddressCompany">
+              公司名称
+            </label>
+            <input type="text"
+                   id="AddressCompany"
+                   name="address[company]"
+                   value="{{ form.company }}"
+                   class="form-input"
+                   autocomplete="organization">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="AddressAddress1">
+              地址 <span class="required">*</span>
+            </label>
+            <input type="text"
+                   id="AddressAddress1"
+                   name="address[address1]"
+                   value="{{ form.address1 }}"
+                   class="form-input"
+                   required
+                   autocomplete="address-line1">
+            {%- if form.errors contains 'address1' -%}
+              <div class="form-error">{{ form.errors.address1 }}</div>
+            {%- endif -%}
+          </div>
+
+          <div class="form-group">
+            <input type="text"
+                   id="AddressAddress2"
+                   name="address[address2]"
+                   value="{{ form.address2 }}"
+                   class="form-input"
+                   placeholder="公寓号、门牌号等（可选）"
+                   autocomplete="address-line2">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="AddressCity">
+                城市 <span class="required">*</span>
+              </label>
+              <input type="text"
+                     id="AddressCity"
+                     name="address[city]"
+                     value="{{ form.city }}"
+                     class="form-input"
+                     required
+                     autocomplete="address-level2">
+              {%- if form.errors contains 'city' -%}
+                <div class="form-error">{{ form.errors.city }}</div>
+              {%- endif -%}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="AddressProvince">
+                省份 <span class="required">*</span>
+              </label>
+              <input type="text"
+                     id="AddressProvince"
+                     name="address[province]"
+                     value="{{ form.province }}"
+                     class="form-input"
+                     required
+                     autocomplete="address-level1">
+              {%- if form.errors contains 'province' -%}
+                <div class="form-error">{{ form.errors.province }}</div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="AddressZip">
+                邮政编码 <span class="required">*</span>
+              </label>
+              <input type="text"
+                     id="AddressZip"
+                     name="address[zip]"
+                     value="{{ form.zip }}"
+                     class="form-input"
+                     required
+                     autocomplete="postal-code"
+                     pattern="[0-9]{6}">
+              {%- if form.errors contains 'zip' -%}
+                <div class="form-error">{{ form.errors.zip }}</div>
+              {%- endif -%}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="AddressCountry">
+                国家/地区 <span class="required">*</span>
+              </label>
+              <select id="AddressCountry"
+                      name="address[country]"
+                      class="form-select"
+                      required
+                      autocomplete="country">
+                {{ country_option_tags }}
+              </select>
+              {%- if form.errors contains 'country' -%}
+                <div class="form-error">{{ form.errors.country }}</div>
+              {%- endif -%}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="AddressPhone">
+              手机号码
+            </label>
+            <input type="tel"
+                   id="AddressPhone"
+                   name="address[phone]"
+                   value="{{ form.phone }}"
+                   class="form-input"
+                   autocomplete="tel"
+                   pattern="[0-9]{11}">
+            {%- if form.errors contains 'phone' -%}
+              <div class="form-error">{{ form.errors.phone }}</div>
+            {%- endif -%}
+          </div>
+
+          <div class="form-checkbox">
+            <input type="checkbox"
+                   id="AddressDefault"
+                   name="address[default]"
+                   class="checkbox-input">
+            <label class="checkbox-label" for="AddressDefault">
+              设为默认地址
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              {{ 'customer.addresses.add' | t }}
+            </button>
+            <button type="button"
+                    class="btn btn-secondary"
+                    data-modal-close>
+              取消
+            </button>
+          </div>
+        {% endform %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div id="DeleteConfirmModal" class="confirm-modal" data-confirm-modal aria-hidden="true">
+  <div class="modal__overlay" data-modal-overlay></div>
+  <div class="modal__container modal__container--small">
+    <div class="modal__header">
+      <h2 class="modal__title">确认删除地址</h2>
+      <button type="button"
+              class="modal__close"
+              data-modal-close
+              aria-label="关闭">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal__content">
+      <p class="confirm-message">确定要删除这个地址吗？此操作无法撤销。</p>
+    </div>
+
+    <div class="modal__actions">
+      <form id="DeleteAddressForm" method="post">
+        <input type="hidden" name="_method" value="delete">
+        <button type="submit" class="btn btn-error">删除地址</button>
+        <button type="button"
+                class="btn btn-secondary"
+                data-modal-close>
+          取消
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+/* 地址管理页面样式 */
+.addresses-page {
+  background: var(--color-bg-primary);
+  min-height: 100vh;
+}
+
+/* 页面头部 */
+.addresses-header {
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--spacing-6) 0;
+}
+
+.addresses-header__content {
+  text-align: center;
+}
+
+.page-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.page-description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 操作栏 */
+.addresses-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.address-count {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+/* 地址网格 */
+.addresses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-6);
+}
+
+/* 地址卡片 */
+.address-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    border-color: var(--color-secondary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  &--add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    border-style: dashed;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-secondary);
+      border-style: solid;
+    }
+  }
+}
+
+.address-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4) var(--spacing-5);
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.address-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.default-badge {
+  background: var(--color-success);
+  color: white;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+.address-actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+
+  &--edit:hover {
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+  }
+
+  &--delete:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.address-content {
+  padding: var(--spacing-5);
+}
+
+.address-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.address-company {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.address-street,
+.address-city,
+.address-country,
+.address-phone {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-sm);
+}
+
+.address-city {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.address-footer {
+  padding: var(--spacing-4) var(--spacing-5);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: center;
+}
+
+/* 添加地址卡片 */
+.add-address-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+}
+
+.add-address-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-tertiary);
+  border-radius: 50%;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-2);
+}
+
+.add-address-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.add-address-description {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 空状态 */
+.addresses-empty {
+  text-align: center;
+  padding: var(--spacing-16) 0;
+}
+
+.empty-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--spacing-6);
+  color: var(--color-text-light);
+}
+
+.empty-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-3);
+}
+
+.empty-description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-6);
+}
+
+/* 模态框 */
+.address-modal,
+.confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-slow) var(--ease-sci-fi);
+}
+
+.address-modal[aria-hidden="false"],
+.confirm-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+.modal__container {
+  position: relative;
+  background: var(--color-bg-primary);
+  margin: 5vh auto;
+  max-width: 600px;
+  max-height: 90vh;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: translateY(-20px);
+  transition: transform var(--duration-slow) var(--ease-sci-fi);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.address-modal[aria-hidden="false"] .modal__container,
+.confirm-modal[aria-hidden="false"] .modal__container {
+  transform: translateY(0);
+}
+
+.modal__container--small {
+  max-width: 400px;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.modal__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal__close {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-secondary);
+  }
+}
+
+.modal__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-6);
+}
+
+.modal__actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* 地址表单 */
+.address-form-wrapper {
+  max-width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-4);
+}
+
+.form-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.required {
+  color: var(--color-error);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--color-text-light);
+  }
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-secondary);
+}
+
+.checkbox-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.form-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: var(--spacing-1);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-6);
+}
+
+/* 确认消息 */
+.confirm-message {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .addresses-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .addresses-header {
+    padding: var(--spacing-4) 0;
+  }
+
+  .addresses-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+
+  .address-count {
+    text-align: center;
+  }
+
+  .addresses-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .modal__container {
+    margin: 2vh var(--spacing-4);
+    max-width: calc(100% - 2 * var(--spacing-4));
+    max-height: 90vh;
+  }
+
+  .modal__header,
+  .modal__content,
+  .modal__actions {
+    padding: var(--spacing-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .addresses-grid {
+    gap: var(--spacing-3);
+  }
+
+  .form-actions,
+  .modal__actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+/* 动画 */
+.address-card {
+  animation: fadeInUp 0.6s ease-out backwards;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 0.05}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .address-card {
+    animation: none;
+  }
+
+  .address-card,
+  .action-btn,
+  .address-modal,
+  .confirm-modal {
+    transition: none;
+  }
+}
+
+/* 无障碍支持 */
+.action-btn:focus-visible,
+.btn:focus-visible,
+.form-input:focus-visible,
+.form-select:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .address-card {
+    border-width: 2px;
+  }
+
+  .form-input,
+  .form-select {
+    border-width: 2px;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .addresses-toolbar,
+  .address-actions,
+  .address-footer,
+  .modal {
+    display: none;
+  }
+
+  .addresses-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-4);
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 地址管理功能
+  const addressModals = {
+    add: document.getElementById('AddressModal'),
+    delete: document.getElementById('DeleteConfirmModal'),
+    deleteForm: document.getElementById('DeleteAddressForm')
+  };
+
+  // 打开添加地址模态框
+  document.querySelectorAll('[data-address-add]').forEach(button => {
+    button.addEventListener('click', () => {
+      openModal(addressModals.add);
+      resetAddressForm();
+    });
+  });
+
+  // 打开编辑地址模态框
+  document.querySelectorAll('[data-address-edit]').forEach(button => {
+    button.addEventListener('click', () => {
+      const addressId = button.dataset.addressEdit;
+      editAddress(addressId);
+    });
+  });
+
+  // 删除地址
+  document.querySelectorAll('[data-address-delete]').forEach(button => {
+    button.addEventListener('click', () => {
+      const addressId = button.dataset.addressDelete;
+      confirmDeleteAddress(addressId);
+    });
+  });
+
+  // 设为默认地址
+  document.querySelectorAll('[data-address-default]').forEach(button => {
+    button.addEventListener('click', () => {
+      const addressId = button.dataset.addressDefault;
+      setDefaultAddress(addressId);
+    });
+  });
+
+  // 关闭模态框
+  document.querySelectorAll('[data-modal-close]').forEach(button => {
+    button.addEventListener('click', () => {
+      closeModal(addressModals.add);
+      closeModal(addressModals.delete);
+    });
+  });
+
+  // 点击遮罩层关闭
+  document.querySelectorAll('[data-modal-overlay]').forEach(overlay => {
+    overlay.addEventListener('click', () => {
+      closeModal(addressModals.add);
+      closeModal(addressModals.delete);
+    });
+  });
+
+  // ESC键关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal(addressModals.add);
+      closeModal(addressModals.delete);
+    }
+  });
+
+  function openModal(modal) {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeModal(modal) {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function resetAddressForm() {
+    const form = document.querySelector('#AddressModal form');
+    if (form) {
+      form.reset();
+      // 更新模态框标题
+      const title = document.querySelector('[data-modal-title]');
+      if (title) {
+        title.textContent = '添加新地址';
+      }
+      // 更新提交按钮文本
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = '添加地址';
+      }
+    }
+  }
+
+  async function editAddress(addressId) {
+    try {
+      // 获取地址数据
+      const response = await fetch(`/account/addresses/${addressId}.json`);
+      if (!response.ok) throw new Error('Failed to fetch address');
+
+      const data = await response.json();
+      const address = data.customer_address;
+
+      // 填充表单
+      const form = document.querySelector('#AddressModal form');
+      if (form && address) {
+        form.action = `/account/addresses/${addressId}`;
+        form.method = 'post';
+
+        // 添加隐藏输入用于编辑
+        let methodInput = form.querySelector('input[name="_method"]');
+        if (!methodInput) {
+          methodInput = document.createElement('input');
+          methodInput.type = 'hidden';
+          methodInput.name = '_method';
+          form.appendChild(methodInput);
+        }
+        methodInput.value = 'patch';
+
+        // 填充表单字段
+        form.querySelector('[name="address[first_name]"]').value = address.first_name || '';
+        form.querySelector('[name="address[last_name]"]').value = address.last_name || '';
+        form.querySelector('[name="address[company]"]').value = address.company || '';
+        form.querySelector('[name="address[address1]"]').value = address.address1 || '';
+        form.querySelector('[name="address[address2]"]').value = address.address2 || '';
+        form.querySelector('[name="address[city]"]').value = address.city || '';
+        form.querySelector('[name="address[province]"]').value = address.province || '';
+        form.querySelector('[name="address[zip]"]').value = address.zip || '';
+        form.querySelector('[name="address[country]"]').value = address.country || '';
+        form.querySelector('[name="address[phone]"]').value = address.phone || '';
+        form.querySelector('[name="address[default]"]').checked = address.default;
+
+        // 更新标题和按钮文本
+        const title = document.querySelector('[data-modal-title]');
+        if (title) {
+          title.textContent = '编辑地址';
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.textContent = '保存修改';
+        }
+
+        // 打开模态框
+        openModal(addressModals.add);
+      }
+    } catch (error) {
+      console.error('Error loading address:', error);
+      alert('加载地址失败，请重试');
+    }
+  }
+
+  function confirmDeleteAddress(addressId) {
+    if (confirm('确定要删除这个地址吗？此操作无法撤销。')) {
+      // 直接提交删除表单
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = `/account/addresses/${addressId}`;
+
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'delete';
+      form.appendChild(methodInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+
+  function setDefaultAddress(addressId) {
+    // 这里需要实现设为默认地址的逻辑
+    // 通常是通过AJAX提交到Shopify API
+    console.log('Setting default address:', addressId);
+  }
+
+  // 表单验证
+  function validateForm(form) {
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+
+    requiredFields.forEach(field => {
+      if (!field.value.trim()) {
+        isValid = false;
+        field.classList.add('error');
+
+        // 添加错误消息
+        let errorMsg = field.parentNode.querySelector('.error-message');
+        if (!errorMsg) {
+          errorMsg = document.createElement('div');
+          errorMsg.className = 'error-message';
+          errorMsg.style.color = 'var(--color-error)';
+          errorMsg.style.fontSize = 'var(--font-size-sm)';
+          errorMsg.style.marginTop = 'var(--spacing-1)';
+          field.parentNode.appendChild(errorMsg);
+        }
+        errorMsg.textContent = '此字段是必填的';
+      } else {
+        field.classList.remove('error');
+        const errorMsg = field.parentNode.querySelector('.error-message');
+        if (errorMsg) {
+          errorMsg.remove();
+        }
+      }
+    });
+
+    // 验证邮编格式
+    const zipInput = form.querySelector('[name="address[zip]"]');
+    if (zipInput && zipInput.value) {
+      const zipRegex = /^[0-9]{6}$/;
+      if (!zipRegex.test(zipInput.value)) {
+        isValid = false;
+        zipInput.classList.add('error');
+
+        let errorMsg = zipInput.parentNode.querySelector('.error-message');
+        if (!errorMsg) {
+          errorMsg = document.createElement('div');
+          errorMsg.className = 'error-message';
+          errorMsg.style.color = 'var(--color-error)';
+          errorMsg.style.fontSize = 'var(--font-size-sm)';
+          errorMsg.style.marginTop = 'var(--spacing-1)';
+          zipInput.parentNode.appendChild(errorMsg);
+        }
+        errorMsg.textContent = '请输入6位数字邮政编码';
+      }
+    }
+
+    // 验证手机号格式
+    const phoneInput = form.querySelector('[name="address[phone]"]');
+    if (phoneInput && phoneInput.value) {
+      const phoneRegex = /^[0-9]{11}$/;
+      if (!phoneRegex.test(phoneInput.value)) {
+        isValid = false;
+        phoneInput.classList.add('error');
+
+        let errorMsg = phoneInput.parentNode.querySelector('.error-message');
+        if (!errorMsg) {
+          errorMsg = document.createElement('div');
+          errorMsg.className = 'error-message';
+          errorMsg.style.color = 'var(--color-error)';
+          errorMsg.style.fontSize = 'var(--font-size-sm)';
+          errorMsg.style.marginTop = 'var(--spacing-1)';
+          phoneInput.parentNode.appendChild(errorMsg);
+        }
+        errorMsg.textContent = '请输入11位手机号码';
+      }
+    }
+
+    return isValid;
+  }
+
+  // 为地址表单添加验证
+  const addressForm = document.querySelector('#AddressModal form');
+  if (addressForm) {
+    addressForm.addEventListener('submit', (e) => {
+      if (!validateForm(addressForm)) {
+        e.preventDefault();
+      }
+    });
+  }
+});
+</script>

@@ -1,0 +1,549 @@
+{% layout none %}
+
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    {% # theme-check-disable ParserBlockingScript %}
+    <script src="{{ 'critical.js' | asset_url }}"></script>
+    {% # theme-check-enable ParserBlockingScript %}
+    <script src="{{ 'qr-code-image.js' | asset_url }}"></script>
+    <script src="{{ 'copy-simple.js' | asset_url }}" defer="defer"></script>
+    {%- unless settings.type_header_font.system? and settings.type_body_font.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+
+    {%- assign formatted_balance = gift_card.balance | money_without_trailing_zeros | strip_html -%}
+    <title>{{ 'gift_cards.issued.title' | t: value: formatted_balance, shop: shop.name }} - Cyber Gift Card</title>
+    <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }} | Futuristic Digital Gift Experience">
+
+    {{ content_for_header }}
+
+    {% comment %}theme-check-disable AssetPreload{% endcomment %}
+    {%- unless settings.type_header_font.system? -%}
+      <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
+    {%- endunless -%}
+    {%- unless settings.type_body_font.system? -%}
+      <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
+n    <!-- 现代CSS -->
+    {{ 'template-giftcard.css' | asset_url | stylesheet_tag }}/a
+    <!-- 现代CSS -->
+    {{ 'template-giftcard.css' | asset_url | stylesheet_tag }}/a
+    <!-- 复制功能脚本 - 放在所有元素之后 -->
+    {%- endunless -%}
+    {% comment %}theme-check-enable AssetPreload{% endcomment %}
+
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'template-giftcard.css' | asset_url | stylesheet_tag }}
+
+    <!-- 现代字体加载 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+
+  <body class="gift-card cyberpunk-theme">
+    <!-- 动态背景层 -->
+    <div class="cyber-background">
+      <div class="matrix-rain"></div>
+      <div class="cyber-grid"></div>
+      <div class="floating-particles"></div>
+      <div class="glow-orbs"></div>
+    </div>
+
+    <!-- 主要内容容器 -->
+    <div class="cyber-container">
+      <!-- 头部 -->
+      <header class="cyber-header">
+        <div class="header-content">
+          <div class="brand-section">
+            <div class="brand-glow"></div>
+            <h1 class="brand-title">{{ shop.name }}</h1>
+            <div class="brand-divider">◆ ◆ ◆</div>
+            <p class="brand-subtitle">CYBER GIFT CARD</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- 主要内容 -->
+      <main class="cyber-main">
+        <!-- 礼品卡3D展示 -->
+        <section class="gift-card-showcase">
+          <div class="card-3d-container">
+            <div class="card-3d-flipper">
+              <!-- 正面 -->
+              <div class="card-3d-front">
+                {%- if settings.logo != blank -%}
+                  <div class="card-logo">
+                    {{
+                      settings.logo
+                      | image_url: width: 200
+                      | image_tag: class: 'card-logo-image', alt: shop.name
+                    }}
+                  </div>
+                {%- else %}
+                  <div class="card-logo-placeholder">
+                    <div class="cyber-icon">🚀</div>
+                    <span class="brand-name">{{ shop.name }}</span>
+                  </div>
+                {%- endif %}
+
+                <div class="card-chip"></div>
+                <div class="card-circuit"></div>
+                <div class="card-id">{{ gift_card.code | slice: 0, 4 }} ●●●● ●●●● {{ gift_card.code | slice: -4, 4 }}</div>
+              </div>
+
+              <!-- 背面 -->
+              <div class="card-3d-back">
+                <div class="card-magnetic-strip"></div>
+                <div class="card-cvv">{{ gift_card.code | slice: -3, 3 }}</div>
+                <div class="card-expiry">
+                  {% if gift_card.expires_on %}
+                    {{ gift_card.expires_on | date: '%m/%y' }}
+                  {% else %}
+                    NO EXPIRY
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 金额显示 -->
+        <section class="balance-display">
+          <div class="balance-container">
+            <div class="balance-glow"></div>
+            <div class="balance-label">AVAILABLE BALANCE</div>
+            <div class="balance-amount">
+              <span class="currency">{{ cart.currency.symbol }}</span>
+              <span class="amount">{{ gift_card.balance | money_without_currency }}</span>
+            </div>
+            {%- if gift_card.enabled == false or gift_card.expired -%}
+              <div class="status-badge expired">
+                <span class="status-icon">⚠️</span>
+                <span class="status-text">EXPIRED</span>
+              </div>
+            {%- else -%}
+            {%- endif -%}
+          </div>
+        </section>
+
+        <!-- 礼品卡代码 -->
+        <section class="code-section">
+          <div class="code-container">
+            <div class="code-header">
+              <h3 class="code-title">GIFT CODE</h3>
+              <div class="code-scanner-line"></div>
+            </div>
+            <div class="code-display">
+              <div class="code-background"></div>
+              <div class="code-text" id="giftCardCode">{{ gift_card.code | format_code }}</div>
+            </div>
+            <button id="copyButton" class="copy-button" onclick="copyGiftCode()">
+                <span class="copy-icon">📋</span>
+                <span class="copy-text">COPY CODE</span>
+            </button>
+            <!-- 消息提示弹窗 -->
+            <div class="copy-success" id="copySuccess">
+              <span class="success-icon">✅</span>
+              <span class="success-text">COPIED!</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- QR码 -->
+        <section class="qr-section">
+          <div class="qr-container">
+            <div class="qr-header">
+              <h3 class="qr-title">QUICK ACCESS</h3>
+              <p class="qr-subtitle">Scan for instant redemption</p>
+            </div>
+            <div class="qr-wrapper">
+              <qr-code-image
+                class="qr-code"
+                data-identifier="{{ gift_card.qr_identifier }}"
+                width="200"
+                height="200"
+                alt="Gift Card QR Code"
+              ></qr-code-image>
+            </div>
+          </div>
+        </section>
+
+        <!-- 过期时间 -->
+        {% if gift_card.expires_on %}
+          <section class="expiry-section">
+            <div class="expiry-container">
+              <div class="expiry-icon">⏰</div>
+              <div class="expiry-info">
+                <div class="expiry-label">EXPIRES ON</div>
+                <div class="expiry-date">{{ gift_card.expires_on | date: '%B %e, %Y' }}</div>
+              </div>
+            </div>
+          </section>
+        {% else %}
+          <!-- 测试用过期时间显示 -->
+          <section class="expiry-section">
+            <div class="expiry-container">
+              <div class="expiry-icon">⏰</div>
+              <div class="expiry-info">
+                <div class="expiry-label">EXPIRES ON</div>
+                <div class="expiry-date">December 31, 2025</div>
+              </div>
+            </div>
+          </section>
+        {% endif %}
+
+        <!-- 操作按钮 -->
+        <section class="actions-section">
+          <div class="actions-container">
+            {%- if gift_card.pass_url -%}
+              <a href="{{ gift_card.pass_url }}" class="action-button primary">
+                <div class="button-glow"></div>
+                <span class="button-icon">📱</span>
+                <span class="button-text">ADD TO WALLET</span>
+                <div class="button-particles"></div>
+              </a>
+            {%- endif -%}
+
+            <a href="{{ shop.url }}" class="action-button secondary" target="_blank" rel="noopener">
+              <div class="button-glow"></div>
+              <span class="button-icon">🛍️</span>
+              <span class="button-text">START SHOPPING</span>
+              <div class="button-particles"></div>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 无障碍提示 -->
+    <div hidden>
+      <span id="a11y-new-window-message">{{ 'accessibility.new_window' | t }}</span>
+    </div>
+
+    <!-- 高级动画脚本 -->
+    <script>
+      // 全局动画控制器
+      const CyberAnimations = {
+        init() {
+          this.createMatrixRain();
+          this.createCyberGrid();
+          this.createFloatingParticles();
+          this.createGlowOrbs();
+          this.initInteractions();
+          this.initCardFlip();
+          this.startAnimations();
+        },
+
+        // 矩阵雨效果
+        createMatrixRain() {
+          const container = document.querySelector('.matrix-rain');
+          if (!container) return;
+
+          const characters = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          const fontSize = 12;
+          const columns = Math.floor(window.innerWidth / fontSize);
+
+          container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.1;
+          `;
+
+          for (let i = 0; i < columns; i++) {
+            const column = document.createElement('div');
+            column.className = 'matrix-column';
+            column.style.cssText = `
+              position: absolute;
+              left: ${i * fontSize}px;
+              font-size: ${fontSize}px;
+              color: #4169E1;
+              font-family: 'Space Mono', monospace;
+              animation: matrix-fall ${5 + Math.random() * 5}s linear infinite;
+              animation-delay: ${Math.random() * 5}s;
+            `;
+
+            let text = '';
+            const length = Math.floor(Math.random() * 20) + 10;
+            for (let j = 0; j < length; j++) {
+              text += characters[Math.floor(Math.random() * characters.length)];
+            }
+            column.textContent = text;
+            container.appendChild(column);
+          }
+        },
+
+        // 科幻网格
+        createCyberGrid() {
+          const grid = document.querySelector('.cyber-grid');
+          if (!grid) return;
+
+          grid.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+              linear-gradient(rgba(65, 105, 225, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(65, 105, 225, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 1;
+            animation: grid-pulse 10s ease-in-out infinite;
+          `;
+        },
+
+        // 漂浮粒子
+        createFloatingParticles() {
+          const container = document.querySelector('.floating-particles');
+          if (!container) return;
+
+          container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+          `;
+
+          for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'floating-particle';
+            particle.style.cssText = `
+              position: absolute;
+              width: ${2 + Math.random() * 4}px;
+              height: ${2 + Math.random() * 4}px;
+              background: radial-gradient(circle, rgba(65, 105, 225, 0.8) 0%, transparent 70%);
+              border-radius: 50%;
+              left: ${Math.random() * 100}%;
+              top: ${Math.random() * 100}%;
+              animation: float ${8 + Math.random() * 12}s ease-in-out infinite;
+              animation-delay: ${Math.random() * 8}s;
+              box-shadow: 0 0 ${5 + Math.random() * 10}px rgba(65, 105, 225, 0.5);
+            `;
+            container.appendChild(particle);
+          }
+        },
+
+        // 发光球体
+        createGlowOrbs() {
+          const container = document.querySelector('.glow-orbs');
+          if (!container) return;
+
+          container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+          `;
+
+          for (let i = 0; i < 3; i++) {
+            const orb = document.createElement('div');
+            orb.className = 'glow-orb';
+            orb.style.cssText = `
+              position: absolute;
+              width: ${200 + Math.random() * 300}px;
+              height: ${200 + Math.random() * 300}px;
+              background: radial-gradient(circle, rgba(65, 105, 225, 0.2) 0%, transparent 70%);
+              border-radius: 50%;
+              left: ${Math.random() * 100}%;
+              top: ${Math.random() * 100}%;
+              animation: orb-float ${15 + Math.random() * 10}s ease-in-out infinite;
+              animation-delay: ${Math.random() * 10}s;
+              filter: blur(40px);
+            `;
+            container.appendChild(orb);
+          }
+        },
+
+        // 初始化交互
+        initInteractions() {
+          // 鼠标跟随效果
+          document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            document.documentElement.style.setProperty('--mouse-x', x);
+            document.documentElement.style.setProperty('--mouse-y', y);
+          });
+
+          // 按钮悬停效果
+          document.querySelectorAll('.action-button').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+              this.createButtonParticles(button);
+            });
+          });
+        },
+
+        // 卡片翻转
+        initCardFlip() {
+          const container = document.querySelector('.card-3d-container');
+          if (!container) return;
+
+          let isFlipped = false;
+
+          container.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            container.classList.toggle('flipped', isFlipped);
+          });
+
+          // 自动翻转
+          setInterval(() => {
+            container.classList.add('flipped');
+            setTimeout(() => {
+              container.classList.remove('flipped');
+            }, 3000);
+          }, 10000);
+        },
+
+        // 按钮粒子效果
+        createButtonParticles(button) {
+          const particles = button.querySelector('.button-particles');
+          if (!particles) return;
+
+          for (let i = 0; i < 10; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+              position: absolute;
+              width: 2px;
+              height: 2px;
+              background: #4169E1;
+              border-radius: 50%;
+              left: ${Math.random() * 100}%;
+              top: ${Math.random() * 100}%;
+              animation: particle-explode 1s ease-out forwards;
+            `;
+            particles.appendChild(particle);
+
+            setTimeout(() => particle.remove(), 1000);
+          }
+        },
+
+        // 启动动画
+        startAnimations() {
+          // 添加CSS动画
+          const style = document.createElement('style');
+          style.textContent = this.getAnimationCSS();
+          document.head.appendChild(style);
+        },
+
+        getAnimationCSS() {
+          return `
+            @keyframes matrix-fall {
+              0% {
+                transform: translateY(-100vh);
+                opacity: 0;
+              }
+              10% {
+                opacity: 1;
+              }
+              90% {
+                opacity: 1;
+              }
+              100% {
+                transform: translateY(100vh);
+                opacity: 0;
+              }
+            }
+
+            @keyframes grid-pulse {
+              0%, 100% {
+                opacity: 0.1;
+                transform: scale(1);
+              }
+              50% {
+                opacity: 0.2;
+                transform: scale(1.02);
+              }
+            }
+
+            @keyframes float {
+              0%, 100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+              }
+              10% {
+                opacity: 1;
+              }
+              90% {
+                opacity: 1;
+              }
+              100% {
+                transform: translateY(-100vh) translateX(calc(var(--mouse-x, 0.5) * 100px - 50px)) scale(0.5);
+              }
+            }
+
+            @keyframes orb-float {
+              0%, 100% {
+                transform: translate(0, 0) scale(1);
+              }
+              25% {
+                transform: translate(100px, -50px) scale(1.1);
+              }
+              50% {
+                transform: translate(-50px, 100px) scale(0.9);
+              }
+              75% {
+                transform: translate(-100px, -100px) scale(1.05);
+              }
+            }
+
+            @keyframes particle-explode {
+              0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+              }
+              100% {
+                transform: translate(var(--tx, 0), var(--ty, -50px)) scale(0);
+                opacity: 0;
+              }
+            }
+
+            @keyframes code-glow {
+              0%, 100% {
+                box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+              }
+              50% {
+                box-shadow: 0 0 20px rgba(0, 255, 65, 1), 0 0 40px rgba(0, 255, 65, 0.5);
+              }
+            }
+
+            @keyframes scanner-move {
+              0% {
+                transform: translateY(0);
+              }
+              100% {
+                transform: translateY(100%);
+              }
+            }
+          `;
+        }
+      };
+
+      // 初始化
+      document.addEventListener('DOMContentLoaded', () => {
+        CyberAnimations.init();
+      });
+
+      // 响应式处理
+      window.addEventListener('resize', () => {
+        const container = document.querySelector('.matrix-rain');
+        if (container) {
+          container.innerHTML = '';
+          CyberAnimations.createMatrixRain();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1815 @@
+{%- comment -%}
+  购物车页面模板 - 与首页一致的设计
+  包含：横幅、头部、导航、购物步骤、商品内容、政策、页脚
+{%- endcomment -%}
+
+<!-- 确保加载共享样式 - common-styles.css包含横幅、头部、导航、页脚样式 -->
+{{ 'common-styles.css' | asset_url | stylesheet_tag }}
+
+<div class="sci-fi-homepage-optimized">
+
+  <!-- 顶部横幅模块 - 与首页保持一致 -->
+  <section class="announcement-bar enhanced" data-section-type="announcement-bar">
+    <div class="announcement-content" id="announcementText">
+      {% if section.settings.announcement_text != blank %}
+        {{ section.settings.announcement_text }}
+      {% else %}
+        🎉 限时优惠：全场商品满299减50，新用户首单8折优惠！优惠码：SCI-FI-2024
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- 头部模块 - 与首页保持一致 -->
+  <header class="main-header enhanced" data-section-type="header">
+    <div class="header-container">
+      <!-- 店铺Logo -->
+      <div class="header-logo">
+        <a href="/" class="logo-link">
+          <img src="{{ 'logo.png' | asset_url }}"
+               alt="{{ shop.name }}"
+               class="logo-image">
+        </a>
+      </div>
+
+      <!-- 搜索栏和其他组件 -->
+      <div class="header-actions">
+        <!-- 搜索栏 -->
+        <div class="search-container enhanced">
+          <form class="search-form" action="/search" method="get" role="search">
+            <input type="search"
+                   name="q"
+                   class="search-input"
+                   placeholder="搜索产品..."
+                   value="{{ search.terms | escape }}"
+                   aria-label="搜索产品">
+            <button type="submit" class="search-button" aria-label="搜索">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- FAQ按钮 - 增强效果 -->
+        <a href="/pages/faq" class="header-btn faq-btn enhanced">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="btn-text">FAQ</span>
+        </a>
+
+        <!-- My Account按钮 - 增强效果 -->
+        {% if customer %}
+          <a href="{{ routes.account_url }}" class="header-btn account-btn enhanced">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="btn-text">{{ customer.first_name | default: 'My Account' }}</span>
+          </a>
+        {% else %}
+          <a href="{{ routes.account_login_url }}" class="header-btn account-btn enhanced">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="btn-text">My Account</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- 导航栏模块 - 与首页1:1复刻 -->
+  <nav class="main-navigation sticky-nav" data-section-type="navigation">
+    <div class="nav-container">
+      <!-- 左侧导航菜单 - 完全与首页一致 -->
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/" class="nav-link">HOME</a>
+        </li>
+        <li class="nav-item mega-dropdown">
+          <a href="/collections/all" class="nav-link">SHOP</a>
+          <div class="mega-menu">
+            <div class="mega-menu-content">
+              <!-- 电子产品 -->
+              <div class="mega-category">
+                <a href="/collections/electronics" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="6" cy="18" r="1" fill="currentColor"/>
+                    <circle cx="18" cy="18" r="1" fill="currentColor"/>
+                  </svg>
+                  电子产品
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smartphones">智能手机</a></li>
+                  <li><a href="/collections/laptops">笔记本电脑</a></li>
+                  <li><a href="/collections/tablets">平板电脑</a></li>
+                  <li><a href="/collections/headphones">耳机音响</a></li>
+                  <li><a href="/collections/cameras">摄影摄像</a></li>
+                </ul>
+              </div>
+
+              <!-- 智能家居 -->
+              <div class="mega-category">
+                <a href="/collections/smart-home" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  智能家居
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smart-speakers">智能音箱</a></li>
+                  <li><a href="/collections/smart-lights">智能照明</a></li>
+                  <li><a href="/collections/smart-locks">智能门锁</a></li>
+                  <li><a href="/collections/some-sensors">传感器</a></li>
+                  <li><a href="/collections/home-automation">家居控制</a></li>
+                </ul>
+              </div>
+
+              <!-- 穿戴设备 -->
+              <div class="mega-category">
+                <a href="/collections/wearables" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="12" y="2" width="8" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="14" y1="4" x2="18" y2="4" stroke="currentColor" stroke-width="2"/>
+                    <line x1="14" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 18a4 4 0 01-8 0" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  穿戴设备
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smartwatches">智能手表</a></li>
+                  <li><a href="/collections/fitness-trackers">运动手环</a></li>
+                  <li><a href="/collections/smart-rings">智能戒指</a></li>
+                  <li><a href="/collections/health-monitors">健康监测</a></li>
+                  <li><a href="/collections/ar-glasses">AR眼镜</a></li>
+                </ul>
+              </div>
+
+              <!-- 游戏电竞 -->
+              <div class="mega-category">
+                <a href="/collections/gaming" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="6" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="4"/>
+                    <circle cx="18" cy="12" r="2" fill="currentColor"/>
+                    <rect x="8" y1="10" width="6" height="4" rx="1" fill="currentColor"/>
+                  </svg>
+                  游戏电竞
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/gaming-consoles">游戏主机</a></li>
+                  <li><a href="/collections/gaming-pc">游戏电脑</a></li>
+                  <li><a href="/collections/gaming-monitors">电竞显示器</a></li>
+                  <li><a href="/collections/gaming-keyboards">机械键盘</a></li>
+                  <li><a href="/collections/gaming-mice">游戏鼠标</a></li>
+                </ul>
+              </div>
+
+              <!-- 办公设备 -->
+              <div class="mega-category">
+                <a href="/collections/office" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                    <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/>
+                    <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  办公设备
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/printers">打印机</a></li>
+                  <li><a href="/collections/scanners">扫描仪</a></li>
+                  <li><a href="/collections/projectors">投影仪</a></li>
+                  <li><a href="/collections/office-furniture">办公家具</a></li>
+                  <li><a href="/collections/network-equipment">网络设备</a></li>
+                </ul>
+              </div>
+
+              <!-- 配件周边 -->
+              <div class="mega-category">
+                <a href="/collections/accessories" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                  </svg>
+                  配件周边
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/phone-cases">手机壳膜</a></li>
+                  <li><a href="/collections/cables">连接线材</a></li>
+                  <li><a href="/collections/chargers">充电设备</a></li>
+                  <li><a href="/cases/external-storage">存储设备</a></li>
+                  <li><a href="/cases/car-accessories">车载配件</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="/blogs/news" class="nav-link">BLOG</a>
+        </li>
+        <li class="nav-item">
+          <a href="/pages/about" class="nav-link">ABOUT US</a>
+        </li>
+      </ul>
+
+      <!-- 移除购物车页面导航栏中的购物车按钮 - 避免重复 -->
+      <!-- 购物车页面已有完整的购物车内容，导航栏不需要购物车按钮 -->
+    </div>
+  </nav>
+
+  <!-- 购物车主要内容区 -->
+  <div class="cart-page-content">
+    <div class="content-container">
+
+      <!-- 购物步骤横向骨架图 -->
+      <div class="checkout-progress">
+        <div class="progress-container">
+          <div class="progress-step active">
+            <div class="step-number">1</div>
+            <div class="step-label">Shopping Cart</div>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step">
+            <div class="step-number">2</div>
+            <div class="step-label">Shipping & Checkout</div>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step">
+            <div class="step-number">3</div>
+            <div class="step-label">Confirmation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 移除页面标题模块，简化购物车页面布局 -->
+
+      <!-- 购物车内容 -->
+      <div class="cart-main-content">
+        {%- if cart.items.size == 0 -%}
+          <!-- 空购物车 -->
+          <div class="empty-cart">
+            <div class="empty-cart-content">
+              <div class="empty-cart-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9 2L3 9v11a2 2 0 002 2h14a2 2 0 002-2V9l-6-7z"/>
+                  <line x1="3" y1="9" x2="21" y2="9"/>
+                  <path d="M9 22V12h6v10"/>
+                </svg>
+              </div>
+              <h2 class="empty-cart-title">{{ 'cart.general.empty' | t }}</h2>
+              <p class="empty-cart-description">{{ 'cart.general.empty_message' | t }}</p>
+              <a href="{{ routes.all_products_collection_url }}" class="continue-shopping-btn glow-button primary">
+                {{ 'cart.general.continue_shopping' | t }}
+              </a>
+            </div>
+          </div>
+        {%- else -%}
+          <!-- 购物车商品和汇总 -->
+          <div class="cart-grid">
+            <!-- 右侧：购物车商品列表 -->
+            <div class="cart-items-section">
+              <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-form" id="cart-form">
+                <div class="cart-items">
+                  {%- for item in cart.items -%}
+                    <div class="cart-item-card" data-item-key="{{ item.key }}">
+                      <div class="cart-item-image">
+                        <a href="{{ item.url }}">
+                          {%- if item.image -%}
+                            <img src="{{ item.image | image_url: width: 100, height: 100 }}"
+                                 srcset="{{ item.image | image_url: width: 100 }} 1x, {{ item.image | image_url: width: 200 }} 2x"
+                                 alt="{{ item.image.alt | default: item.product.title | escape }}"
+                                 loading="lazy"
+                                 class="cart-item-img">
+                          {%- else -%}
+                            <div class="placeholder-image">{{ item.product.title | slice: 0, 1 }}</div>
+                          {%- endif -%}
+                        </a>
+                      </div>
+
+                      <div class="cart-item-details">
+                        <div class="cart-item-header">
+                          <h3 class="cart-item-title">
+                            <a href="{{ item.url }}">{{ item.product.title }}</a>
+                          </h3>
+                          <button type="button"
+                                  class="remove-item-btn"
+                                  data-item-key="{{ item.key }}"
+                                  aria-label="{{ 'cart.general.remove' | t }}: {{ item.product.title | escape }}">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- 变体信息 -->
+                        {%- unless item.product.has_only_default_variant -%}
+                          <div class="cart-item-variants">
+                            {%- for option in item.options_with_values -%}
+                              <div class="variant-item">
+                                <span class="variant-label">{{ option.name }}:</span>
+                                <span class="variant-value">{{ option.value }}</span>
+                              </div>
+                            {%- endfor -%}
+                          </div>
+                        {%- endunless -%}
+
+                        <!-- 数量控制 -->
+                        <div class="item-actions">
+                          <div class="quantity-control">
+                            <button type="button"
+                                    class="quantity-btn minus-btn"
+                                    name="minus"
+                                    aria-label="{{ 'cart.general.reduce_quantity' | t }}">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                <path d="M2 6a1 1 0 011-1h6a1 1 0 110 2H3a1 1 0 01-1-1z"/>
+                              </svg>
+                            </button>
+
+                            <input type="number"
+                                   name="updates[]"
+                                   value="{{ item.quantity }}"
+                                   min="0"
+                                   class="quantity-input"
+                                   aria-label="{{ 'cart.general.quantity' | t }}"
+                                   id="updates_{{ item.key }}">
+
+                            <button type="button"
+                                    class="quantity-btn plus-btn"
+                                    name="plus"
+                                    aria-label="{{ 'cart.general.increase_quantity' | t }}">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                <path d="M6 2a1 1 0 011 1v2h2a1 1 0 110 2H7v2a1 1 0 11-2 0V7H3a1 1 0 110-2h2V3a1 1 0 011-1z"/>
+                              </svg>
+                            </button>
+                          </div>
+
+                          <div class="item-price-section">
+                            <div class="unit-price-label">单价:</div>
+                            <div class="unit-price">
+                              {%- if item.original_price != item.final_price -%}
+                                <div class="price-row">
+                                  <span class="price-original">{{ item.original_price | money }}</span>
+                                  <span class="price-current" data-price="{{ item.final_price }}">{{ item.final_price | money }}</span>
+                                </div>
+                              {%- else -%}
+                              <span class="price-current" data-price="{{ item.final_price }}">{{ item.final_price | money }}</span>
+                              {%- endif -%}
+                            </div>
+
+                            {%- if item.quantity > 1 -%}
+                            <div class="total-price-label">总价:</div>
+                            <div class="total-price" data-item-total="{{ item.line_price }}">{{ item.line_price | money }}</div>
+                            {%- endif -%}
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 小计已移至价格区域 -->
+                    </div>
+                  {%- endfor -%}
+                </div>
+              </form>
+            </div>
+
+            <!-- 左侧：货款汇总卡片 -->
+            <div class="order-summary-section">
+              <div class="order-summary-card">
+                <h3 class="summary-title">Order Summary</h3>
+
+                <!-- 免费配送提醒 -->
+                {%- if section.settings.show_free_shipping_bar -%}
+                  {%- assign freeShippingThreshold = section.settings.free_shipping_threshold | times: 100 -%}
+                  <div class="free-shipping-bar">
+                    {%- if cart.total_price >= freeShippingThreshold -%}
+                      <div class="shipping-success">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                        <span>{{ 'cart.general.free_shipping_achieved' | t }}</span>
+                      </div>
+                    {%- else -%}
+                      {%- assign remainingAmount = freeShippingThreshold | minus: cart.total_price -%}
+                      <div class="shipping-progress">
+                        <div class="shipping-info">
+                          <span>{{ 'cart.general.free_shipping_progress' | t: amount: remainingAmount }}</span>
+                          <div class="shipping-progress-bar">
+                            <div class="progress-fill" style="width: {{ cart.total_price | times: 100 | divided_by: free_shipping_threshold }}%"></div>
+                          </div>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+
+                <!-- 订单金额明细 -->
+                <div class="summary-details">
+                  <div class="summary-row">
+                    <span class="summary-label">{{ 'cart.general.subtotal' | t }}</span>
+                    <span class="summary-value">{{ cart.total_price | money }}</span>
+                  </div>
+
+                  <!-- 运费选项 -->
+                  <div class="shipping-options">
+                    <span class="summary-label">{{ 'cart.general.shipping' | t }}</span>
+                    <div class="shipping-selection">
+                      <select class="shipping-select" name="shipping_method">
+                        <option value="standard">Standard Delivery (¥15.00)</option>
+                        <option value="express">Express Delivery (¥35.00)</option>
+                        <option value="overnight">Overnight Delivery (¥65.00)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- 折扣总计 -->
+                  {%- if cart.total_discount > 0 -%}
+                    <div class="summary-row discount-row">
+                      <span class="summary-label">{{ 'cart.general.discount' | t }}</span>
+                      <span class="summary-value discount-value">-{{ cart.total_discount | money }}</span>
+                    </div>
+                  {%- endif -%}
+
+                  <!-- 税费 -->
+                  {%- if section.settings.show_taxes -%}
+                    <div class="summary-row">
+                      <span class="summary-label">{{ 'cart.general.taxes' | t }}</span>
+                      <span class="summary-value">{{ cart.tax_price | money }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <!-- 总计 -->
+                <div class="summary-total">
+                  <div class="summary-row total-row">
+                    <span class="summary-label">{{ 'cart.general.total' | t }}</span>
+                    <span class="summary-value total-value">{{ cart.total_price | money }}</span>
+                  </div>
+                </div>
+
+                <!-- 折扣代码 -->
+                <div class="discount-section">
+                  <div class="discount-form">
+                    <input type="text"
+                           class="discount-input"
+                           placeholder="{{ 'cart.general.discount_placeholder' | t }}"
+                           name="discount"
+                           value="{{ cart.discount_applications.first.code }}"
+                           {% if cart.discount_applications.size > 0 %}readonly{% endif %}>
+                    <button type="submit" form="cart-form" class="discount-btn glow-button small">
+                      {%- if cart.discount_applications.size > 0 -%}
+                        {{ 'cart.general.remove' | t }}
+                      {%- else -%}
+                        {{ 'cart.general.apply' | t }}
+                      {%- endif -%}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 结账按钮 -->
+                <div class="checkout-actions">
+                  <button type="submit" form="cart-form" name="checkout" class="checkout-btn glow-button primary large">
+                    {{ 'cart.general.checkout' | t }}
+                  </button>
+
+                  {%- if section.settings.show_payment_buttons -%}
+                    <div class="additional-checkout-buttons">
+                      {{ form | payment_button }}
+                    </div>
+                  {%- endif -%}
+
+                  <a href="{{ routes.all_products_collection_url }}" class="continue-shopping-link">
+                    {{ 'cart.general.continue_shopping' | t }}
+                  </a>
+                </div>
+
+                <!-- 安全信息 -->
+                <div class="security-info">
+                  <div class="security-badges">
+                    <div class="security-badge">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                      </svg>
+                      <span>{{ 'cart.general.secure_checkout' | t }}</span>
+                    </div>
+                    <div class="security-badge">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                      </svg>
+                      <span>{{ 'cart.general.ssl_encrypted' | t }}</span>
+                    </div>
+                  </div>
+
+                  <!-- 支付图标 -->
+                  {%- if section.settings.show_payment_icons -%}
+                    <div class="payment-icons">
+                      {%- for type in shop.enabled_payment_types limit: 4 -%}
+                        <span class="payment-icon">
+                          {{ type | payment_type_svg_tag: class: 'payment-icon-svg' }}
+                        </span>
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <!-- 政策部分 - 与首页保持一致 -->
+  <div class="policy-section">
+    <div class="content-container">
+      <div class="policy-grid">
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="policy-content">
+            <h3>正品保证</h3>
+            <p>100%正品，支持官方验证，假一赔十</p>
+          </div>
+        </div>
+
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <rect x="1" y="3" width="15" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+              <polygon points="16,8 20,8 23,11 23,16 16,16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M8.5,8 L8.5,11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="policy-content">
+            <h3>快速发货</h3>
+            <p>24小时内发货，全国主要城市次日达</p>
+          </div>
+        </div>
+
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="22,4 12,14.01 9,11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="policy-content">
+            <h3>7天无理由退换</h3>
+            <p>支持7天无理由退换，购物无忧</p>
+          </div>
+        </div>
+
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="policy-content">
+            <h3>24/7客服支持</h3>
+            <p>专业客服团队24小时在线服务</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚部分 - 与首页保持一致 -->
+  <footer class="site-footer">
+    <div class="content-container">
+      <div class="footer-top">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <h3 class="footer-logo-text scifi-gradient-text">{{ shop.name }}</h3>
+            <p class="footer-description">
+              专注于提供最新科技产品和智能解决方案，让科技改变生活，创新引领未来。
+            </p>
+          </div>
+          <div class="footer-contact">
+            <h4>联系我们</h4>
+            <div class="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              <span>客服热线：400-123-4567</span>
+            </div>
+            <div class="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <span>service@scifistore.com</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-title">Useful Links</h4>
+          <ul class="footer-links">
+            <li><a href="/pages/about">关于我们</a></li>
+            <li><a href="/pages/shipping">配送信息</a></li>
+            <li><a href="/pages/returns">退换货政策</a></li>
+            <li><a href="/pages/privacy">隐私政策</a></li>
+            <li><a href="/pages/terms">服务条款</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-title">FAQ</h4>
+          <ul class="footer-links">
+            <li><a href="/pages/faq#shipping">配送时间</a></li>
+            <li><a href="/pages/faq#payment">支付方式</a></li>
+            <li><a href="/pages/faq#warranty">质保服务</a></li>
+            <li><a href="/pages/faq#tracking">订单追踪</a></li>
+            <li><a href="/pages/faq#contact">联系客服</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-title">Join Us</h4>
+          <div class="newsletter-form">
+            <p>订阅获取最新产品资讯和独家优惠</p>
+            <form class="newsletter-form-inner" action="/contact#contact_form" method="post" id="contact_form" accept-charset="UTF-8">
+              <input type="hidden" name="form_type" value="customer">
+              <input type="hidden" name="utf8" value="✓">
+              <div class="newsletter-input-group">
+                <input type="email" name="contact[email]" id="email" placeholder="请输入您的邮箱" required>
+                <button type="submit" class="newsletter-btn glow-button small">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  订阅
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="social-links">
+            <h5>关注我们</h5>
+            <div class="social-icons">
+              <a href="#" class="social-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                </svg>
+              </a>
+              <a href="#" class="social-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                </svg>
+              </a>
+              <a href="#" class="social-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </a>
+              <a href="#" class="social-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11a29 29 0 00.46 5.58A2.78 2.78 0 003.4 18.6c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2A29 29 0 0023 11a29 29 0 00-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="copyright">
+          <p>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
+        </div>
+        <div class="footer-bottom-links">
+          <a href="/pages/sitemap">网站地图</a>
+          <a href="/pages/careers">招聘信息</a>
+          <a href="/pages/partners">合作伙伴</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<style>
+/* 购物车页面特定样式 - 共享样式已通过common-styles.css加载 */
+/* 使用全局CSS变量，不重复定义以避免冲突 */
+
+/* 购物步骤横向骨架图 */
+.checkout-progress {
+  padding: var(--spacing-8) 0;
+  margin-bottom: var(--spacing-6);
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 60%;
+  margin: 0 auto;
+  position: relative;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--dark-bg);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  color: var(--primary-color);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  margin-bottom: var(--spacing-2);
+}
+
+.progress-step.active .step-number {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: var(--dark-bg);
+  box-shadow: 0 0 20px rgba(135, 206, 235, 0.6);
+}
+
+.step-label {
+  font-size: var(--font-size-base);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.progress-step.active .step-label {
+  color: var(--secondary-color);
+  font-weight: var(--font-weight-semibold);
+  opacity: 1;
+}
+
+/* 修复：步骤2和步骤3的文字颜色改为黑色 */
+.step-label {
+  color: #000000 !important; /* 强制黑色文字 */
+  font-weight: 600; /* 增加字体粗细以提高可读性 */
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.5); /* 添加轻微白色光晕确保可读性 */
+}
+
+.progress-step.active .step-label {
+  color: var(--secondary-color) !important; /* 活跃状态仍为天空蓝 */
+  font-weight: var(--font-weight-semibold);
+  text-shadow: 0 0 3px rgba(135, 206, 235, 0.8); /* 增强发光效果 */
+}
+
+.progress-connector {
+  width: 120px;
+  height: 3px;
+  background: var(--border-color);
+  position: relative;
+  z-index: 1;
+}
+
+/* 修复：骨架颜色改为发光的天蓝色 */
+.progress-connector {
+  background: linear-gradient(90deg,
+    rgba(135, 206, 235, 0.8) 0%,
+    rgba(135, 206, 235, 1) 50%,
+    rgba(135, 206, 235, 0.8) 100%
+  ) !important;
+  height: 3px;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(135, 206, 235, 0.6),
+              0 0 15px rgba(135, 206, 235, 0.4);
+  animation: connector-glow 2s ease-in-out infinite alternate;
+}
+
+/* 骨架发光动画 */
+@keyframes connector-glow {
+  0% {
+    box-shadow: 0 0 8px rgba(135, 206, 235, 0.6),
+                0 0 15px rgba(135, 206, 235, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(135, 206, 235, 0.8),
+                0 0 25px rgba(135, 206, 235, 0.6);
+  }
+}
+
+/* 购物车页面内容区域 - 与首页保持一致的背景 */
+.cart-page-content {
+  min-height: 60vh;
+  padding-bottom: var(--spacing-12);
+  /* 移除自定义背景，使用与首页一致的全局背景 */
+}
+
+/* 政策部分 - 与首页1:1复刻样式 */
+.policy-section {
+  width: 100%;
+  padding: var(--spacing-2xl) 0;
+  background: rgba(0, 0, 0, 0.9); /* 与首页一致的黑色半透明背景 */
+}
+
+.policy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 改为一行四列 */
+  gap: var(--spacing-xl);
+  text-align: center; /* 与首页一致的居中对齐 */
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-4);
+}
+
+.policy-item {
+  padding: var(--spacing-lg); /* 与首页一致的padding */
+  background: transparent; /* 移除自定义背景 */
+  border: none; /* 移除自定义边框 */
+  border-radius: 0; /* 移除自定义圆角 */
+  transition: none; /* 移除自定义过渡 */
+  text-align: center; /* 与首页一致居中 */
+}
+
+/* 移除悬停效果，与首页保持一致 */
+.policy-item:hover {
+  background: transparent;
+  border: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.policy-icon {
+  margin-bottom: var(--spacing-md); /* 与首页一致的图标下边距 */
+  display: inline-block; /* 与首页一致的显示方式 */
+  color: var(--secondary-color); /* 与首页一致的图标颜色 */
+  width: 48px; /* 与首页一致的图标尺寸 */
+  height: 48px;
+}
+
+.policy-content h3 {
+  font-size: var(--font-size-xl); /* 与首页一致的标题字体 */
+  font-weight: 600; /* 与首页一致的字体粗细 */
+  margin-bottom: var(--spacing-sm); /* 与首页一致的标题下边距 */
+  color: var(--primary-color); /* 与首页一致的标题颜色 */
+  font-family: inherit; /* 使用默认字体族 */
+}
+
+.policy-content p {
+  color: var(--text-light); /* 与首页一致的描述文字颜色 */
+  font-size: var(--font-size-base); /* 与首页一致的描述字体 */
+  margin: 0; /* 与首页一致的边距 */
+  line-height: inherit; /* 使用默认行高 */
+}
+
+/* 响应式设计 - 1:1复刻首页的响应式逻辑 */
+@media (max-width: 1024px) {
+  .policy-grid {
+    grid-template-columns: repeat(2, 1fr); /* 平板端2列 */
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .policy-grid {
+    grid-template-columns: 1fr; /* 移动端1列 */
+    gap: var(--spacing-lg);
+  }
+}
+
+.page-title-section {
+  text-align: center;
+  margin-bottom: var(--spacing-10);
+}
+
+.page-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: var(--spacing-4);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--primary-color);
+  opacity: 0.8;
+  margin: 0;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 20px rgba(135, 206, 235, 0.5); }
+  to { text-shadow: 0 0 30px rgba(135, 206, 235, 0.8); }
+}
+
+/* 购物车网格布局 - 商品列表60% + 订单汇总40% */
+.cart-main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-4);
+}
+
+.cart-grid {
+  display: grid;
+  grid-template-columns: 60% 40%; /* 商品列表60%，订单汇总40% */
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-12);
+}
+
+/* 购物车商品列表 - 左侧60% */
+.cart-items-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(135, 206, 235, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
+              0 0 20px rgba(135, 206, 235, 0.1);
+}
+
+/* 订单汇总卡片 - 右侧40% */
+.order-summary-section {
+  position: sticky;
+  top: var(--spacing-8);
+  height: fit-content;
+}
+
+.order-summary-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-8);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(135, 206, 235, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
+              0 0 20px rgba(135, 206, 235, 0.1);
+}
+
+.summary-title {
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.5rem, 4vw, 2rem); /* 更大的字体，响应式 */
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-8);
+  color: #FFFFFF; /* 纯白色文字，确保与背景对比 */
+  text-align: center;
+  text-shadow: 0 0 10px rgba(135, 206, 235, 0.5); /* 蓝色发光效果 */
+  letter-spacing: 0.5px;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: var(--spacing-2);
+}
+
+.cart-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-items::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+}
+
+.cart-items::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+}
+
+/* 购物车商品卡片 */
+.cart-item-card {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+}
+
+.cart-item-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(135, 206, 235, 0.2);
+}
+
+.cart-item-image {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.cart-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-sci-fi);
+}
+
+.cart-item-card:hover .cart-item-img {
+  transform: scale(1.05);
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  background: rgba(135, 206, 235, 0.1);
+  color: var(--primary-color);
+}
+
+.cart-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cart-item-title {
+  font-size: clamp(1.125rem, 3vw, 1.375rem); /* 更大的响应式字体 */
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.cart-item-title a {
+  color: #000000; /* 黑色文字，确保清晰可读 */
+  text-decoration: none;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8); /* 轻微白色光晕确保在深色背景上可见 */
+}
+
+.cart-item-title a:hover {
+  color: var(--secondary-color); /* 悬停时变为天空蓝 */
+  text-shadow: 0 0 10px rgba(135, 206, 235, 0.8);
+  transform: translateY(-1px);
+}
+
+.remove-item-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: var(--spacing-1);
+  border-radius: var(--radius-base);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+}
+
+.remove-item-btn:hover {
+  background: rgba(255, 67, 54, 0.2);
+  color: #ff4336;
+  transform: scale(1.1);
+}
+
+.cart-item-variants {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  font-size: clamp(0.875rem, 2vw, 1rem); /* 更大的响应式字体 */
+  margin-top: var(--spacing-2);
+}
+
+.variant-item {
+  display: flex;
+  gap: var(--spacing-3);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.variant-label {
+  color: #B0B0B0; /* 浅灰色标签 */
+  font-weight: var(--font-weight-semibold);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  text-shadow: 0 0 2px rgba(135, 206, 235, 0.2);
+}
+
+.variant-value {
+  color: #E0E0E0; /* 浅灰色值 */
+  font-weight: var(--font-weight-medium);
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  background: rgba(135, 206, 235, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  text-shadow: 0 0 1px rgba(135, 206, 235, 0.4);
+}
+
+.item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-base);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.quantity-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+}
+
+.quantity-btn:hover {
+  background: var(--primary-color);
+  color: var(--bg-dark);
+}
+
+.quantity-input {
+  width: 40px;
+  height: 28px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.item-price-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-2);
+  margin-left: var(--spacing-4);
+}
+
+.unit-price-label, .total-price-label {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  color: #666666;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 2px;
+  text-align: right;
+}
+
+.unit-price, .total-price {
+  text-align: right;
+}
+
+.item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.price-row {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.price-original {
+  font-size: clamp(0.875rem, 2vw, 1rem); /* 更大的响应式字体 */
+  color: #999999; /* 中等灰色，确保可见性 */
+  text-decoration: line-through;
+  font-weight: var(--font-weight-medium);
+}
+
+.price-current {
+  font-size: clamp(1rem, 2.5vw, 1.25rem); /* 更大的响应式字体 */
+  font-weight: var(--font-weight-bold);
+  color: #003d7a; /* 深蓝色文字 */
+  text-shadow: 0 0 3px rgba(0, 61, 122, 0.4); /* 深蓝色发光效果 */
+}
+
+.item-quantity {
+  font-size: clamp(0.875rem, 2vw, 1rem); /* 更大的响应式字体 */
+  color: #B0B0B0; /* 浅灰色文字 */
+  font-weight: var(--font-weight-medium);
+  background: rgba(135, 206, 235, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.item-total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.total-price {
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.25rem, 3.5vw, 1.5rem); /* 更大的响应式字体 */
+  font-weight: var(--font-weight-bold);
+  color: #002966; /* 更深的蓝色文字 */
+  text-shadow: 0 0 8px rgba(0, 41, 102, 0.6); /* 深蓝色发光效果 */
+  letter-spacing: 0.5px;
+  background: rgba(135, 206, 235, 0.05);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 61, 122, 0.3);
+}
+
+/* 空购物车 */
+.empty-cart {
+  padding: var(--spacing-20) 0;
+  text-align: center;
+}
+
+.empty-cart-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-cart-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--spacing-6);
+  color: var(--primary-color);
+  opacity: 0.6;
+}
+
+.empty-cart-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-4);
+  color: var(--text-primary);
+}
+
+.empty-cart-description {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-8);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 订单摘要样式 - 完整实现 */
+.free-shipping-bar {
+  margin-bottom: var(--spacing-6);
+}
+
+.shipping-success {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  border-radius: var(--radius-base);
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+.shipping-progress {
+  .shipping-info {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-2);
+  }
+
+  .shipping-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-success) 0%, #28a745 100%);
+    transition: width var(--duration-slow) var(--ease-out);
+  }
+}
+
+.summary-details {
+  margin-bottom: var(--spacing-6);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-4) 0;
+  font-size: clamp(1rem, 2.5vw, 1.125rem); /* 更大的响应式字体 */
+}
+
+.summary-label {
+  color: #E0E0E0; /* 浅灰色文字，确保与背景对比 */
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.3px;
+}
+
+.summary-value {
+  color: #FFFFFF; /* 纯白色文字 */
+  font-weight: var(--font-weight-semibold);
+  text-shadow: 0 0 3px rgba(135, 206, 235, 0.4); /* 蓝色发光效果 */
+}
+
+.discount-row .summary-value {
+  color: #4CAF50; /* 绿色文字，突出折扣 */
+  font-weight: var(--font-weight-bold);
+  text-shadow: 0 0 5px rgba(76, 175, 80, 0.6);
+}
+
+.summary-total {
+  margin-bottom: var(--spacing-8);
+  margin-top: var(--spacing-6);
+}
+
+.total-row {
+  padding-top: var(--spacing-6);
+  border-top: 2px solid rgba(135, 206, 235, 0.4);
+  margin-top: var(--spacing-6);
+  background: rgba(135, 206, 235, 0.05);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  backdrop-filter: blur(5px);
+}
+
+.total-row .summary-label {
+  font-size: clamp(1.25rem, 3vw, 1.5rem); /* 更大的响应式字体 */
+  font-weight: var(--font-weight-bold);
+  color: var(--secondary-color); /* 天空蓝色标签 */
+  text-shadow: 0 0 8px rgba(135, 206, 235, 0.8);
+  letter-spacing: 0.5px;
+}
+
+.total-value {
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.5rem, 4vw, 2rem); /* 更大的响应式字体 */
+  font-weight: var(--font-weight-bold);
+  color: #FFFFFF; /* 纯白色文字 */
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8),
+              0 0 25px rgba(135, 206, 235, 0.6);
+  letter-spacing: 1px;
+}
+
+.discount-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.discount-form {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.discount-input {
+  flex: 1;
+  padding: var(--spacing-3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-base);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--duration-normal) var(--ease-sci-fi);
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.3);
+  }
+
+  &:read-only {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-secondary);
+  }
+}
+
+.discount-btn {
+  padding: var(--spacing-3) var(--spacing-4);
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+}
+
+.checkout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+}
+
+.checkout-btn {
+  width: 100%;
+  padding: var(--spacing-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.additional-checkout-buttons {
+  margin-top: var(--spacing-3);
+}
+
+.continue-shopping-link {
+  display: block;
+  text-align: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--duration-normal) var(--ease-sci-fi);
+}
+
+.continue-shopping-link:hover {
+  color: var(--primary-color);
+}
+
+.security-info {
+  text-align: center;
+}
+
+.security-badges {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-3);
+}
+
+.payment-icon {
+  opacity: 0.5;
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.payment-icon:hover {
+  opacity: 1;
+}
+
+.payment-icon-svg {
+  width: 32px;
+  height: auto;
+}
+
+/* Glow Button样式 - 已在common-styles.css中定义 */
+
+/* 运费选项 */
+.shipping-options {
+  padding: var(--spacing-3) 0;
+}
+
+.shipping-selection {
+  margin-top: var(--spacing-1);
+}
+
+.shipping-select {
+  width: 100%;
+  padding: var(--spacing-2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-base);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--duration-normal) var(--ease-sci-fi);
+}
+
+.shipping-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.3);
+}
+
+.shipping-select option {
+  background: var(--bg-medium);
+  color: var(--text-primary);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .progress-container {
+    max-width: 80%;
+  }
+
+  .cart-grid {
+    grid-template-columns: 350px 1fr;
+    gap: var(--spacing-6);
+  }
+}
+
+@media (max-width: 768px) {
+  .progress-container {
+    max-width: 95%;
+  }
+
+  .progress-step {
+    flex: 1;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-base);
+  }
+
+  .step-label {
+    font-size: var(--font-size-sm);
+  }
+
+  .progress-connector {
+    width: 60px;
+  }
+
+  .cart-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+
+  .order-summary-section {
+    position: static;
+  }
+
+  .cart-item-card {
+    grid-template-columns: 80px 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .cart-item-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .item-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+
+  .quantity-control {
+    order: 2;
+  }
+
+  .item-price {
+    order: 1;
+    align-items: flex-start;
+  }
+
+  .item-total {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-item-header {
+    flex-direction: column;
+    gap: var(--spacing-2);
+    align-items: flex-start;
+  }
+
+  .remove-item-btn {
+    align-self: flex-end;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 数量控制 - 修复后的逻辑
+  const quantityInputs = document.querySelectorAll('.quantity-input');
+  const minusBtns = document.querySelectorAll('.minus-btn');
+  const plusBtns = document.querySelectorAll('.plus-btn');
+  const removeBtns = document.querySelectorAll('.remove-item-btn');
+
+  // 手动输入数量验证
+  quantityInputs.forEach(input => {
+    input.addEventListener('change', (e) => {
+      let value = parseInt(e.target.value);
+
+      if (isNaN(value) || value < 0) {
+        e.target.value = 1;
+        value = 1;
+      }
+
+      if (value > 99) {
+        e.target.value = 99;
+        value = 99;
+      }
+
+      // 如果输入为0，询问是否删除
+      if (value === 0) {
+        if (!confirm('确定要删除这个商品吗？')) {
+          e.target.value = 1;
+          return;
+        }
+        // 如果确认删除，则更新商品显示
+        updateCartItemDisplay(e.target, 0);
+      } else {
+        // 更新商品显示
+        updateCartItemDisplay(e.target, value);
+      }
+    });
+  });
+
+  // 减少数量按钮 - 修复后只控制数量，当为0时询问删除
+  minusBtns.forEach((btn, index) => {
+    btn.addEventListener('click', (e) => {
+      // 阻止事件冒泡
+      e.preventDefault();
+      e.stopPropagation();
+
+      const input = quantityInputs[index];
+      let value = parseInt(input.value);
+
+      if (value > 0) {
+        value = value - 1;
+        input.value = value;
+
+        // 如果减少到0，询问是否删除
+        if (value === 0) {
+          if (!confirm('确定要删除这个商品吗？')) {
+            input.value = 1; // 用户取消删除，恢复数量为1
+            return;
+          }
+          // 用户确认删除，更新显示
+          updateCartItemDisplay(input, 0);
+        } else {
+          // 更新商品显示
+          updateCartItemDisplay(input, value);
+        }
+      }
+    });
+  });
+
+  // 增加数量按钮
+  plusBtns.forEach((btn, index) => {
+    btn.addEventListener('click', (e) => {
+      // 阻止事件冒泡
+      e.preventDefault();
+      e.stopPropagation();
+
+      const input = quantityInputs[index];
+      let value = parseInt(input.value);
+
+      if (value < 99) {
+        value = value + 1;
+        input.value = value;
+
+        // 更新商品显示
+        updateCartItemDisplay(input, value);
+      }
+    });
+  });
+
+  // 更新商品显示的函数
+  function updateCartItemDisplay(input, quantity) {
+    const cartItem = input.closest('.cart-item-card');
+    const unitPriceElement = cartItem.querySelector('.price-current');
+    const totalPriceElement = cartItem.querySelector('.total-price');
+    const totalPriceLabel = cartItem.querySelector('.total-price-label');
+
+    // 获取单价 - 优先使用data属性
+    let unitPrice = 0;
+
+    if (unitPriceElement && unitPriceElement.dataset.price) {
+      // 优先使用data属性中的价格（以分为单位）
+      unitPrice = parseFloat(unitPriceElement.dataset.price) / 100;
+    } else {
+      // 回退到文本解析
+      if (unitPriceElement) {
+        const priceText = unitPriceElement.textContent.trim();
+        // 更完整的货币符号清理，包括人民币符号
+        unitPrice = parseFloat(priceText.replace(/[¥$￥,\s]/g, ''));
+      }
+    }
+
+    // 检查价格是否有效
+    if (isNaN(unitPrice) || unitPrice <= 0) {
+      console.warn('Invalid unit price detected:', unitPrice, 'from element:', unitPriceElement);
+      return;
+    }
+
+    // 更新总价显示
+    if (quantity > 1) {
+      // 显示总价区域
+      if (totalPriceLabel) totalPriceLabel.style.display = 'block';
+      if (totalPriceElement) {
+        totalPriceElement.style.display = 'block';
+        const totalPrice = unitPrice * quantity;
+        totalPriceElement.textContent = `¥${totalPrice.toFixed(2)}`;
+      }
+    } else {
+      // 隐藏总价区域（数量为1时）
+      if (totalPriceLabel) totalPriceLabel.style.display = 'none';
+      if (totalPriceElement) totalPriceElement.style.display = 'none';
+    }
+
+    // 如果数量为0，准备删除商品
+    if (quantity === 0) {
+      setTimeout(() => {
+        // 提交表单进行实际删除
+        submitCartUpdate(input);
+      }, 1000); // 给用户1秒钟看到变化
+    }
+  }
+
+  // 提交购物车更新的函数
+  function submitCartUpdate(input) {
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/cart/update.js';
+
+    const formData = new FormData();
+    const itemKey = input.closest('.cart-item-card').dataset.itemKey;
+    formData.append('updates[' + itemKey + ']', input.value);
+
+    for (let [key, value] of formData.entries()) {
+      form.appendChild(Object.assign(document.createElement('input'), {type: 'hidden', name: key, value: value}));
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // 直接删除按钮（保留原有的删除功能，但改进逻辑）
+  removeBtns.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      // 阻止事件冒泡，防止触发父元素事件
+      e.preventDefault();
+      e.stopPropagation();
+
+      const card = btn.closest('.cart-item-card');
+      const itemKey = card.dataset.itemKey;
+
+      // 显示确认对话框
+      if (!confirm('确定要删除这个商品吗？')) {
+        return;
+      }
+
+      card.style.opacity = '0.5';
+
+      try {
+        // 直接删除商品
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/cart/change.js';
+
+        const formData = new FormData();
+        formData.append('line', itemKey);
+        formData.append('quantity', 0);
+
+        for (let [key, value] of formData.entries()) {
+          form.appendChild(Object.assign(document.createElement('input'), {type: 'hidden', name: key, value: value}));
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      } catch (error) {
+        console.error('Remove item error:', error);
+        card.style.opacity = '1';
+      }
+    });
+  });
+
+  // 初始化页面时根据数量显示总价
+  quantityInputs.forEach(input => {
+    const quantity = parseInt(input.value);
+    updateCartItemDisplay(input, quantity);
+  });
+});
+</script>

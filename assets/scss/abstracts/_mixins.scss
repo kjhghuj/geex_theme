@@ -1,0 +1,259 @@
+// ============================================
+// SCSS Mixins - 科幻主题工具函数
+// ============================================
+
+// 响应式断点混合器
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "未找到断点 `#{$breakpoint}` in $breakpoints map.";
+  }
+}
+
+@mixin mobile-only {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+// 发光效果混合器
+@mixin glow($size: medium, $color: var(--glow-primary), $intensity: 0.6) {
+  box-shadow: 0 0 $size rgba($color, $intensity);
+}
+
+@mixin glow-hover($size: large, $color: var(--glow-hover), $intensity: 0.8) {
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    @include glow($size, $color, $intensity);
+    transform: translateY(-2px);
+  }
+}
+
+// 科幻按钮效果
+@mixin scifi-button($bg-color: var(--color-secondary), $text-color: var(--color-text-inverse)) {
+  background: linear-gradient(135deg, $bg-color 0%, lighten($bg-color, 10%) 100%);
+  color: $text-color;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3) var(--spacing-6);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  position: relative;
+  overflow: hidden;
+
+  // 发光效果
+  @include glow(var(--glow-size-medium));
+
+  // 过渡动画
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  // 悬停效果
+  &:hover {
+    @include glow(var(--glow-size-large));
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+      0 0 var(--glow-size-large) var(--glow-hover),
+      0 8px 16px rgba(0,0,0,0.2);
+  }
+
+  // 激活效果
+  &:active {
+    transform: translateY(0) scale(0.98);
+    transition: all var(--duration-fast) var(--ease-in);
+  }
+
+  // 聚焦效果
+  &:focus {
+    outline: none;
+    @include glow(var(--glow-size-large));
+  }
+
+  // 波纹效果（可选）
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active::after {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+// 卡片组件混合器
+@mixin scifi-card($bg-color: var(--color-bg-primary)) {
+  background: $bg-color;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-medium);
+  transition: all var(--duration-normal) var(--ease-sci-fi);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      var(--shadow-large),
+      0 0 var(--glow-size-small) var(--glow-secondary);
+    border-color: var(--color-secondary);
+  }
+}
+
+// 标题文字效果
+@mixin scifi-heading($size: 2xl, $glow: true) {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+
+  @if $glow {
+    text-shadow: 0 0 20px var(--glow-primary);
+  }
+
+  @if $size == '3xl' {
+    font-size: var(--font-size-3xl);
+  } @else if $size == '4xl' {
+    font-size: var(--font-size-4xl);
+  } @else if $size == '5xl' {
+    font-size: var(--font-size-5xl);
+  } @else {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+// 网格布局混合器
+@mixin grid-columns($columns: 12, $gap: var(--spacing-4)) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+}
+
+@mixin responsive-grid($mobile-columns: 1, $tablet-columns: 2, $desktop-columns: 3, $gap: var(--spacing-6)) {
+  display: grid;
+  gap: $gap;
+  grid-template-columns: repeat($mobile-columns, 1fr);
+
+  @include respond-to('md') {
+    grid-template-columns: repeat($tablet-columns, 1fr);
+  }
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat($desktop-columns, 1fr);
+  }
+}
+
+// 视差滚动效果
+@mixin parallax($speed: 0.5) {
+  transform: translateY(0);
+  transition: transform var(--duration-slow) var(--ease-out);
+
+  .parallax-active & {
+    transform: translateY(calc(var(--scroll-y) * #{$speed}));
+  }
+}
+
+// 脉冲动画
+@mixin pulse-animation($duration: 2s, $scale: 1.05) {
+  animation: pulse #{$duration} infinite;
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale($scale);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+// 渐入动画
+@mixin fade-in($direction: up, $duration: var(--duration-normal)) {
+  opacity: 0;
+  transform: if($direction == up, translateY(20px),
+               if($direction == down, translateY(-20px),
+               if($direction == left, translateX(20px), translateX(-20px))));
+  transition: all $duration var(--ease-out);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+// 加载动画
+@mixin loading-spinner($size: 40px, $color: var(--color-secondary)) {
+  width: $size;
+  height: $size;
+  border: 3px solid rgba($color, 0.2);
+  border-top: 3px solid $color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+// 渐变文字效果
+@mixin gradient-text($colors: (var(--color-text-primary), var(--color-secondary))) {
+  background: linear-gradient(90deg, $colors...);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+// 玻璃态效果
+@mixin glass-morphism($blur: 10px, $opacity: 0.1) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+// 霓虹边框效果
+@mixin neon-border($color: var(--color-secondary), $width: 2px) {
+  border: $width solid $color;
+  box-shadow:
+    0 0 5px $color,
+    inset 0 0 5px rgba($color, 0.3);
+}
+
+// 减少动画的混合器（可访问性）
+@mixin reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

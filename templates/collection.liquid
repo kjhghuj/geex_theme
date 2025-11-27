@@ -1,0 +1,1292 @@
+{%- comment -%}
+  收藏页面模板 - Sci-Fi主题版本
+  包含与首页一致的布局，筛选功能和商品展示
+{%- endcomment -%}
+
+<div class="sci-fi-collection-page">
+
+  <!-- 复用首页的顶部横幅 -->
+  <section class="announcement-bar enhanced" data-section-type="announcement-bar">
+    <div class="announcement-content" id="announcementText">
+      {% if section.settings.announcement_text != blank %}
+        {{ section.settings.announcement_text }}
+      {% else %}
+        🎉 限时优惠：全场商品满299减50，新用户首单8折优惠！优惠码：SCI-FI-2024
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- 复用首页的头部 -->
+  <header class="main-header enhanced" data-section-type="header">
+    <div class="header-container">
+      <!-- 店铺Logo -->
+      <div class="header-logo">
+        <a href="/" class="logo-link">
+          <img src="{{ 'logo.png' | asset_url }}"
+               alt="{{ shop.name }}"
+               class="logo-image">
+        </a>
+      </div>
+
+      <!-- 搜索栏和其他组件 -->
+      <div class="header-actions">
+        <!-- 搜索栏 -->
+        <div class="search-container enhanced">
+          <form class="search-form" action="/search" method="get" role="search">
+            <input type="search"
+                   name="q"
+                   class="search-input"
+                   placeholder="搜索产品..."
+                   value="{{ search.terms | escape }}"
+                   aria-label="搜索产品">
+            <button type="submit" class="search-button" aria-label="搜索">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- FAQ按钮 -->
+        <a href="/pages/faq" class="header-btn faq-btn enhanced">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="btn-text">FAQ</span>
+        </a>
+
+        <!-- My Account按钮 -->
+        {% if customer %}
+          <a href="{{ routes.account_url }}" class="header-btn account-btn enhanced">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="btn-text">{{ customer.first_name | default: 'My Account' }}</span>
+          </a>
+        {% else %}
+          <a href="{{ routes.account_login_url }}" class="header-btn account-btn enhanced">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="btn-text">My Account</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- 复用首页的导航栏 -->
+  <nav class="main-navigation sticky-nav" data-section-type="navigation">
+    <div class="nav-container">
+      <!-- 左侧导航菜单 -->
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="/" class="nav-link">HOME</a>
+        </li>
+        <li class="nav-item mega-dropdown">
+          <a href="/collections/all" class="nav-link">SHOP</a>
+          <div class="mega-menu">
+            <div class="mega-menu-content">
+              <!-- 电子产品 -->
+              <div class="mega-category">
+                <a href="/collections/electronics" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="6" cy="18" r="1" fill="currentColor"/>
+                    <circle cx="18" cy="18" r="1" fill="currentColor"/>
+                  </svg>
+                  电子产品
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smartphones">智能手机</a></li>
+                  <li><a href="/collections/laptops">笔记本电脑</a></li>
+                  <li><a href="/collections/tablets">平板电脑</a></li>
+                  <li><a href="/collections/headphones">耳机音响</a></li>
+                  <li><a href="/collections/cameras">摄影摄像</a></li>
+                </ul>
+              </div>
+
+              <!-- 智能家居 -->
+              <div class="mega-category">
+                <a href="/collections/smart-home" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  智能家居
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smart-speakers">智能音箱</a></li>
+                  <li><a href="/collections/smart-lights">智能照明</a></li>
+                  <li><a href="/collections/smart-locks">智能门锁</a></li>
+                  <li><a href="/collections/some-sensors">传感器</a></li>
+                  <li><a href="/collections/home-automation">家居控制</a></li>
+                </ul>
+              </div>
+
+              <!-- 穿戴设备 -->
+              <div class="mega-category">
+                <a href="/collections/wearables" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="12" y="2" width="8" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="14" y1="4" x2="18" y2="4" stroke="currentColor" stroke-width="2"/>
+                    <line x1="14" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 18a4 4 0 01-8 0" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  穿戴设备
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/smartwatches">智能手表</a></li>
+                  <li><a href="/collections/fitness-trackers">运动手环</a></li>
+                  <li><a href="/collections/smart-rings">智能戒指</a></li>
+                  <li><a href="/collections/health-monitors">健康监测</a></li>
+                  <li><a href="/collections/ar-glasses">AR眼镜</a></li>
+                </ul>
+              </div>
+
+              <!-- 游戏电竞 -->
+              <div class="mega-category">
+                <a href="/collections/gaming" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="6" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="4"/>
+                    <circle cx="18" cy="12" r="2" fill="currentColor"/>
+                    <rect x="8" y="10" width="6" height="4" rx="1" fill="currentColor"/>
+                  </svg>
+                  游戏电竞
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/gaming-consoles">游戏主机</a></li>
+                  <li><a href="/collections/gaming-pc">游戏电脑</a></li>
+                  <li><a href="/collections/gaming-monitors">电竞显示器</a></li>
+                  <li><a href="/collections/gaming-keyboards">机械键盘</a></li>
+                  <li><a href="/collections/gaming-mice">游戏鼠标</a></li>
+                </ul>
+              </div>
+
+              <!-- 办公设备 -->
+              <div class="mega-category">
+                <a href="/collections/office" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                    <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/>
+                    <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  办公设备
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/printers">打印机</a></li>
+                  <li><a href="/collections/scanners">扫描仪</a></li>
+                  <li><a href="/collections/projectors">投影仪</a></li>
+                  <li><a href="/collections/office-furniture">办公家具</a></li>
+                  <li><a href="/collections/network-equipment">网络设备</a></li>
+                </ul>
+              </div>
+
+              <!-- 配件周边 -->
+              <div class="mega-category">
+                <a href="/collections/accessories" class="category-title">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                  </svg>
+                  配件周边
+                </a>
+                <ul class="subcategories">
+                  <li><a href="/collections/phone-cases">手机壳膜</a></li>
+                  <li><a href="/collections/cables">连接线材</a></li>
+                  <li><a href="/collections/chargers">充电设备</a></li>
+                  <li><a href="/cases/external-storage">存储设备</a></li>
+                  <li><a href="/cases/car-accessories">车载配件</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="/blogs/news" class="nav-link">BLOG</a>
+        </li>
+        <li class="nav-item">
+          <a href="/pages/about" class="nav-link">ABOUT US</a>
+        </li>
+      </ul>
+
+      <!-- 右侧购物车 -->
+      <div class="cart-section">
+        <div class="cart-total" id="cartTotal">¥0.00</div>
+        <a href="{{ routes.cart_url }}" class="cart-button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M9 2 6 9H22l-2 7H4l-3-7h0.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="9" cy="22" r="2" fill="currentColor"/>
+            <circle cx="20" cy="22" r="2" fill="currentColor"/>
+          </svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 收藏页面主要内容 -->
+  <section class="collection-content-section">
+    <div class="content-container">
+
+      <!-- 面包屑导航 -->
+      <nav class="collection-breadcrumb" aria-label="面包屑导航">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item">
+            <a href="/" class="breadcrumb-link">HOME</a>
+            <span class="breadcrumb-separator">/</span>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="/collections/all" class="breadcrumb-link">SHOP</a>
+            <span class="breadcrumb-separator">/</span>
+          </li>
+          <li class="breadcrumb-item">
+            {%- case collection.handle -%}
+              {%- when 'electronics' -%}
+                <a href="/collections/electronics" class="breadcrumb-link">电子产品</a>
+              {%- when 'smart-home' -%}
+                <a href="/collections/smart-home" class="breadcrumb-link">智能家居</a>
+              {%- when 'wearables' -%}
+                <a href="/collections/wearables" class="breadcrumb-link">穿戴设备</a>
+              {%- when 'gaming' -%}
+                <a href="/collections/gaming" class="breadcrumb-link">游戏电竞</a>
+              {%- when 'office' -%}
+                <a href="/collections/office" class="breadcrumb-link">办公设备</a>
+              {%- when 'accessories' -%}
+                <a href="/collections/accessories" class="breadcrumb-link">配件周边</a>
+              {%- else -%}
+                <a href="{{ collection.url }}" class="breadcrumb-link">{{ collection.title }}</a>
+            {%- endcase -%}
+            <span class="breadcrumb-separator">/</span>
+          </li>
+          <li class="breadcrumb-item active">
+            {{ collection.title }}
+          </li>
+        </ol>
+      </nav>
+
+      <!-- 主要内容区域 - 左侧筛选+右侧商品 -->
+      <div class="collection-main-layout">
+
+        <!-- 左侧筛选条件侧边栏 -->
+        <aside class="collection-sidebar">
+          <div class="filter-section">
+            <h3 class="filter-title">筛选条件</h3>
+
+            <!-- Brands筛选 -->
+            <div class="filter-group">
+              <h4 class="filter-subtitle">Brands</h4>
+              <ul class="filter-options">
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="brand" value="Apple">
+                    <span class="filter-checkmark"></span>
+                    Apple ({{ collection.products | where: 'vendor', 'Apple' | size }})
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="brand" value="Samsung">
+                    <span class="filter-checkmark"></span>
+                    Samsung ({{ collection.products | where: 'vendor', 'Samsung' | size }})
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="brand" value="Sony">
+                    <span class="filter-checkmark"></span>
+                    Sony ({{ collection.products | where: 'vendor', 'Sony' | size }})
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="brand" value="Xiaomi">
+                    <span class="filter-checkmark"></span>
+                    Xiaomi ({{ collection.products | where: 'vendor', 'Xiaomi' | size }})
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="brand" value="Huawei">
+                    <span class="filter-checkmark"></span>
+                    Huawei ({{ collection.products | where: 'vendor', 'Huawei' | size }})
+                  </label>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Categories筛选 -->
+            <div class="filter-group">
+              <h4 class="filter-subtitle">Categories</h4>
+              <ul class="filter-options">
+                {%- for tag in collection.tags limit: 8 -%}
+                  <li class="filter-option">
+                    <label class="filter-label">
+                      <input type="checkbox" name="tag" value="{{ tag | handle }}">
+                      <span class="filter-checkmark"></span>
+                      {{ tag }} ({{ collection.products | where: 'tags', tag | size }})
+                    </label>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+
+            <!-- 价格筛选 -->
+            <div class="filter-group">
+              <h4 class="filter-subtitle">价格区间</h4>
+              <div class="price-range">
+                <input type="number" class="price-input" placeholder="最低价" min="0">
+                <span class="price-separator">-</span>
+                <input type="number" class="price-input" placeholder="最高价" min="0">
+              </div>
+              <div class="price-slider">
+                <input type="range" class="price-range-slider" min="0" max="10000" value="0">
+                <input type="range" class="price-range-slider" min="0" max="10000" value="10000">
+              </div>
+            </div>
+
+            <!-- 产品参数筛选 -->
+            <div class="filter-group">
+              <h4 class="filter-subtitle">产品参数</h4>
+              <ul class="filter-options">
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="feature" value="5g">
+                    <span class="filter-checkmark"></span>
+                    5G网络
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="feature" value="wireless">
+                    <span class="filter-checkmark"></span>
+                    无线充电
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="feature" value="waterproof">
+                    <span class="filter-checkmark"></span>
+                    防水防尘
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="feature" value="fast-charge">
+                    <span class="filter-checkmark"></span>
+                    快速充电
+                  </label>
+                </li>
+                <li class="filter-option">
+                  <label class="filter-label">
+                    <input type="checkbox" name="feature" value="premium">
+                    <span class="filter-checkmark"></span>
+                    高端旗舰
+                  </label>
+                </li>
+              </ul>
+            </div>
+
+            <button class="apply-filters-btn glow-button">应用筛选</button>
+          </div>
+        </aside>
+
+        <!-- 右侧商品展示区域 -->
+        <main class="collection-products">
+
+          <!-- 页面标题和统计信息 -->
+          <div class="collection-header">
+            <h1 class="collection-page-title">{{ collection.title }}</h1>
+            <div class="collection-stats">
+              <span class="product-count">共 {{ collection.products_count }} 件产品</span>
+              <select class="sort-select">
+                <option value="manual">精选推荐</option>
+                <option value="price-ascending">价格从低到高</option>
+                <option value="price-descending">价格从高到低</option>
+                <option value="created-descending">最新上架</option>
+                <option value="best-selling">热销商品</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 商品网格 -->
+          {% if collection.products.size > 0 %}
+            <div class="products-grid">
+              {%- for product in collection.products -%}
+                <div class="collection-product-card">
+                  <div class="product-card-image">
+                    <a href="{{ product.url }}">
+                      {% if product.featured_image %}
+                        <img src="{{ product.featured_image | image_url: width: 400, height: 400 }}"
+                             alt="{{ product.title }}"
+                             loading="lazy">
+                      {% else %}
+                        <div class="product-image-placeholder">
+                          <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                          </svg>
+                        </div>
+                      {% endif %}
+                    </a>
+
+                    {% if product.compare_at_price > product.price %}
+                      <span class="sale-badge">-{{ product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round }}%</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="product-card-content">
+                    <h3 class="product-card-title">
+                      <a href="{{ product.url }}">{{ product.title }}</a>
+                    </h3>
+
+                    <div class="product-card-price">
+                      {% if product.compare_at_price > product.price %}
+                        <span class="compare-price">{{ product.compare_at_price | money }}</span>
+                        <span class="current-price">{{ product.price | money }}</span>
+                      {% else %}
+                        <span class="current-price">{{ product.price | money }}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="product-card-actions">
+                      <form action="/cart/add" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                        <button type="submit"
+                                class="add-to-cart-btn glow-button primary"
+                                {% unless product.available %}disabled{% endunless %}>
+                          {% if product.available %}
+                            加入购物车
+                          {% else %}
+                            暂时缺货
+                          {% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+
+            <!-- 分页 -->
+            {%- if paginate.pages > 1 -%}
+              <div class="collection-pagination">
+                <div class="pagination-info">
+                  显示 {{ paginate.current_offset | plus: 1 }} - {{ paginate.current_offset | plus: paginate.page_size }} / {{ paginate.items }} 件产品
+                </div>
+                <div class="pagination-links">
+                  {% if paginate.previous %}
+                    <a href="{{ paginate.previous.url }}" class="pagination-link">上一页</a>
+                  {% endif %}
+
+                  {%- for part in paginate.parts -%}
+                    {%- if part.is_link -%}
+                      <a href="{{ part.url }}" class="pagination-link">{{ part.title }}</a>
+                    {%- else -%}
+                      <span class="pagination-current">{{ part.title }}</span>
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {% if paginate.next %}
+                    <a href="{{ paginate.next.url }}" class="pagination-link">下一页</a>
+                  {% endif %}
+                </div>
+              </div>
+            {%- endif -%}
+
+          {% else %}
+            <!-- 空状态 -->
+            <div class="collection-empty">
+              <div class="empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                </svg>
+              </div>
+              <h2 class="empty-title">没有找到相关产品</h2>
+              <p class="empty-description">该分类暂时没有商品，请尝试其他分类或稍后再来查看。</p>
+              <a href="/collections/all" class="glow-button primary">浏览全部商品</a>
+            </div>
+          {% endif %}
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- 商店政策部分 -->
+  <section class="store-policies-section">
+    <div class="content-container">
+      <div class="policies-grid">
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="policy-title">Fast Delivery</h3>
+          <p class="policy-description">全国范围内3-5天快速送达</p>
+        </div>
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="policy-title">Warranty</h3>
+          <p class="policy-description">官方正品保障，享一年质保服务</p>
+        </div>
+        <div class="policy-item">
+          <div class="policy-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="policy-title">24/7 Support</h3>
+          <p class="policy-description">全天候在线客服，随时解答疑问</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚部分 -->
+  <footer class="site-footer">
+    <div class="content-container">
+      <div class="footer-top">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <h3 class="footer-logo-text scifi-gradient-text">{{ shop.name }}</h3>
+            <p class="footer-description">
+              专注于提供最新科技产品和智能解决方案，让科技改变生活，创新引领未来。
+            </p>
+          </div>
+          <div class="footer-contact">
+            <h4>联系我们</h4>
+            <div class="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              <span>客服热线：400-123-4567</span>
+            </div>
+            <div class="contact-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <span>service@scifistore.com</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4 class="footer-title">Useful Links</h4>
+          <ul class="footer-links">
+            <li><a href="/pages/about">关于我们</a></li>
+            <li><a href="/pages/shipping">配送信息</a></li>
+            <li><a href="/pages/returns">退换货政策</a></li>
+            <li><a href="/pages/privacy">隐私政策</a></li>
+            <li><a href="/pages/terms">服务条款</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4 class="footer-title">FAQ</h4>
+          <ul class="footer-links">
+            <li><a href="/pages/faq#shipping">配送时间</a></li>
+            <li><a href="/pages/faq#payment">支付方式</a></li>
+            <li><a href="/pages/faq#warranty">质保服务</a></li>
+            <li><a href="/pages/faq#tracking">订单追踪</a></li>
+            <li><a href="/pages/faq#contact">联系客服</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4 class="footer-title">Join Us</h4>
+          <div class="newsletter-form">
+            <p class="newsletter-text">订阅获取最新优惠信息</p>
+            <form action="/contact" method="post" class="newsletter-input">
+              <input type="hidden" name="form_type" value="customer">
+              <input type="email" name="contact[email]" placeholder="输入邮箱地址" required>
+              <button type="submit" class="newsletter-submit">订阅</button>
+            </form>
+          </div>
+          <div class="social-links">
+            <a href="#" class="social-link" aria-label="Facebook">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Twitter">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Instagram">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-section">
+          <h4 class="footer-title">We Accept</h4>
+          <div class="payment-methods">
+            <div class="payment-icon">
+              <svg width="32" height="20" viewBox="0 0 32 20" fill="currentColor">
+                <rect width="32" height="20" rx="2"/>
+                <text x="16" y="14" text-anchor="middle" fill="white" font-size="6">VISA</text>
+              </svg>
+            </div>
+            <div class="payment-icon">
+              <svg width="32" height="20" viewBox="0 0 32 20" fill="currentColor">
+                <rect width="32" height="20" rx="2"/>
+                <text x="16" y="14" text-anchor="middle" fill="white" font-size="5">MasterCard</text>
+              </svg>
+            </div>
+            <div class="payment-icon">
+              <svg width="32" height="20" viewBox="0 0 32 20" fill="currentColor">
+                <rect width="32" height="20" rx="2"/>
+                <text x="16" y="14" text-anchor="middle" fill="white" font-size="5">Alipay</text>
+              </svg>
+            </div>
+            <div class="payment-icon">
+              <svg width="32" height="20" viewBox="0 0 32 20" fill="currentColor">
+                <rect width="32" height="20" rx="2"/>
+                <text x="16" y="14" text-anchor="middle" fill="white" font-size="5">WeChat</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- 引用公共样式文件 -->
+{{ 'common-styles.css' | asset_url | stylesheet_tag }}
+
+<!-- Collections页面特定样式 -->
+<style>
+.sci-fi-collection-page {
+  background: var(--dark-bg);
+  min-height: 100vh;
+}
+
+/* 面包屑导航 */
+.collection-breadcrumb {
+  padding: var(--spacing-lg) 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-xl);
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb-link {
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.breadcrumb-link:hover {
+  color: var(--secondary-color);
+}
+
+.breadcrumb-separator {
+  color: var(--text-light);
+  opacity: 0.5;
+}
+
+.breadcrumb-item.active {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+
+/* 主要内容布局 */
+.collection-content-section {
+  padding: var(--spacing-xl) 0;
+}
+
+.content-container {
+  max-width: 60%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.collection-main-layout {
+  display: grid;
+  grid-template-columns: 20% 1fr;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+/* 左侧筛选栏 */
+.collection-sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.filter-section {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(135, 206, 235, 0.2);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.filter-title {
+  color: var(--secondary-color);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+.filter-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.filter-subtitle {
+  color: var(--primary-color);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.filter-subtitle::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--secondary-color);
+  border-radius: 2px;
+}
+
+.filter-options {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-option {
+  margin-bottom: var(--spacing-sm);
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  transition: color 0.3s ease;
+}
+
+.filter-label:hover {
+  color: var(--secondary-color);
+}
+
+.filter-label input[type="checkbox"] {
+  display: none;
+}
+
+.filter-checkmark {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-light);
+  border-radius: 3px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.filter-label input[type="checkbox"]:checked + .filter-checkmark {
+  background: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.filter-label input[type="checkbox"]:checked + .filter-checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--dark-bg);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* 价格筛选 */
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.price-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+}
+
+.price-separator {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.price-slider {
+  margin-top: var(--spacing-md);
+}
+
+.price-range-slider {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
+}
+
+.apply-filters-btn {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+
+/* 右侧商品展示 */
+.collection-products {
+  min-height: 600px;
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collection-page-title {
+  color: var(--secondary-color);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin: 0;
+}
+
+.collection-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.product-count {
+  color: var(--text-light);
+  font-size: var(--font-size-sm);
+}
+
+.sort-select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+/* 商品网格 */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.collection-product-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.collection-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(135, 206, 235, 0.3);
+}
+
+.product-card-image {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.product-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.collection-product-card:hover .product-card-image img {
+  transform: scale(1.05);
+}
+
+.product-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+}
+
+.sale-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--accent-color);
+  color: var(--dark-bg);
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.product-card-content {
+  padding: var(--spacing-md);
+}
+
+.product-card-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.product-card-title a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.product-card-title a:hover {
+  color: var(--secondary-color);
+}
+
+.product-card-price {
+  margin-bottom: var(--spacing-md);
+}
+
+.compare-price {
+  color: var(--text-light);
+  text-decoration: line-through;
+  font-size: var(--font-size-sm);
+  margin-right: var(--spacing-xs);
+}
+
+.current-price {
+  color: var(--accent-color);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  font-size: var(--font-size-sm);
+}
+
+.add-to-cart-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 空状态 */
+.collection-empty {
+  text-align: center;
+  padding: var(--spacing-2xl) 0;
+}
+
+.empty-icon {
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-light);
+}
+
+.empty-title {
+  color: var(--primary-color);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-description {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* 分页 */
+.collection-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-info {
+  color: var(--text-light);
+  font-size: var(--font-size-sm);
+}
+
+.pagination-links {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.pagination-link {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.pagination-link:hover {
+  background: var(--secondary-color);
+  color: var(--dark-bg);
+}
+
+.pagination-current {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--secondary-color);
+  color: var(--dark-bg);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+</style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 筛选器功能
+  const filterToggle = document.querySelector('[data-filter-toggle]');
+  const filterClose = document.querySelector('[data-filter-close]');
+  const collectionSidebar = document.querySelector('[data-collection-sidebar]');
+  const collectionOverlay = document.querySelector('[data-collection-overlay]');
+
+  function openFilters() {
+    collectionSidebar.classList.add('active');
+    collectionOverlay.classList.add('active');
+    collectionOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    filterToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeFilters() {
+    collectionSidebar.classList.remove('active');
+    collectionOverlay.classList.remove('active');
+    setTimeout(() => {
+      collectionOverlay.style.display = 'none';
+    }, 300);
+    document.body.style.overflow = '';
+    filterToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  if (filterToggle) {
+    filterToggle.addEventListener('click', openFilters);
+  }
+
+  if (filterClose) {
+    filterClose.addEventListener('click', closeFilters);
+  }
+
+  if (collectionOverlay) {
+    collectionOverlay.addEventListener('click', closeFilters);
+  }
+
+  // ESC键关闭筛选器
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && collectionSidebar.classList.contains('active')) {
+      closeFilters();
+    }
+  });
+
+  // 视图切换
+  const viewButtons = document.querySelectorAll('[data-view]');
+  const productsContainer = document.querySelector('[data-products-container]');
+
+  viewButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const view = button.dataset.view;
+
+      // 更新按钮状态
+      viewButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+      button.classList.add('active');
+      button.setAttribute('aria-pressed', 'true');
+
+      // 更新视图
+      productsContainer.dataset.view = view;
+
+      // 保存用户偏好
+      localStorage.setItem('collectionView', view);
+    });
+  });
+
+  // 恢复用户偏好
+  const savedView = localStorage.getItem('collectionView');
+  if (savedView) {
+    productsContainer.dataset.view = savedView;
+    viewButtons.forEach(button => {
+      button.classList.toggle('active', button.dataset.view === savedView);
+      button.setAttribute('aria-pressed', button.dataset.view === savedView);
+    });
+  }
+
+  // 排序功能
+  const sortSelect = document.querySelector('[data-sort-select]');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('sort_by', sortSelect.value);
+      window.location.href = url.toString();
+    });
+  }
+
+  // 每页显示数量
+  const perPageSelect = document.querySelector('[data-per-page-select]');
+  if (perPageSelect) {
+    perPageSelect.addEventListener('change', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('per_page', perPageSelect.value);
+      url.searchParams.delete('page'); // 重置到第一页
+      window.location.href = url.toString();
+    });
+  }
+
+  // 清除所有筛选器
+  const clearFiltersLink = document.querySelector('[data-clear-filters]');
+  if (clearFiltersLink) {
+    clearFiltersLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = clearFiltersLink.href;
+    });
+  }
+
+  // 价格范围滑块
+  const priceRange = document.querySelector('[data-price-range]');
+  if (priceRange) {
+    const minInput = priceRange.querySelector('[data-min-input]');
+    const maxInput = priceRange.querySelector('[data-max-input]');
+    const progress = priceRange.querySelector('[data-progress]');
+    const minField = priceRange.querySelector('#Filter-Price-GTE');
+    const maxField = priceRange.querySelector('#Filter-Price-LTE');
+
+    function updatePriceRange() {
+      const minValue = parseInt(minInput.value);
+      const maxValue = parseInt(maxInput.value);
+      const range = parseInt(minInput.max);
+
+      const percentMin = (minValue / range) * 100;
+      const percentMax = (maxValue / range) * 100;
+
+      progress.style.left = `${percentMin}%`;
+      progress.style.width = `${percentMax - percentMin}%`;
+
+      // 更新输入字段
+      minField.value = minValue;
+      maxField.value = maxValue;
+    }
+
+    function syncInputs() {
+      const minValue = parseInt(minField.value) || 0;
+      const maxValue = parseInt(maxField.value) || parseInt(minInput.max);
+
+      minInput.value = minValue;
+      maxInput.value = maxValue;
+      updatePriceRange();
+    }
+
+    minInput.addEventListener('input', () => {
+      const minValue = parseInt(minInput.value);
+      const maxValue = parseInt(maxInput.value);
+
+      if (minValue > maxValue) {
+        maxInput.value = minValue;
+      }
+
+      updatePriceRange();
+    });
+
+    maxInput.addEventListener('input', () => {
+      const minValue = parseInt(minInput.value);
+      const maxValue = parseInt(maxInput.value);
+
+      if (maxValue < minValue) {
+        minInput.value = maxValue;
+      }
+
+      updatePriceRange();
+    });
+
+    minField.addEventListener('input', syncInputs);
+    maxField.addEventListener('input', syncInputs);
+
+    updatePriceRange();
+  }
+});
+</script>

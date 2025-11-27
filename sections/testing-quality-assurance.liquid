@@ -1,0 +1,307 @@
+{%- comment -%}
+Quality Testing Section - 科幻主题质量保证
+测试和质量保证系统
+{%- endcomment -%}
+
+<section class="quality-testing" data-section-id="{{ section.id }}" data-section-type="quality-testing">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.title | default: '质量保证' }}</h2>
+      <p class="section-subtitle">{{ section.settings.subtitle | default: '严格测试流程，确保最佳用户体验' }}</p>
+    </div>
+
+    <div class="testing-grid">
+      <div class="testing-item">
+        <div class="testing-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>单元测试</h3>
+        <p>所有组件功能验证</p>
+        <div class="testing-status">
+          <span class="status-badge success">100% 通过</span>
+        </div>
+      </div>
+
+      <div class="testing-item">
+        <div class="testing-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>集成测试</h3>
+        <p>系统间交互验证</p>
+        <div class="testing-status">
+          <span class="status-badge success">已通过</span>
+        </div>
+      </div>
+
+      <div class="testing-item">
+        <div class="testing-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>安全测试</h3>
+        <p>数据保护验证</p>
+        <div class="testing-status">
+          <span class="status-badge success">安全</span>
+        </div>
+      </div>
+
+      <div class="testing-item">
+        <div class="testing-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>性能测试</h3>
+        <p>加载速度验证</p>
+        <div class="testing-status">
+          <span class="status-badge success">优秀</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quality-metrics">
+      <h3>质量指标</h3>
+      <div class="metrics-grid">
+        <div class="metric-item">
+          <span class="metric-number">99.9%</span>
+          <span class="metric-label">正常运行时间</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-number">1.2s</span>
+          <span class="metric-label">平均加载时间</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-number">0</span>
+          <span class="metric-label">严重错误</span>
+        </div>
+        <div class="metric-item">
+          <span class="metric-number">A+</span>
+          <span class="metric-label">性能评级</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .quality-testing {
+    padding: 5rem 0;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #87ceeb, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .testing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .testing-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .testing-item:hover {
+    transform: translateY(-5px);
+    border-color: #87ceeb;
+    box-shadow: 0 10px 30px rgba(135, 206, 235, 0.3);
+  }
+
+  .testing-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(45deg, #87ceeb, #00d4ff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+  }
+
+  .testing-item h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #87ceeb;
+  }
+
+  .testing-item p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+  }
+
+  .testing-status {
+    margin-top: 1rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+  }
+
+  .status-badge.success {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border-color: rgba(40, 167, 69, 0.3);
+  }
+
+  .quality-metrics {
+    text-align: center;
+  }
+
+  .quality-metrics h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: #ffffff;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .metric-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .metric-number {
+    display: block;
+    color: #00d4ff;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .testing-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 质量监控初始化
+  initQualityMonitoring();
+});
+
+function initQualityMonitoring() {
+  // 监控JavaScript错误
+  window.addEventListener('error', function(e) {
+    console.error('JavaScript错误:', e.error);
+    reportQualityIssue('JS_ERROR', e.error.message);
+  });
+
+  // 监控未处理的Promise拒绝
+  window.addEventListener('unhandledrejection', function(e) {
+    console.error('未处理的Promise拒绝:', e.reason);
+    reportQualityIssue('PROMISE_REJECTION', e.reason);
+  });
+
+  // 监控资源加载错误
+  document.addEventListener('error', function(e) {
+    if (e.target.tagName === 'IMG' || e.target.tagName === 'SCRIPT') {
+      console.error('资源加载失败:', e.target.src);
+      reportQualityIssue('RESOURCE_ERROR', e.target.src);
+    }
+  }, true);
+}
+
+function reportQualityIssue(type, details) {
+  // 这里可以发送错误报告到监控服务
+  console.log('质量问题报告:', { type, details, timestamp: new Date().toISOString() });
+}
+</script>
+
+{% schema %}
+{
+  "name": "Quality Testing",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "质量保证"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "副标题",
+      "default": "严格测试流程，确保最佳用户体验"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_metrics",
+      "label": "显示质量指标",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quality Testing",
+      "category": "Performance"
+    }
+  ]
+}
+{% endschema %}

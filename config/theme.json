@@ -1,0 +1,105 @@
+{
+  "name": "Sci-Fi Store Theme",
+  "settings": [
+    {
+      "type": "header",
+      "content": "品牌颜色设置"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "主要颜色",
+      "default": "#ffffff",
+      "info": "主题的主要背景颜色（科幻白色）"
+    },
+    {
+      "type": "color",
+      "id": "secondary_color",
+      "label": "次要颜色",
+      "default": "#87ceeb",
+      "info": "天空蓝，用于强调和发光效果"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "default": "#333333",
+      "info": "主要文字颜色"
+    },
+    {
+      "type": "header",
+      "content": "发光按钮设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_glow_effects",
+      "label": "启用发光效果",
+      "default": true,
+      "info": "为按钮和交互元素添加科幻发光效果"
+    },
+    {
+      "type": "range",
+      "id": "glow_intensity",
+      "label": "发光强度",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "unit": "px",
+      "info": "控制发光效果的强度"
+    },
+    {
+      "type": "header",
+      "content": "字体设置"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "标题字体",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "正文字体",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "header",
+      "content": "动画设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "启用动画效果",
+      "default": true,
+      "info": "启用滚动动画和微交互效果"
+    },
+    {
+      "type": "checkbox",
+      "id": "respect_motion_preference",
+      "label": "尊重用户的动画偏好",
+      "default": true,
+      "info": "对于偏好减少动画的用户禁用动画"
+    }
+  ],
+  "content_for_index": [
+    {
+      "type": "hero-banner",
+      "settings": {
+        "title": "欢迎来到未来商店",
+        "subtitle": "体验科幻购物的全新世界",
+        "cta_text": "立即购买",
+        "cta_url": "/collections/all"
+      }
+    },
+    {
+      "type": "featured-products",
+      "settings": {
+        "title": "精选产品",
+        "collection": "",
+        "products_count": 8
+      }
+    }
+  ]
+}
